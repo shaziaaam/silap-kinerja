@@ -37,7 +37,7 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                         Laporan Bulanan Observasi Stasiun
                     </h1>
                     <p className="text-slate-500 text-xs mt-1">
@@ -46,14 +46,14 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                 </div>
 
                 {/* Filter Form */}
-                <div className="bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm">
+                <div className="bg-white border border-sky-100/80 rounded-2xl p-5 shadow-sm shadow-sky-100/30">
                     <form onSubmit={handleFilter} className="flex flex-wrap items-end gap-4">
                         <div className="w-full sm:w-40 shrink-0">
                             <label className="block text-xs font-semibold text-slate-700 mb-1.5">Bulan</label>
                             <select
                                 value={selectedBulan}
                                 onChange={e => setSelectedBulan(parseInt(e.target.value))}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                             >
                                 {NAMA_BULAN.map((b, idx) => (
                                     <option key={b} value={idx + 1}>{b}</option>
@@ -67,7 +67,7 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                                 type="number"
                                 value={selectedTahun}
                                 onChange={e => setSelectedTahun(parseInt(e.target.value))}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                             />
                         </div>
 
@@ -76,7 +76,7 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                             <select
                                 value={selectedMode}
                                 onChange={e => setSelectedMode(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                             >
                                 <option value="stasiun">Seluruh Stasiun</option>
                                 <option value="pegawai">Per Pegawai</option>
@@ -89,7 +89,7 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                                 <select
                                     value={selectedPegawaiId}
                                     onChange={e => setSelectedPegawaiId(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                                 >
                                     {users.map(u => (
                                         <option key={u.id} value={u.id}>{u.nama} ({u.nip})</option>
@@ -101,7 +101,7 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                         <div className="flex items-center gap-2.5 w-full sm:w-auto pt-2 sm:pt-0 sm:ml-auto">
                             <button
                                 type="submit"
-                                className="flex-1 sm:flex-initial px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm whitespace-nowrap"
+                                className="flex-1 sm:flex-initial px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold h-10 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm shadow-sky-600/20 whitespace-nowrap"
                             >
                                 <Filter className="w-3.5 h-3.5" />
                                 <span>Tampilkan</span>
@@ -110,10 +110,10 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                                 href={pdfUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex-1 sm:flex-initial px-4 bg-emerald-800 hover:bg-emerald-900 text-white font-bold h-10 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm whitespace-nowrap"
+                                className="flex-1 sm:flex-initial px-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm whitespace-nowrap"
                             >
                                 <Printer className="w-3.5 h-3.5" />
-                                <span>Unduh / Cetak PDF</span>
+                                <span>Cetak PDF</span>
                             </a>
                         </div>
                     </form>
@@ -121,38 +121,38 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
 
                 {/* Summary Info */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-white rounded-2xl border border-emerald-100 p-5 shadow-sm flex items-center space-x-4">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-                            <CloudRain className="w-6 h-6 text-emerald-600" />
+                    <div className="bg-white rounded-2xl border border-sky-100/80 p-5 shadow-sm shadow-sky-100/30 flex items-center space-x-4">
+                        <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center font-bold text-lg shrink-0">
+                            <CloudRain className="w-6 h-6 text-sky-600" />
                         </div>
                         <div>
                             <div className="text-xs text-slate-500 font-medium">Total Hari Hujan (≥0.5 mm)</div>
                             <div className="text-2xl font-extrabold text-slate-900">{totalHariHujan} Hari</div>
-                            <div className="text-[11px] text-emerald-700 font-semibold mt-0.5">Dihitung otomatis dari akumulasi per jam</div>
+                            <div className="text-[11px] text-sky-700 font-semibold mt-0.5">Dihitung otomatis dari akumulasi per jam</div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-emerald-100 p-5 shadow-sm flex items-center space-x-4">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-                            <Calendar className="w-6 h-6 text-emerald-600" />
+                    <div className="bg-white rounded-2xl border border-sky-100/80 p-5 shadow-sm shadow-sky-100/30 flex items-center space-x-4">
+                        <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center font-bold text-lg shrink-0">
+                            <Calendar className="w-6 h-6 text-sky-600" />
                         </div>
                         <div>
                             <div className="text-xs text-slate-500 font-medium">Periode &amp; Status Laporan</div>
                             <div className="text-2xl font-extrabold text-slate-900">{NAMA_BULAN[bulan - 1]} {tahun}</div>
-                            <div className="text-[11px] text-emerald-700 font-semibold mt-0.5">Hanya menampilkan data observasi status Approved</div>
+                            <div className="text-[11px] text-sky-700 font-semibold mt-0.5">Hanya menampilkan data observasi status Approved</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Table Data */}
-                <div className="bg-white border border-emerald-100 rounded-2xl overflow-hidden shadow-md">
-                    <div className="px-6 py-4 border-b border-emerald-100 font-extrabold text-sm text-slate-900 bg-emerald-50/50 flex items-center justify-between">
+                <div className="bg-white border border-sky-100/80 rounded-2xl overflow-hidden shadow-sm shadow-sky-100/30">
+                    <div className="px-6 py-4 border-b border-sky-100 font-bold text-sm text-slate-900 bg-sky-50/70 flex items-center justify-between">
                         <span>Daftar Observasi Harian ({dailySummary.length} Hari)</span>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs text-slate-700">
-                            <thead className="bg-emerald-50/80 text-emerald-950 uppercase font-bold text-[11px] tracking-wider border-b border-emerald-100">
+                            <thead className="bg-sky-50/70 text-slate-900 uppercase font-bold text-[11px] tracking-wider border-b border-sky-100">
                                 <tr>
                                     <th className="px-5 py-4 text-center">Tanggal</th>
                                     <th className="px-5 py-4">Slot Jam Terdata (Approved)</th>
@@ -161,9 +161,9 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                                     <th className="px-5 py-4">Kelengkapan Data</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-emerald-50">
+                            <tbody className="divide-y divide-sky-50">
                                 {dailySummary.map(row => (
-                                    <tr key={row.tgl} className="hover:bg-emerald-50/40 transition">
+                                    <tr key={row.tgl} className="hover:bg-sky-50/40 transition">
                                         <td className="px-5 py-4 text-center font-bold text-slate-900">
                                             {String(row.tgl).padStart(2, '0')} {NAMA_BULAN[bulan - 1]} {tahun}
                                         </td>
@@ -175,7 +175,7 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                                         </td>
                                         <td className="px-5 py-4">
                                             {row.isRainyDay ? (
-                                                <span className="bg-blue-100 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold text-[11px]">
+                                                <span className="bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full font-bold text-[11px]">
                                                     Hari Hujan (≥0.5 mm)
                                                 </span>
                                             ) : (
@@ -186,11 +186,11 @@ export default function MonthlyReport({ bulan, tahun, mode, pegawaiId, users, da
                                         </td>
                                         <td className="px-5 py-4">
                                             {row.isComplete ? (
-                                                <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold text-[11px]">
+                                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold text-[11px]">
                                                     Lengkap (16 Slot)
                                                 </span>
                                             ) : (
-                                                <span className="bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold text-[11px]">
+                                                <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold text-[11px]">
                                                     {row.slotCount === 0 ? 'Tanpa Data Approved' : 'Tidak Lengkap'}
                                                 </span>
                                             )}

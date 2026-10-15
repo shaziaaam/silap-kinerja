@@ -37,13 +37,20 @@ Route::middleware(['auth', \App\Http\Middleware\EnsurePasswordIsChanged::class])
     Route::get('/observations', [ObservationController::class, 'index'])->name('observations.index');
     Route::get('/observations/create', [ObservationController::class, 'create'])->name('observations.create');
     Route::post('/observations', [ObservationController::class, 'store'])->name('observations.store');
+    Route::get('/observations/{observation}/edit', [ObservationController::class, 'edit'])->name('observations.edit');
+    Route::put('/observations/{observation}', [ObservationController::class, 'update'])->name('observations.update');
 
     // Supervisor Queue & Approval
     Route::get('/supervisor/queue', [ValidationController::class, 'queue'])->name('supervisor.queue');
     Route::post('/supervisor/observations/{observation}/action', [ValidationController::class, 'action'])->name('supervisor.action');
+    Route::post('/supervisor/approve-quarter', [ValidationController::class, 'approveQuarter'])->name('supervisor.approve_quarter');
+    Route::post('/supervisor/approve-all', [ValidationController::class, 'approveAll'])->name('supervisor.approve_all');
 
-    // Laporan & Export PDF
+    // Laporan & Export PDF / Image / Photo / CSV
+    Route::get('/observations/export-csv', [ObservationController::class, 'exportCsv'])->name('observations.export_csv');
     Route::get('/observations/{observation}/pdf', [ObservationController::class, 'downloadHourlyPdf'])->name('observations.pdf');
+    Route::get('/observations/{observation}/shift-image', [ObservationController::class, 'downloadShiftImage'])->name('observations.shift_image');
+    Route::get('/observations/{observation}/photo', [ObservationController::class, 'viewPhoto'])->name('observations.photo');
     Route::get('/reports/monthly', [SkpReportController::class, 'monthlyReportIndex'])->name('reports.monthly.index');
     Route::get('/reports/monthly/pdf', [SkpReportController::class, 'downloadMonthlyPdf'])->name('reports.monthly.pdf');
 
@@ -77,22 +84,6 @@ Route::middleware(['auth', \App\Http\Middleware\EnsurePasswordIsChanged::class])
 
         // Settings
         Route::post('/settings', [InstrumentController::class, 'updateSettings'])->name('settings.update');
-    });
-
-    // Modul Fenologi
-    Route::prefix('phenology')->name('phenology.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\PhenologyController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\PhenologyController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\PhenologyController::class, 'store'])->name('store');
-
-        // Master CRUD Admin
-        Route::post('/plants', [\App\Http\Controllers\PhenologyController::class, 'storePlant'])->name('plants.store');
-        Route::put('/plants/{plant}', [\App\Http\Controllers\PhenologyController::class, 'updatePlant'])->name('plants.update');
-        Route::delete('/plants/{plant}', [\App\Http\Controllers\PhenologyController::class, 'destroyPlant'])->name('plants.destroy');
-
-        Route::post('/phases', [\App\Http\Controllers\PhenologyController::class, 'storePhase'])->name('phases.store');
-        Route::put('/phases/{phase}', [\App\Http\Controllers\PhenologyController::class, 'updatePhase'])->name('phases.update');
-        Route::delete('/phases/{phase}', [\App\Http\Controllers\PhenologyController::class, 'destroyPhase'])->name('phases.destroy');
     });
 });
 

@@ -8,8 +8,36 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
     const [capturedImage, setCapturedImage] = useState(null);
     const [currentTime, setCurrentTime] = useState({ utc: '', wib: '' });
     
+    // Dynamic Geolocation State
+    const [geoCoords, setGeoCoords] = useState({
+        lat: -6.983073,
+        lng: 110.409536,
+        alt: 95,
+        isDynamic: false,
+    });
+    
     // Emergency Mode for slow internet / camera permission failure
     const [showEmergencyUpload, setShowEmergencyUpload] = useState(false);
+
+    // Dynamic Geolocation Fetching
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    setGeoCoords({
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        alt: pos.coords.altitude ? Math.round(pos.coords.altitude) : 95,
+                        isDynamic: true,
+                    });
+                },
+                (err) => {
+                    console.log('Using default BMKG Staklim Jateng coordinates fallback');
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+    }, []);
 
     // Live clock update for watermark preview
     useEffect(() => {
@@ -79,12 +107,12 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
         const locationText = isEmergency
             ? "Taman Alat, Stasiun Klimatologi Jawa Tengah (BMKG) • Mode Darurat"
             : "Taman Alat, Stasiun Klimatologi Jawa Tengah (BMKG)";
-        const coordText = "Lat: -6.983073°  Long: 110.409536°  Elevasi: 95 m dpl";
+        const coordText = `Lat: ${geoCoords.lat.toFixed(6)}°  Long: ${geoCoords.lng.toFixed(6)}°  Elevasi: ${geoCoords.alt} m dpl`;
         const timeText = `Tanggal: ${dateStr}  |  Waktu: ${timeWib} WIB (${timeUtc})`;
 
         const boxHeight = Math.max(64, Math.round(height * 0.14));
         
-        // Semi-transparent dark background overlay
+        // Semi-transparent dark background overlay on image
         ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
         ctx.fillRect(0, height - boxHeight, width, boxHeight);
 
@@ -138,16 +166,16 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
             {!capturedImage ? (
                 <div className="space-y-4">
                     {isCameraActive ? (
-                        <div className="relative rounded-xl overflow-hidden bg-black border border-slate-200">
+                        <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
                             <video ref={videoRef} autoPlay playsInline className="w-full h-64 object-cover" />
-                            <div className="absolute bottom-2 left-2 bg-slate-900/90 backdrop-blur text-xs px-3 py-1.5 rounded-lg text-emerald-300 border border-slate-700 font-medium">
+                            <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-xs px-3 py-1.5 rounded-lg text-slate-900 border border-sky-100 font-medium shadow-xs">
                                 📍 Taman Alat Jateng | {currentTime.wib}
                             </div>
                             <div className="absolute bottom-3 right-3 flex space-x-2">
                                 <button
                                     type="button"
                                     onClick={capturePhoto}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-lg flex items-center space-x-2"
+                                    className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center space-x-2"
                                 >
                                     <Camera className="w-4 h-4" />
                                     <span>Ambil Foto Realtime</span>
@@ -155,29 +183,29 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
                             </div>
                         </div>
                     ) : (
-                        <div className="border-2 border-dashed border-emerald-200 rounded-xl p-6 sm:p-8 text-center bg-emerald-50/30">
-                            <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <div className="border-2 border-dashed border-sky-200 rounded-xl p-6 sm:p-8 text-center bg-white shadow-sm shadow-sky-100/50">
+                            <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-100">
                                 <Camera className="w-6 h-6" />
                             </div>
-                            <p className="text-sm text-slate-800 font-bold mb-1">
+                            <p className="text-sm text-slate-900 font-bold mb-1">
                                 Ambil Foto Bukti Pengamatan Secara Live
                             </p>
-                            <p className="text-xs text-slate-500 max-w-md mx-auto mb-5 leading-relaxed">
+                            <p className="text-xs text-slate-600 max-w-md mx-auto mb-5 leading-relaxed">
                                 Pengamatan diwajibkan mengambil foto bukti langsung di lokasi. Foto otomatis dikompresi dan diberi watermark waktu &amp; lokasi BMKG.
                             </p>
                             <div className="flex flex-wrap justify-center gap-3">
                                 <button
                                     type="button"
                                     onClick={startCamera}
-                                    className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-md shadow-emerald-600/20"
+                                    className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-sm shadow-sky-600/30"
                                 >
                                     <Camera className="w-4 h-4" />
                                     <span>Buka Kamera Web Live</span>
                                 </button>
 
                                 {/* Direct HP Native Camera Trigger */}
-                                <label className="cursor-pointer inline-flex items-center space-x-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
-                                    <Camera className="w-4 h-4 text-emerald-700" />
+                                <label className="cursor-pointer inline-flex items-center space-x-2 bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs">
+                                    <Camera className="w-4 h-4 text-sky-600" />
                                     <span>Foto via Kamera HP</span>
                                     <input
                                         type="file"
@@ -192,9 +220,9 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
                     )}
 
                     {/* Mode Darurat (Instant Access without waiting) */}
-                    <div className="pt-2 border-t border-slate-100">
+                    <div className="pt-2 border-t border-sky-100">
                         {showEmergencyUpload ? (
-                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs space-y-3">
+                            <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-4 text-xs space-y-3">
                                 <div className="flex items-center space-x-2 text-amber-900 font-bold">
                                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                                     <span>Mode Upload Darurat (Kendala Jaringan / Perangkat)</span>
@@ -203,7 +231,7 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
                                     Pilih foto dari galeri HP jika lokasi bermasalah atau sinyal buruk. Foto tetap akan otomatis dikompresi &amp; diberi watermark timestamp BMKG.
                                 </p>
                                 <div className="flex items-center space-x-3">
-                                    <label className="cursor-pointer inline-flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition shadow">
+                                    <label className="cursor-pointer inline-flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-xs">
                                         <ImageIcon className="w-4 h-4" />
                                         <span>Pilih Foto dari Galeri</span>
                                         <input
@@ -223,7 +251,7 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-sky-100">
                                 <div className="flex items-center space-x-2">
                                     <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
                                     <span>Ada kendala sinyal atau kamera web? Anda bisa beralih ke Mode Upload Darurat kapan saja.</span>
@@ -241,19 +269,19 @@ export default function WatermarkCamera({ onCapture, isSynoptic }) {
                 </div>
             ) : (
                 <div className="space-y-3">
-                    <div className="relative rounded-xl overflow-hidden border border-emerald-300 shadow-md">
+                    <div className="relative rounded-xl overflow-hidden border border-sky-200 shadow-sm">
                         <img src={capturedImage} alt="Captured Watermarked" className="w-full h-64 object-cover" />
-                        <div className="absolute top-3 left-3 bg-emerald-800 text-white text-xs px-3 py-1 rounded-full border border-emerald-600 flex items-center space-x-1.5 shadow">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-300" />
+                        <div className="absolute top-3 left-3 bg-sky-600 text-white text-xs px-3 py-1 rounded-full border border-sky-500 flex items-center space-x-1.5 shadow-xs">
+                            <CheckCircle className="w-3.5 h-3.5 text-white" />
                             <span className="font-bold">Foto Ber-Watermark &amp; Terkompresi Siap Kirim</span>
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={resetPhoto}
-                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2"
+                        className="bg-white hover:bg-sky-50 text-slate-800 border border-sky-200 px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2"
                     >
-                        <RefreshCw className="w-3.5 h-3.5 text-emerald-700" />
+                        <RefreshCw className="w-3.5 h-3.5 text-sky-600" />
                         <span>Foto Ulang / Ganti Gambar</span>
                     </button>
                 </div>

@@ -19,20 +19,23 @@ class AuthenticatedSessionController extends Controller
         $request->validate([
             'nip' => ['required', 'string'],
             'password' => ['required', 'string'],
+        ], [
+            'nip.required' => 'NIP atau email wajib diisi.',
+            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
         $loginInput = trim($request->input('nip'));
-        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'nip';
 
-        $credentials = [
-            $fieldType => $loginInput,
-            'password' => $request->input('password'),
-        ];
+        // Mencari user berdasarkan NIP atau email dari satu kolom input
+        $user = \App\Models\User::where('nip', $loginInput)
+            ->orWhere('email', $loginInput)
+            ->first();
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if ($user && \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
+            Auth::login($user, $request->boolean('remember'));
             $request->session()->regenerate();
 
-            if (Auth::user()->must_change_password) {
+            if ($user->must_change_password) {
                 return redirect()->route('password.force_change');
             }
 
@@ -40,7 +43,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         return back()->withErrors([
-            'nip' => 'NIP / Email atau password yang dimasukkan tidak sesuai.',
+            'nip' => 'NIP atau email atau kata sandi yang dimasukkan tidak sesuai.',
         ]);
     }
 

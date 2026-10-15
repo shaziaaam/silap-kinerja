@@ -1,0 +1,770 @@
+import os
+
+html_content = '''<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SILAP-Kinerja — Staklim Jawa Tengah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/motion@11.18.2/dist/motion.js"></script>
+<style>
+:root {
+  --w: #FFFFFF;
+  --sky: #EAF6FF;
+  --sk2: #D6ECFB;
+  --ac: #168BC5;
+  --act: #0F6C9E;
+  --ink: #102B4E;
+  --tx: #2B3F5C;
+  --mu: #4B5F7A;
+  --ln: #D3E6F4;
+  --sh: rgba(16, 43, 78, 0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body {
+  margin: 0;
+  background: var(--w);
+  color: var(--tx);
+  font: 450 16px/1.65 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.w { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+/* Sticky Header */
+.hd {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--ln);
+}
+.hd .w {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 72px; gap: 24px;
+}
+.br {
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 800; color: var(--ink); line-height: 1.2; font-size: 17px;
+}
+.br img { height: 40px; width: auto; }
+.br small { display: block; font-size: 12px; font-weight: 600; color: var(--ac); font-family: 'Plus Jakarta Sans', sans-serif; }
+.nv {
+  position: relative; display: flex; gap: 32px; font-size: 15px; font-weight: 600;
+}
+.nv a { padding: 6px 0; transition: color .2s; }
+.nv a:hover, .nv a.on { color: var(--act); }
+.ind {
+  position: absolute; left: 0; bottom: -4px; height: 2.5px; width: 0;
+  background: var(--ac); border-radius: 2px;
+  transition: transform .25s ease, width .25s ease;
+}
+.hr { display: flex; gap: 12px; align-items: center; }
+.bt {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 26px; border-radius: 9999px;
+  background: linear-gradient(90deg, #102B4E 0%, #0E5284 50%, #168BC5 100%);
+  color: #fff; font-weight: 700; font-size: 14px;
+  box-shadow: 0 4px 14px rgba(16, 43, 78, 0.25);
+  transition: transform .25s, box-shadow .25s, filter .25s;
+}
+.bt:hover { transform: translateY(-1.5px); filter: brightness(1.1); box-shadow: 0 8px 22px rgba(22, 139, 197, 0.35); }
+.mbt {
+  display: none; width: 40px; height: 40px; border-radius: 8px;
+  border: 1px solid var(--ln); place-items: center; color: var(--ink);
+}
+.mn {
+  display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; overflow: hidden;
+}
+.mn.open { grid-template-rows: 1fr; }
+.mn > div { min-height: 0; overflow: hidden; display: grid; padding: 0 20px; }
+.mn a { padding: 12px 0; font-weight: 600; border-top: 1px solid var(--ln); }
+
+/* Typography Scale */
+.ey {
+  font: 600 11.5px/1 'IBM Plex Mono', monospace;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ac); margin-bottom: 12px; display: inline-flex; align-items: center; gap: 6px;
+}
+.ey::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ac); }
+h1 {
+  font-size: clamp(30px, 3.4vw, 42px);
+  line-height: 1.18; letter-spacing: -.02em; font-weight: 800; color: var(--ink);
+}
+h2 {
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1.15; letter-spacing: -.02em; font-weight: 700; color: var(--ink); margin-bottom: 12px;
+}
+h3 { font-size: 20px; line-height: 1.3; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+h4 { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.mu { color: var(--mu); }
+.cd { background: var(--w); border: 1px solid var(--ln); border-radius: 16px; }
+
+/* Sections */
+section { padding: 80px 0; }
+.tn { background: var(--sky); border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln); }
+.hero { padding: 60px 0 84px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.hero p { margin: 20px 0 28px; font-size: 16px; max-width: 520px; line-height: 1.6; }
+.act { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.lk { color: var(--act); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 4px; }
+.lk:hover { text-decoration: underline; color: var(--ac); }
+
+/* Hero Visual Box with Cutout & Blue Aura */
+.hv {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  min-height: 380px;
+}
+.hv-aura {
+  position: absolute; width: 85%; height: 85%; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(56,189,248,0.28) 0%, rgba(2,132,199,0.15) 45%, rgba(234,246,255,0) 75%);
+  filter: blur(40px); pointer-events: none; z-index: 0;
+}
+.hv-arcs {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 0; opacity: 0.45;
+}
+.aws-tag {
+  position: absolute; top: 10px; right: 20px; text-align: right; font-size: 11px;
+  color: var(--mu); line-height: 1.25; z-index: 2;
+}
+.aws-tag b { color: var(--ac); display: block; font-weight: 700; }
+.hv-img {
+  position: relative; z-index: 1; width: 100%; max-width: 540px; display: flex; justify-content: center;
+}
+.hv-img img {
+  width: 100%; height: auto; display: block; filter: drop-shadow(0 15px 30px rgba(16, 43, 78, 0.1));
+  transition: transform .4s ease;
+}
+.hv-img:hover img { transform: scale(1.02); }
+
+/* 3 Pillars */
+.pl { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr; gap: 28px; }
+.ib {
+  width: 48px; height: 48px; border-radius: 12px; background: var(--sky);
+  display: grid; place-items: center; margin-bottom: 16px; color: var(--ac);
+}
+.cd.pv { padding: 24px; box-shadow: 0 2px 8px var(--sh); transition: border-color .2s; }
+.cd.pv:hover { border-color: var(--ac); }
+
+/* Instrument Cards */
+.ic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+.ic .cd {
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ic .cd:hover { border-color: var(--ac); box-shadow: 0 8px 24px var(--sh); }
+.im-photo {
+  height: 200px; background: #F8FAFC; display: grid; place-items: center;
+  overflow: hidden; border-bottom: 1px solid var(--ln); padding: 12px;
+}
+.im-photo.full { padding: 0; background: #fff; }
+.im-photo img { max-height: 100%; max-width: 100%; object-fit: contain; transition: transform .4s ease; }
+.im-photo.full img { width: 100%; height: 100%; object-fit: cover; }
+.ic .cd:hover .im-photo img { transform: scale(1.05); }
+.ic-body { padding: 24px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.dl { display: grid; gap: 8px; font-size: 14px; }
+.dl li { padding-left: 14px; position: relative; }
+.dl li::before {
+  content: ''; position: absolute; left: 0; top: 8px; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--ac);
+}
+.cps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--ln); }
+.cp {
+  font: 500 11px/1 'IBM Plex Mono', monospace; background: var(--sky);
+  color: var(--act); padding: 5px 8px; border-radius: 4px;
+}
+
+/* Operational Table Card */
+.pn { background: #fff; border: 1px solid var(--ln); border-radius: 20px; padding: 24px; box-shadow: 0 8px 30px var(--sh); position: relative; }
+.tt { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--ln); }
+.tr { display: grid; grid-template-columns: 1fr 1.3fr .8fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--ln); font-size: 14px; align-items: center; }
+.tr.th { font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--mu); text-transform: uppercase; border: 0; }
+.bg { justify-self: start; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.bg.g { background: #E3F6EC; color: #14794B; }
+.bg.y { background: #FFF3D6; color: #8A5A00; }
+.bg.r { background: #FDE7E7; color: #B42318; }
+.fl {
+  position: absolute; left: 16px; bottom: -20px; padding: 12px 18px;
+  background: #fff; border: 1px solid var(--ln); border-radius: 12px;
+  box-shadow: 0 6px 20px var(--sh); display: flex; gap: 12px; align-items: center;
+}
+.fl b { font-size: 13px; color: var(--ink); display: block; }
+.fl span { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--mu); }
+
+/* Features Checklist */
+.cl { display: grid; gap: 20px; }
+.cl li { display: grid; grid-template-columns: 24px 1fr; gap: 14px; font-size: 14.5px; }
+.cl svg { width: 22px; height: 22px; color: var(--ac); margin-top: 2px; }
+.cl b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 2px; }
+
+/* Workflow Steps */
+.st4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+.st-line {
+  position: absolute; top: 24px; left: 24px; right: 24px; height: 2px;
+  background: var(--ln); z-index: 0;
+}
+.st { position: relative; z-index: 1; }
+.st .n {
+  width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--ac);
+  background: var(--w); color: var(--ink); font-weight: 800; font-size: 16px;
+  display: grid; place-items: center; margin-bottom: 16px; box-shadow: 0 2px 8px var(--sh);
+}
+
+/* Report Mockup */
+.rp-box {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.rp-box img { width: 100%; max-width: 560px; height: auto; display: block; filter: drop-shadow(0 12px 28px rgba(16, 43, 78, 0.12)); transition: transform .4s ease; }
+.rp-box:hover img { transform: scale(1.02); }
+
+/* FAQ Accordion */
+.faq { display: grid; grid-template-columns: .8fr 1.4fr; gap: 64px; align-items: start; }
+.fq details { border-bottom: 1px solid var(--ln); }
+.fq details:first-child { border-top: 1px solid var(--ln); }
+.fq summary {
+  display: flex; justify-content: space-between; gap: 16px; padding: 20px 0;
+  font-weight: 650; font-size: 16px; color: var(--ink); cursor: pointer; list-style: none;
+}
+.fq summary::-webkit-details-marker { display: none; }
+.fq summary::after { content: '+'; color: var(--ac); font-size: 22px; line-height: 1; }
+.fq details[open] summary::after { content: '−'; }
+.fq .an p { padding: 0 0 20px; font-size: 15px; color: var(--mu); }
+
+/* Location Section */
+.loc { display: grid; grid-template-columns: 1fr 1.4fr; gap: 56px; align-items: center; }
+.ct { display: grid; gap: 16px; margin-top: 24px; }
+.ct li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; font-size: 15px; }
+.ct svg { color: var(--ac); margin-top: 3px; }
+.mp {
+  position: relative; border-radius: 18px; overflow: hidden;
+  border: 1px solid var(--ln); height: 400px; background: #EAF2F8;
+  box-shadow: 0 4px 20px var(--sh);
+}
+.mp iframe { width: 100%; height: 100%; border: 0; display: block; }
+.mp-card {
+  position: absolute; top: 14px; left: 14px; z-index: 10;
+  background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px);
+  border: 1px solid rgba(211, 230, 244, 0.9); border-radius: 14px;
+  padding: 14px 16px; max-width: 330px; box-shadow: 0 8px 24px rgba(16, 43, 78, 0.12);
+}
+.mp-badge {
+  display: inline-block; background: #EAF6FF; color: var(--act);
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;
+}
+.mp-card h4 { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.3; margin: 0 0 4px; }
+.mp-card p { font-size: 12px; color: var(--mu); line-height: 1.4; margin: 0 0 8px; }
+.mp-rating { font-size: 12px; color: #64748B; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+.mp-rating .stars { color: #F59E0B; font-weight: 700; }
+.mp-actions { display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid var(--ln); }
+.mp-btn {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--ac); color: #fff;
+  font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 6px;
+  text-decoration: none; transition: background .2s;
+}
+.mp-btn:hover { background: var(--act); }
+.mp-btn.sub { background: #F1F5F9; color: var(--ink); }
+.mp-btn.sub:hover { background: #E2E8F0; }
+
+/* Footer */
+.ft { background: var(--ink); color: #C5D6EA; padding: 14px 0; font-size: 13px; border-top: 1px solid var(--ink); }
+.ft .r1 {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; flex-wrap: wrap;
+}
+.ft .br { color: #fff; font-size: 16px; gap: 10px; }
+.ft .br img { height: 34px; }
+.ft .br small { color: #8FD0F2; font-size: 11.5px; }
+.ft .cpr { color: #A2BEDD; font-size: 12.5px; font-weight: 500; }
+
+@media(max-width: 900px) {
+  .w { padding: 0 20px; }
+  section { padding: 60px 0; }
+  .g2, .pl, .ic, .st4, .faq, .loc { grid-template-columns: 1fr; gap: 36px; }
+  .nv { display: none; }
+  .mbt { display: grid; }
+  .st-line { display: none; }
+  .lbs { grid-template-columns: 1fr; }
+  .fl { position: static; margin-top: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="w">
+    <a class="br" href="#beranda">
+      <img src="images/logo.png" alt="Logo BMKG">
+      <span>SILAP-Kinerja<small>Staklim Jawa Tengah</small></span>
+    </a>
+    <nav class="nv" aria-label="Navigasi utama">
+      <a href="#beranda">Beranda</a>
+      <a href="#fitur">Fitur</a>
+      <a href="#instrumen">Instrumen</a>
+      <a href="#alur">Alur Kerja</a>
+      <a href="#faq">FAQ</a>
+      <i class="ind"></i>
+    </nav>
+    <div class="hr">
+      <a class="bt" href="/login">Login</a>
+      <button id="mb" class="mbt" aria-label="Buka menu" aria-expanded="false" aria-controls="mn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav id="mn" class="mn" aria-label="Menu seluler">
+    <div>
+      <a href="#beranda">Beranda</a>
+      <a href="#fitur">Fitur</a>
+      <a href="#instrumen">Instrumen</a>
+      <a href="#alur">Alur Kerja</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="beranda">
+    <div class="w g2">
+      <div>
+        <div class="ey">/ SISTEM INTEGRASI LAPORAN PENGAMATAN</div>
+        <h1>Pengamatan Cuaca Terverifikasi, Pelaporan Lebih Mudah.</h1>
+        <p class="mu">SILAP-Kinerja mengintegrasikan pencatatan pengamatan cuaca multi-alat, validasi data meteorologi, dokumentasi lapangan, dan penyusunan bukti dukung SKP dalam satu sistem.</p>
+        <div class="act">
+          <a class="bt" href="/login">Masuk Akun Pegawai &rarr;</a>
+          <a class="lk" href="#fitur">Pelajari Lebih Lanjut &rarr;</a>
+        </div>
+      </div>
+      <div class="hv">
+        <div class="hv-aura"></div>
+        <div class="hv-arcs">
+          <svg viewBox="0 0 600 500" width="100%" height="100%">
+            <ellipse cx="300" cy="270" rx="270" ry="190" fill="none" stroke="#168BC5" stroke-width="1.2" stroke-dasharray="6 6" />
+            <ellipse cx="300" cy="270" rx="190" ry="130" fill="none" stroke="#38BDF8" stroke-width="1.5" />
+            <circle cx="160" cy="180" r="4.5" fill="#0284C7" />
+            <circle cx="430" cy="360" r="4" fill="#168BC5" />
+            <circle cx="470" cy="210" r="3.5" fill="#38BDF8" />
+          </svg>
+        </div>
+        <div class="hv-img">
+          <img src="images/hero_instruments.png" alt="Instrumen Pengamatan Cuaca Otomatis AWS dan Sensor BMKG">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NILAI UTAMA -->
+  <section class="tn">
+    <div class="w pl">
+      <div>
+        <div class="ey">NILAI UTAMA</div>
+        <h2>Tiga Pilar, Satu Tujuan.</h2>
+        <p class="mu">Mendukung proses pengamatan cuaca yang akurat, terdokumentasi dengan baik, dan terhubung dengan penyusunan SKP pegawai.</p>
+      </div>
+      <div class="cd pv">
+        <div class="ib">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M7.8 7.8c-2.3 2.3-2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19M4.9 4.9C1 8.8 1 15.1 4.9 19"/></svg>
+        </div>
+        <h3>Pengamatan</h3>
+        <p class="mu">Pencatatan data 19 slot harian dari sensor otomatis digital AWS, display Wind YOUNG, dan alat konvensional taman alat.</p>
+      </div>
+      <div class="cd pv">
+        <div class="ib">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h3>Validasi</h3>
+        <p class="mu">Pemeriksaan kaidah fisika meteorologi realtime (TBB &le; TBK) serta verifikasi bertingkat oleh penyelia stasiun.</p>
+      </div>
+      <div class="cd pv">
+        <div class="ib">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        </div>
+        <h3>Pelaporan</h3>
+        <p class="mu">Rekapitulasi otomatis, dokumentasi foto ber-watermark cloud, hingga pencetakan bukti dukung SKP triwulanan siap unggah.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FITUR OPERASIONAL -->
+  <section id="fitur">
+    <div class="w g2">
+      <div class="pn">
+        <div class="tt">
+          <div>
+            <h4>Validasi Data</h4>
+            <p class="mu" style="font-size:13px">Antrean verifikasi penyelia stasiun</p>
+          </div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ac);font-weight:700">LIVE QUEUE</span>
+        </div>
+        <div class="tr th"><span>Slot Waktu</span><span>Form Pengamatan</span><span>Status</span></div>
+        <div class="tr"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">07.00 WIB</span><span>Jam Penuh + Foto</span><span class="bg g">Valid</span></div>
+        <div class="tr"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">07.30 WIB</span><span>AGM 1-B (Kartu 1-7)</span><span class="bg y">Pending</span></div>
+        <div class="tr"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">13.30 WIB</span><span>AGM 1-B (Kartu 1-7)</span><span class="bg r">Revisi</span></div>
+        <div class="tr"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">17.00 WIB</span><span>Jam Penuh + Foto</span><span class="bg g">Valid</span></div>
+        <div class="fl">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+          <div>
+            <b>Validasi Fisika Lolos</b>
+            <span>T_basah &le; T_kering &amp; T_min &le; T_max</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="ey">FITUR OPERASIONAL</div>
+        <h2>Lebih Mudah, Lebih Terstruktur</h2>
+        <p class="mu" style="margin-bottom:24px">Dari input observasi hingga dokumentasi ber-watermark cloud, semua dirancang untuk memastikan data tercatat dengan baik dan dapat dipertanggungjawabkan.</p>
+        <ul class="cl">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div>
+              <b>Input observasi adaptif (19 slot waktu)</b>
+              <span class="mu">Form dinamis mengikuti slot waktu berjalan. Pre-filling otomatis nilai bacaan sebelumnya (counter anemometer, tinggi air, Piche).</span>
+            </div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div>
+              <b>Pemeriksaan validasi fisika (Physics Guard)</b>
+              <span class="mu">Verifikasi otomatis T_basah &le; T_kering pada sangkar dan 7 tingkat ketinggian Assman, serta Tmin &le; Tmax air evaporimeter.</span>
+            </div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div>
+              <b>Dokumentasi foto dengan watermark cloud</b>
+              <span class="mu">Pengambilan foto diwajibkan tepat 2 kali sehari (07.00 &amp; 17.00 WIB). Watermark lokasi dan stempel waktu WIB &amp; UTC dibakar permanen.</span>
+            </div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div>
+              <b>Rekap &amp; ekspor laporan multi-format</b>
+              <span class="mu">Penerbitan dokumen PDF SKP triwulan, lembar observasi per jam, grafik laporan cuaca shift PNG, dan CSV form nasional kode 9999.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTRUMEN PENGAMATAN -->
+  <section id="instrumen" class="tn">
+    <div class="w">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:20px">
+        <div>
+          <div class="ey">INSTRUMEN PENGAMATAN</div>
+          <h2>Terintegrasi dalam Satu Sistem</h2>
+        </div>
+        <p class="mu" style="max-width:440px">SILAP-Kinerja mencakup seluruh instrumen pengamatan cuaca di Stasiun Klimatologi Jawa Tengah, baik otomatis digital, konvensional, maupun visual.</p>
+      </div>
+
+      <div class="ic">
+        <!-- Otomatis -->
+        <div class="cd">
+          <div class="im-photo"><img src="images/instrument_aws.png" alt="AWS dan Wind YOUNG"></div>
+          <div class="ic-body">
+            <div>
+              <h3>Otomatis (Digital)</h3>
+              <ul class="dl mu">
+                <li><b>AWS:</b> Suhu udara (maks, min), kelembapan, tekanan QFE/QFF, hujan tipping bucket, radiasi surya.</li>
+                <li><b>Wind YOUNG 26800:</b> Kecepatan sesaat &amp; rata-rata (AVG), peak gust (MAX), arah angin, deviasi standar (SDV).</li>
+              </ul>
+            </div>
+            <div class="cps">
+              <span class="cp">TA_meas</span><span class="cp">RH_meas</span><span class="cp">PA_QFE</span><span class="cp">rainHourly</span><span class="cp">SR_Max</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual -->
+        <div class="cd">
+          <div class="im-photo full"><img src="images/instrument_manual.png" alt="Sangkar Meteorologi dan Panci Penguapan"></div>
+          <div class="ic-body">
+            <div>
+              <h3>Manual &amp; Konvensional</h3>
+              <ul class="dl mu">
+                <li>Psikrometer sangkar (1,2 m) &amp; Assman bertingkat (7 ketinggian: 5–200 cm).</li>
+                <li>Open pan evaporimeter (Hook Gauge), Piche buret, termometer apung maks-min.</li>
+                <li>Termometer tanah (0–100 cm), pias Campbell-Stokes, Gunn-Bellani, OBS.</li>
+              </ul>
+            </div>
+            <div class="cps">
+              <span class="cp">TBK/TBB</span><span class="cp">Hook Gauge</span><span class="cp">Assman 7-Tk</span><span class="cp">Gunn-Bellani</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual -->
+        <div class="cd">
+          <div class="im-photo full"><img src="images/instrument_visual.png" alt="Tutupan Awan Langit"></div>
+          <div class="ic-body">
+            <div>
+              <h3>Pengamatan Visual</h3>
+              <ul class="dl mu">
+                <li><b>Jumlah awan:</b> Tutupan kubah langit dari 0 s.d. 8 okta.</li>
+                <li><b>Penglihatan mendatar:</b> Estimasi visibilitas objek patokan (km).</li>
+                <li><b>Kondisi permukaan:</b> Keadaan tanah (Basah/Kering/Lembab) &amp; status hujan.</li>
+              </ul>
+            </div>
+            <div class="cps">
+              <span class="cp">0-8 Okta</span><span class="cp">Visibilitas km</span><span class="cp">Tanah &amp; Hujan</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALUR KERJA -->
+  <section id="alur">
+    <div class="w">
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:48px;align-items:start">
+        <div>
+          <div class="ey">ALUR KERJA</div>
+          <h2>Dari Pengamatan hingga SKP</h2>
+          <p class="mu" style="font-size:15px">Proses yang jelas, terukur, dan terintegrasi dari pencatatan data lapangan hingga penerbitan berkas kinerja triwulan.</p>
+        </div>
+        <div class="st4">
+          <div class="st-line"></div>
+          <div class="st">
+            <div class="n">01</div>
+            <h3>Pengamatan</h3>
+            <p class="mu" style="font-size:13.5px">Input data 19 slot harian dan lampirkan foto tepat di jam 07.00 &amp; 17.00 WIB.</p>
+          </div>
+          <div class="st">
+            <div class="n">02</div>
+            <h3>Validasi</h3>
+            <p class="mu" style="font-size:13.5px">Pemeriksaan kaidah fisika cuaca (TBB &le; TBK) dan auto kalkulasi realtime.</p>
+          </div>
+          <div class="st">
+            <div class="n">03</div>
+            <h3>Verifikasi</h3>
+            <p class="mu" style="font-size:13.5px">Penyelia meninjau antrean dan memberikan catatan revisi jika ada anomali.</p>
+          </div>
+          <div class="st">
+            <div class="n">04</div>
+            <h3>Pengesahan</h3>
+            <p class="mu" style="font-size:13.5px">Data disahkan triwulanan dan berkas PDF SKP triwulan diterbitkan otomatis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HASIL PELAPORAN -->
+  <section class="tn">
+    <div class="w g2">
+      <div class="rp-box">
+        <img src="images/report_docs.png?v=pure3" alt="Dokumen Resmi SKP dan Laporan Cuaca BMKG">
+        <div style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:#fff;border:1px solid var(--ln);border-radius:99px;font:700 11px/1 'IBM Plex Mono', monospace;color:var(--ink);text-transform:uppercase;letter-spacing:0.04em;">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--ac)"></span>
+          Cover SKP Triwulan • Lampiran Shift Pagi • Lampiran Shift Siang (3 Lembar)
+        </div>
+      </div>
+      <div>
+        <div class="ey">HASIL PELAPORAN</div>
+        <h2>Dokumen Siap Digunakan</h2>
+        <p class="mu" style="margin-bottom:24px">Laporan dan bukti dukung tersedia sesuai kebutuhan administrasi BMKG dan BKN.</p>
+        <ul class="cl">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div><b>PDF SKP triwulanan (3 Lembar)</b><span class="mu">Cover laporan (nama dummy &amp; periode triwulan), lampiran shift pagi (07.00 WIB), dan shift siang (17.00 WIB) sesuai template gambar shift dan bukti dokumentasi lapangan.</span></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div><b>Laporan observasi per jam</b><span class="mu">Cetak lembar rekapitulasi parameter resmi per jam WIB.</span></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div><b>Grafik laporan cuaca per shift</b><span class="mu">Format gambar PNG untuk koordinasi cepat antar-staf operasional.</span></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+            <div><b>Ekspor CSV form nasional BMKGSoft v2</b><span class="mu">Standar susunan form nasional dengan penanganan kode 9999.</span></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="w faq">
+      <div>
+        <div class="ey">FAQ</div>
+        <h2>Pertanyaan Umum</h2>
+        <p class="mu">Temukan jawaban seputar operasional, validasi fisika, kebijakan foto watermark, dan pengesahan SKP di SILAP-Kinerja.</p>
+      </div>
+      <div class="fq">
+        <details>
+          <summary>Bagaimana cara mendapat akun?</summary>
+          <div class="an"><p>Akun pegawai dibuatkan secara terpusat oleh Administrator Sistem Stasiun (NIP, nama, dan peran). Sistem ini bersifat internal institusi dan tidak membuka pendaftaran mandiri publik.</p></div>
+        </details>
+        <details>
+          <summary>Apa yang terjadi ketika data perlu direvisi?</summary>
+          <div class="an"><p>Penyelia menandai data dengan status Revisi disertai catatan koreksi spesifik. Pengamat memperbaiki lalu mengirim ulang form. Tombol pengesahan SKP triwulan terkunci selama masih ada data revisi.</p></div>
+        </details>
+        <details>
+          <summary>Kapan foto bukti wajib dilampirkan?</summary>
+          <div class="an"><p>Tepat 2 kali sehari, yaitu pukul 07.00 WIB (awal shift pagi) dan 17.00 WIB (menjelang malam shift siang). Ke-17 slot waktu lainnya tidak meminta upload foto.</p></div>
+        </details>
+        <details>
+          <summary>Bagaimana dokumen SKP dapat diunduh?</summary>
+          <div class="an"><p>Dokumen bukti dukung SKP triwulanan dicetak dari sistem dalam format PDF per pegawai. Paket ZIP seluruh pegawai tersedia untuk penyelia dan administrator setelah semua data terbebas dari revisi.</p></div>
+        </details>
+        <details>
+          <summary>Lupa password, harus bagaimana?</summary>
+          <div class="an"><p>Hubungi Administrator Stasiun Klimatologi Jawa Tengah untuk mereset password akun Anda. Sistem akan mewajibkan pengisian password baru saat login pertama.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOKASI -->
+  <section class="tn" id="lokasi">
+    <div class="w loc">
+      <div>
+        <div class="ey">LOKASI STASIUN</div>
+        <h2>Stasiun Klimatologi Jawa Tengah</h2>
+        <ul class="ct">
+          <li>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.35-7-10a7 7 0 0 1 14 0c0 5.65-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+            <span>Jl. Siliwangi No. 291, Semarang Barat, Kota Semarang 50145</span>
+          </li>
+          <li>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>(024) 7607750</span>
+          </li>
+          <li>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <span>staklim.semarang@bmkg.go.id</span>
+          </li>
+        </ul>
+      </div>
+      <div class="mp">
+        <div class="mp-card">
+          <span class="mp-badge">BMKG Jawa Tengah</span>
+          <h4>Stasiun Klimatologi Jawa Tengah</h4>
+          <p>Jl. Siliwangi No. 291, Kalibanteng Kulon, Kec. Semarang Barat, Kota Semarang, Jawa Tengah 50145</p>
+          <div class="mp-rating">
+            <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733; 4.8</span>
+            <span class="sub">(Kantor &amp; Taman Alat)</span>
+          </div>
+          <div class="mp-actions">
+            <a class="mp-btn" href="https://www.google.com/maps/search/?api=1&query=Stasiun+Klimatologi+Jawa+Tengah+Jl.+Siliwangi+291+Semarang" target="_blank" rel="noopener noreferrer">
+              Open in Maps &rarr;
+            </a>
+            <a class="mp-btn sub" href="https://www.google.com/maps/dir/?api=1&destination=Stasiun+Klimatologi+Jawa+Tengah+Jl.+Siliwangi+291+Semarang" target="_blank" rel="noopener noreferrer">
+              Rute
+            </a>
+          </div>
+        </div>
+        <iframe
+          title="Lokasi BMKG Stasiun Klimatologi Jawa Tengah"
+          src="https://maps.google.com/maps?q=Stasiun+Klimatologi+Klas+I+Semarang+BMKG,+Jl.+Siliwangi+No.+291,+Semarang&t=&z=16&ie=UTF8&iwloc=&output=embed"
+          width="100%"
+          height="100%"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="ft">
+  <div class="w">
+    <div class="r1">
+      <a class="br" href="#beranda">
+        <img src="images/logo.png" alt="Logo BMKG" style="filter:brightness(1.1)">
+        <span>SILAP-Kinerja<small>Stasiun Klimatologi Jawa Tengah</small></span>
+      </a>
+      <div class="cpr">&copy; 2026. Hak Cipta Dilindungi.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var M = window.Motion;
+  var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mb = document.getElementById('mb');
+  var mn = document.getElementById('mn');
+
+  function tg(open) {
+    mn.classList.toggle('open', open);
+    mb.setAttribute('aria-expanded', open);
+  }
+  mb.addEventListener('click', function(){ tg(!mn.classList.contains('open')); });
+  document.querySelectorAll('#mn a').forEach(function(a){
+    a.addEventListener('click', function(){ tg(false); });
+  });
+
+  // Active nav tracking
+  var links = Array.prototype.slice.call(document.querySelectorAll('.hd .nv a'));
+  var ind = document.querySelector('.ind');
+  var hrefs = links.map(function(a){ return a.getAttribute('href'); });
+  var cur = 0;
+
+  function mark(i) {
+    if (i < 0 || i >= links.length) return;
+    cur = i;
+    links.forEach(function(a, j){ a.classList.toggle('on', i === j); });
+    ind.style.width = links[i].offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + links[i].offsetLeft + 'px)';
+  }
+
+  var so = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting) {
+        var idx = hrefs.indexOf('#' + e.target.id);
+        if (idx > -1) mark(idx);
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  hrefs.forEach(function(h){
+    var s = document.querySelector(h);
+    if (s) so.observe(s);
+  });
+  mark(0);
+  window.addEventListener('resize', function(){ mark(cur); });
+
+  if (!M || rm) return;
+
+  try {
+    var animate = M.animate;
+    // Hero Entrance
+    animate('.hero h1, .hero .ey, .hero p, .hero .act', { opacity: [0, 1], y: [16, 0] }, { duration: 0.6, delay: M.stagger(0.1) });
+    animate('.hv', { opacity: [0, 1], y: [24, 0] }, { duration: 0.7, delay: 0.25 });
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
+'''
+
+folder = r'D:\surat pengantar'
+target_path = None
+for f in os.listdir(folder):
+    if f.endswith('.html') and 'SILAP-Kinerja' in f:
+        target_path = os.path.join(folder, f)
+        break
+
+if target_path:
+    with open(target_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    print('Updated:', target_path)
+
+with open(r'd:\silap-kerja\scratch\reference_landing_updated.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+print('Updated copy in scratch!')

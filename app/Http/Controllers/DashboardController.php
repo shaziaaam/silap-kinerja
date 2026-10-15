@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Instrument;
 use App\Models\Observation;
-use App\Models\PhenologyEntry;
-use App\Models\PhenologyPlant;
 use App\Models\Schedule;
 use App\Models\Setting;
 use App\Models\User;
@@ -194,8 +192,6 @@ class DashboardController extends Controller
             'penyelia' => User::where('role', 'penyelia')->count(),
             'admin'    => User::where('role', 'admin')->count(),
         ];
-        $totalPlants = PhenologyPlant::where('is_active', true)->count();
-        $phenoTodayCount = PhenologyEntry::where('tanggal', $today)->count();
 
         // Instrument status grid
         $instruments = Instrument::with('parameters')->get();
@@ -227,42 +223,6 @@ class DashboardController extends Controller
             ];
         }
 
-        // Phenology Tracker per plant
-        $plants = PhenologyPlant::where('is_active', true)->get();
-        $phenoTracker = [];
-        foreach ($plants as $pl) {
-            $entryToday = PhenologyEntry::with('entryPhases.phase')->where('plant_id', $pl->id)->where('tanggal', $today)->first();
-            $lastEntry = PhenologyEntry::with('entryPhases.phase')->where('plant_id', $pl->id)->orderBy('tanggal', 'desc')->first();
-
-            $targetEntry = $entryToday ?: $lastEntry;
-            $phasesData = [];
-            $allPhases = \App\Models\PhenologyPhase::where('is_active', true)->orderBy('urutan')->get();
-
-            $currentStageText = 'belum diisi';
-            $isTodayFilled = $entryToday !== null;
-
-            foreach ($allPhases as $ph) {
-                $ep = $targetEntry ? $targetEntry->entryPhases->firstWhere('phase_id', $ph->id) : null;
-                $phasesData[] = [
-                    'phaseId' => $ph->id,
-                    'phaseNama' => $ph->nama,
-                    'isReached' => $ep !== null,
-                    'tahap' => $ep ? $ep->tahap : null,
-                ];
-                if ($ep) {
-                    $currentStageText = "{$ph->nama}: {$ep->tahap}";
-                }
-            }
-
-            $phenoTracker[] = [
-                'plantId' => $pl->id,
-                'plantNama' => $pl->nama,
-                'isTodayFilled' => $isTodayFilled,
-                'stageText' => $currentStageText,
-                'phases' => $phasesData,
-            ];
-        }
-
         return Inertia::render('Dashboard', [
             'user' => $user,
             'settings' => $settings,
@@ -289,10 +249,7 @@ class DashboardController extends Controller
             'totalInstruments' => $totalInstruments,
             'activeInstruments' => $activeInstruments,
             'roleBreakdown' => $roleBreakdown,
-            'totalPlants' => $totalPlants,
-            'phenoTodayCount' => $phenoTodayCount,
             'instrumentStatusGrid' => $instrumentStatusGrid,
-            'phenoTracker' => $phenoTracker,
         ]);
     }
 

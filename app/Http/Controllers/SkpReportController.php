@@ -75,9 +75,23 @@ class SkpReportController extends Controller
         }
         $recaps = $recapsQuery->paginate(15);
 
-        // Attach human readable label to each recap item
+        // Attach human readable label and revision block flag to each recap item
         $recaps->getCollection()->transform(function ($item) {
             $item->periode_label = self::getPeriodeLabel($item->triwulan);
+            $months = $this->getMonthsForPeriode($item->triwulan);
+            $item->has_pending_revisions = Observation::where('user_id', $item->user_id)
+                ->where('status_approval', 'revision')
+                ->whereYear('tanggal', $item->tahun)
+                ->where(function ($query) use ($months) {
+                    foreach ($months as $idx => $m) {
+                        if ($idx === 0) {
+                            $query->whereMonth('tanggal', $m);
+                        } else {
+                            $query->orWhereMonth('tanggal', $m);
+                        }
+                    }
+                })
+                ->exists();
             return $item;
         });
 
@@ -103,6 +117,28 @@ class SkpReportController extends Controller
             : User::where('id', $validated['user_id'])->get();
 
         foreach ($targetUsers as $targetUser) {
+            // Cek apakah masih ada observasi yang berstatus 'revision' pada tahun dan periode yang dipilih
+            $hasRevision = Observation::where('user_id', $targetUser->id)
+                ->where('status_approval', 'revision')
+                ->whereYear('tanggal', $validated['tahun'])
+                ->where(function ($q) use ($months) {
+                    foreach ($months as $idx => $m) {
+                        if ($idx === 0) {
+                            $q->whereMonth('tanggal', $m);
+                        } else {
+                            $q->orWhereMonth('tanggal', $m);
+                        }
+                    }
+                })
+                ->exists();
+
+            if ($hasRevision) {
+                $label = self::getPeriodeLabel($periodeKey);
+                return redirect()->back()->withErrors([
+                    'message' => "Pengesahan (ACC) SKP {$label} ({$validated['tahun']}) untuk pegawai {$targetUser->nama} diblokir: masih ada data observasi berstatus 'Revisi' yang belum diperbaiki oleh pengamat.",
+                ]);
+            }
+
             $allApproved = Observation::where('user_id', $targetUser->id)
                 ->where('status_approval', 'approved')
                 ->whereYear('tanggal', $validated['tahun'])
@@ -141,11 +177,39 @@ class SkpReportController extends Controller
 
         $months = $this->getMonthsForPeriode($recap->triwulan);
 
+        // Validasi: Tolak preview PDF jika masih ada observasi yang berstatus revisi
+        $hasRevision = Observation::where('user_id', $recap->user_id)
+            ->where('status_approval', 'revision')
+            ->whereYear('tanggal', $recap->tahun)
+            ->where(function ($q) use ($months) {
+                foreach ($months as $idx => $m) {
+                    if ($idx === 0) {
+                        $q->whereMonth('tanggal', $m);
+                    } else {
+                        $q->orWhereMonth('tanggal', $m);
+                    }
+                }
+            })
+            ->exists();
+
+        if ($hasRevision) {
+            $label = self::getPeriodeLabel($recap->triwulan);
+            abort(422, "Pengesahan (ACC) SKP {$label} ({$recap->tahun}) diblokir: masih ada data observasi berstatus 'Revisi' yang belum diperbaiki.");
+        }
+
         $approvedObservations = Observation::with(['schedule', 'values.parameter'])
             ->where('user_id', $recap->user_id)
             ->where('status_approval', 'approved')
             ->whereYear('tanggal', $recap->tahun)
-            ->whereIn(\DB::raw('MONTH(tanggal)'), $months)
+            ->where(function ($q) use ($months) {
+                foreach ($months as $idx => $m) {
+                    if ($idx === 0) {
+                        $q->whereMonth('tanggal', $m);
+                    } else {
+                        $q->orWhereMonth('tanggal', $m);
+                    }
+                }
+            })
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -189,15 +253,41 @@ class SkpReportController extends Controller
             return back()->withErrors(['message' => 'Belum ada rekap SKP yang di-generate untuk pegawai ini pada periode ini. Silakan klik "Hitung & Generate SKP" terlebih dahulu.']);
         }
 
-        $recap->load('user');
-
         $months = $this->getMonthsForPeriode($recap->triwulan);
+
+        // Validasi: Tolak cetak jika ada observasi berstatus revisi
+        $hasRevision = Observation::where('user_id', $recap->user_id)
+            ->where('status_approval', 'revision')
+            ->whereYear('tanggal', $recap->tahun)
+            ->where(function ($q) use ($months) {
+                foreach ($months as $idx => $m) {
+                    if ($idx === 0) {
+                        $q->whereMonth('tanggal', $m);
+                    } else {
+                        $q->orWhereMonth('tanggal', $m);
+                    }
+                }
+            })
+            ->exists();
+
+        if ($hasRevision) {
+            $label = self::getPeriodeLabel($recap->triwulan);
+            return back()->withErrors(['message' => "Pengesahan (ACC) SKP {$label} ({$recap->tahun}) diblokir: masih ada observasi yang berstatus 'Revisi' dan belum diperbaiki."]);
+        }
 
         $approvedObservations = Observation::with(['schedule', 'values.parameter'])
             ->where('user_id', $recap->user_id)
             ->where('status_approval', 'approved')
             ->whereYear('tanggal', $recap->tahun)
-            ->whereIn(\DB::raw('MONTH(tanggal)'), $months)
+            ->where(function ($q) use ($months) {
+                foreach ($months as $idx => $m) {
+                    if ($idx === 0) {
+                        $q->whereMonth('tanggal', $m);
+                    } else {
+                        $q->orWhereMonth('tanggal', $m);
+                    }
+                }
+            })
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -245,6 +335,31 @@ class SkpReportController extends Controller
 
         if ($recaps->isEmpty()) {
             return back()->withErrors(['message' => 'Belum ada rekap SKP yang di-generate untuk periode/pegawai ini. Silakan klik Generate terlebih dahulu.']);
+        }
+
+        $months = $this->getMonthsForPeriode($periodeKey);
+        $recapUserIds = $recaps->pluck('user_id')->toArray();
+        $revisionUsers = User::whereIn('id', $recapUserIds)
+            ->whereHas('observations', function ($q) use ($validated, $months) {
+                $q->where('status_approval', 'revision')
+                  ->whereYear('tanggal', $validated['tahun'])
+                  ->where(function ($sub) use ($months) {
+                      foreach ($months as $idx => $m) {
+                          if ($idx === 0) {
+                              $sub->whereMonth('tanggal', $m);
+                          } else {
+                              $sub->orWhereMonth('tanggal', $m);
+                          }
+                      }
+                  });
+            })->pluck('nama')->toArray();
+
+        if (!empty($revisionUsers)) {
+            $namesStr = implode(', ', $revisionUsers);
+            $label = self::getPeriodeLabel($periodeKey);
+            return back()->withErrors([
+                'message' => "Pengesahan (ACC) & unduh paket ZIP SKP {$label} ({$validated['tahun']}) diblokir: masih ada data observasi berstatus 'Revisi' untuk pegawai: {$namesStr}.",
+            ]);
         }
 
         $userSuffix = (!empty($validated['user_id']) && $validated['user_id'] !== 'all')
@@ -431,6 +546,6 @@ class SkpReportController extends Controller
         ])->setPaper('a4', 'landscape');
 
         $fileName = 'Laporan_Bulanan_' . $namaBulan . '_' . $tahun . '.pdf';
-        return $pdf->download($fileName);
+        return $pdf->stream($fileName);
     }
 }

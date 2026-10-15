@@ -4,7 +4,7 @@ import Sidebar from '../Components/Sidebar';
 import {
     CloudSun, FilePlus, CheckSquare, FileText, Users, ArrowRight,
     ShieldCheck, Clock, Camera, Thermometer, Droplets, Gauge,
-    AlertCircle, CheckCircle2, RefreshCw, ChevronRight, Eye, Wrench, Sprout
+    AlertCircle, CheckCircle2, RefreshCw, ChevronRight, Eye, Wrench, Edit
 } from 'lucide-react';
 
 // Custom SVG 8-Direction Wind Rose
@@ -71,9 +71,9 @@ function WindRoseSVG({ windDirections }) {
                     <g key={d.key}>
                         <polygon
                             points={`${center},${center} ${p1x},${p1y} ${x},${y} ${p2x},${p2y}`}
-                            fill="#10b981"
+                            fill="#0284c7"
                             fillOpacity="0.75"
-                            stroke="#047857"
+                            stroke="#1e40af"
                             strokeWidth="1.5"
                         />
                     </g>
@@ -145,12 +145,12 @@ function SoilTempSVG({ gundul, rumput }) {
                 <circle key={`g-${i}`} cx={getX(d.val)} cy={getY(i)} r="4" fill="#f97316" />
             ))}
 
-            {/* Polyline Rumput (Green) */}
+            {/* Polyline Rumput (Blue) */}
             {rumputPoints && (
-                <polyline points={rumputPoints} fill="none" stroke="#10b981" strokeWidth="2.5" />
+                <polyline points={rumputPoints} fill="none" stroke="#0284c7" strokeWidth="2.5" />
             )}
             {rumput.map((d, i) => d.val !== null && (
-                <circle key={`r-${i}`} cx={getX(d.val)} cy={getY(i)} r="4" fill="#10b981" />
+                <circle key={`r-${i}`} cx={getX(d.val)} cy={getY(i)} r="4" fill="#0284c7" />
             ))}
         </svg>
     );
@@ -240,13 +240,13 @@ export default function Dashboard(props) {
         latestSuhuAws, latestSuhuHour, latestQff, latestQffHour,
         soilTempGundul, soilTempRumput, windDirections,
         pendingCount, approvedTodayCount, revisionCount, observerQueue, heatmapData,
-        totalInstruments, activeInstruments, roleBreakdown, totalPlants, phenoTodayCount,
-        instrumentStatusGrid, phenoTracker
+        totalInstruments, activeInstruments, roleBreakdown,
+        instrumentStatusGrid
     } = props;
 
     const [selectedSlotModal, setSelectedSlotModal] = useState(null);
 
-    const isSynopticHour = (h) => [7, 10, 13, 16, 19, 22].includes(h);
+    const isPhotoSlot = (h) => [7, 17].includes(h);
 
     return (
         <Sidebar>
@@ -255,17 +255,17 @@ export default function Dashboard(props) {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
 
                 {/* HEADER / WELCOME BANNER */}
-                <div className="relative rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-emerald-900 via-emerald-800 to-green-800 text-white shadow-md overflow-hidden border border-emerald-700/50">
+                <div className="relative rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-sky-700 via-blue-700 to-sky-800 text-white shadow-sm overflow-hidden border border-sky-600/20">
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-emerald-200 border border-white/20 mb-2">
+                            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-sky-100 border border-white/20 mb-2">
                                 <ShieldCheck className="w-3.5 h-3.5" />
                                 <span>BMKG Stasiun Klimatologi Jawa Tengah</span>
                             </div>
                             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
                                 Halo, {user.nama}!
                             </h1>
-                            <p className="text-xs text-emerald-100 font-medium mt-0.5">
+                            <p className="text-xs text-sky-100 font-medium mt-0.5">
                                 {today} · Slot berikutnya jam <strong className="text-white font-bold">{nextSchedule ? nextSchedule.jam_wib.substring(0, 5) : '07:00'} WIB</strong>
                             </p>
                         </div>
@@ -273,9 +273,9 @@ export default function Dashboard(props) {
                         {user.role === 'pengamat' && (
                             <Link
                                 href={route('observations.create')}
-                                className="inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-sm transition shadow-lg shrink-0"
+                                className="inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl bg-white hover:bg-sky-50 text-sky-900 font-bold text-sm transition shadow-sm shrink-0"
                             >
-                                <FilePlus className="w-5 h-5 text-emerald-700" />
+                                <FilePlus className="w-5 h-5 text-sky-600" />
                                 <span>Input Observasi Pukul {nextSchedule ? nextSchedule.jam_wib.substring(0, 5) : '07:00'} WIB</span>
                             </Link>
                         )}
@@ -286,14 +286,14 @@ export default function Dashboard(props) {
                 {user.role === 'pengamat' && (
                     <div className="space-y-8">
                         {/* 16-SLOT TIMELINE */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h2 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                    <Clock className="w-5 h-5 text-emerald-600" />
+                                    <Clock className="w-5 h-5 text-sky-600" />
                                     <span>Garis Waktu 16 Slot Pengamatan (07.00 - 22.00 WIB)</span>
                                 </h2>
                                 <span className="text-xs text-slate-500 font-medium">
-                                    📷 Slot Kamera Sinoptik: 07, 10, 13, 16, 19, 22 WIB
+                                    📷 Slot Foto Wajib: 07.00 & 17.00 WIB
                                 </span>
                             </div>
 
@@ -302,7 +302,7 @@ export default function Dashboard(props) {
                                     const h = parseInt(s.jam_wib.substring(0, 2), 10);
                                     const obs = todayObservations.find(o => o.schedule_id === s.id);
                                     const isCurrent = h === currentWibHour;
-                                    const isSynoptic = isSynopticHour(h);
+                                    const isPhoto = isPhotoSlot(h);
 
                                     return (
                                         <div
@@ -313,18 +313,18 @@ export default function Dashboard(props) {
                                             }}
                                             className={`relative rounded-xl p-2.5 text-center cursor-pointer transition flex flex-col items-center justify-between min-h-[72px] border ${
                                                 obs
-                                                    ? 'bg-emerald-100/70 border-emerald-300 text-emerald-950 hover:bg-emerald-200/80'
+                                                    ? 'bg-sky-50 border-sky-200 text-sky-900 hover:bg-sky-100/80'
                                                     : isCurrent
-                                                    ? 'bg-white border-2 border-emerald-600 text-slate-900 shadow-md ring-2 ring-emerald-200'
+                                                    ? 'bg-white border-2 border-sky-600 text-slate-900 shadow-sm ring-2 ring-sky-100'
                                                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                                             }`}
                                         >
                                             <span className="font-bold text-xs">{s.jam_wib.substring(0, 5)}</span>
-                                            {isSynoptic && (
-                                                <Camera className={`w-3.5 h-3.5 my-1 ${obs ? 'text-emerald-700' : 'text-slate-400'}`} title="Kamera Sinoptik Wajib" />
+                                            {isPhoto && (
+                                                <Camera className={`w-3.5 h-3.5 my-1 ${obs ? 'text-sky-700' : 'text-slate-400'}`} title="Slot Foto Wajib (07.00 & 17.00)" />
                                             )}
-                                            <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full ${
-                                                obs ? 'bg-emerald-600 text-white' : isCurrent ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-500'
+                                            <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border ${
+                                                obs ? 'bg-sky-600 text-white border-sky-600' : isCurrent ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-slate-100 text-slate-500 border-slate-200'
                                             }`}>
                                                 {obs ? 'Terisi' : isCurrent ? 'Jam Ini' : 'Belum'}
                                             </span>
@@ -336,12 +336,12 @@ export default function Dashboard(props) {
 
                         {/* THREE NUMBER CARDS */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
                                     <span>Hujan Hari Ini (Akumulasi)</span>
-                                    <Droplets className="w-4 h-4 text-emerald-600" />
+                                    <Droplets className="w-4 h-4 text-sky-600" />
                                 </div>
-                                <div className="text-3xl font-extrabold text-emerald-800">
+                                <div className="text-3xl font-extrabold text-sky-800">
                                     {totalRainToday.toFixed(1)} <span className="text-base font-bold text-slate-500">mm</span>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-medium">
@@ -349,10 +349,10 @@ export default function Dashboard(props) {
                                 </p>
                             </div>
 
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
                                     <span>Suhu Udara AWS (Input Terakhir)</span>
-                                    <Thermometer className="w-4 h-4 text-emerald-600" />
+                                    <Thermometer className="w-4 h-4 text-sky-600" />
                                 </div>
                                 <div className="text-3xl font-extrabold text-slate-900">
                                     {latestSuhuAws !== null ? latestSuhuAws.toFixed(1) : '–'} <span className="text-base font-bold text-slate-500">°C</span>
@@ -362,10 +362,10 @@ export default function Dashboard(props) {
                                 </p>
                             </div>
 
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
                                     <span>Tekanan Udara QFF</span>
-                                    <Gauge className="w-4 h-4 text-emerald-600" />
+                                    <Gauge className="w-4 h-4 text-sky-600" />
                                 </div>
                                 <div className="text-3xl font-extrabold text-slate-900">
                                     {latestQff !== null ? latestQff.toFixed(1) : '–'} <span className="text-base font-bold text-slate-500">mbar</span>
@@ -379,10 +379,10 @@ export default function Dashboard(props) {
                         {/* THREE CHARTS */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Chart 1: Rain Bar + Accumulation Line */}
-                            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                            <div className="lg:col-span-2 bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                                        <Droplets className="w-4 h-4 text-emerald-600" />
+                                        <Droplets className="w-4 h-4 text-sky-600" />
                                         <span>Curah Hujan 1 Jam Terakhir &amp; Akumulasi Harian</span>
                                     </h3>
                                     <div className="flex items-center space-x-3 text-xs font-semibold">
@@ -403,9 +403,9 @@ export default function Dashboard(props) {
                             </div>
 
                             {/* Chart 2: Wind Rose SVG */}
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4 flex flex-col justify-between">
                                 <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                                    <CloudSun className="w-4 h-4 text-emerald-600" />
+                                    <CloudSun className="w-4 h-4 text-sky-600" />
                                     <span>Wind Rose Frekuensi Arah Angin</span>
                                 </h3>
                                 <WindRoseSVG windDirections={windDirections} />
@@ -416,10 +416,10 @@ export default function Dashboard(props) {
                         </div>
 
                         {/* Chart 3: Soil Temperature Profile */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                                    <Thermometer className="w-4 h-4 text-emerald-600" />
+                                    <Thermometer className="w-4 h-4 text-sky-600" />
                                     <span>Profil Kedalaman Suhu Tanah (°C)</span>
                                 </h3>
                                 <div className="flex items-center space-x-4 text-xs font-semibold">
@@ -428,7 +428,7 @@ export default function Dashboard(props) {
                                         <span>Tanah Gundul</span>
                                     </span>
                                     <span className="flex items-center space-x-1.5">
-                                        <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                                        <span className="w-3 h-3 rounded-full bg-sky-500"></span>
                                         <span>Tanah Berumput</span>
                                     </span>
                                 </div>
@@ -443,38 +443,38 @@ export default function Dashboard(props) {
                     <div className="space-y-8">
                         {/* THREE NUMBER CARDS */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-2xl border border-amber-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-amber-200/80 p-6 shadow-sm shadow-amber-100/20 space-y-2">
                                 <div className="text-xs font-bold text-amber-700 uppercase tracking-wider">Menunggu Validasi</div>
-                                <div className="text-3xl font-extrabold text-amber-900">{pendingCount} <span className="text-sm font-bold text-amber-700">Observasi</span></div>
+                                <div className="text-3xl font-extrabold text-amber-800">{pendingCount} <span className="text-sm font-bold text-amber-700">Observasi</span></div>
                                 <p className="text-[11px] text-amber-700 font-medium">Antrean observasi yang belum ditinjau</p>
                             </div>
 
-                            <div className="bg-white rounded-2xl border border-emerald-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-emerald-200/80 p-6 shadow-sm shadow-emerald-100/20 space-y-2">
                                 <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Disetujui Hari Ini</div>
-                                <div className="text-3xl font-extrabold text-emerald-900">{approvedTodayCount} <span className="text-sm font-bold text-emerald-700">Observasi</span></div>
+                                <div className="text-3xl font-extrabold text-emerald-800">{approvedTodayCount} <span className="text-sm font-bold text-emerald-700">Observasi</span></div>
                                 <p className="text-[11px] text-emerald-700 font-medium">Data observasi approved hari berjalan</p>
                             </div>
 
-                            <div className="bg-white rounded-2xl border border-rose-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-rose-200/80 p-6 shadow-sm shadow-rose-100/20 space-y-2">
                                 <div className="text-xs font-bold text-rose-700 uppercase tracking-wider">Perlu Revisi</div>
-                                <div className="text-3xl font-extrabold text-rose-900">{revisionCount} <span className="text-sm font-bold text-rose-700">Observasi</span></div>
+                                <div className="text-3xl font-extrabold text-rose-800">{revisionCount} <span className="text-sm font-bold text-rose-700">Observasi</span></div>
                                 <p className="text-[11px] text-rose-700 font-medium">Dikembalikan ke pengamat untuk perbaikan</p>
                             </div>
                         </div>
 
                         {/* OBSERVER QUEUE (Bordered Rows) */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
                             <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                <Users className="w-5 h-5 text-emerald-600" />
+                                <Users className="w-5 h-5 text-sky-600" />
                                 <span>Antrean Input Per Pengamat</span>
                             </h3>
 
-                            <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+                            <div className="divide-y divide-slate-100 border border-sky-100 rounded-xl overflow-hidden">
                                 {observerQueue.map(obs => (
                                     <div
                                         key={obs.id}
                                         onClick={() => window.location.href = route('supervisor.queue') + `?user_id=${obs.id}`}
-                                        className="flex items-center justify-between p-4 hover:bg-slate-50 cursor-pointer transition"
+                                        className="flex items-center justify-between p-4 hover:bg-sky-50/50 cursor-pointer transition"
                                     >
                                         <div className="flex items-center space-x-3 min-w-0">
                                             <div className="font-bold text-sm text-slate-800">{obs.nama}</div>
@@ -484,12 +484,12 @@ export default function Dashboard(props) {
                                         <div className="flex items-center space-x-4">
                                             <div className="w-32 bg-slate-100 rounded-full h-2 overflow-hidden">
                                                 <div
-                                                    className="bg-emerald-500 h-full rounded-full transition-all"
+                                                    className="bg-sky-600 h-full rounded-full transition-all"
                                                     style={{ width: `${(obs.todaySlots / 16) * 100}%` }}
                                                 />
                                             </div>
                                             <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${
-                                                obs.pendingCount > 0 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-900'
+                                                obs.pendingCount > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-sky-50 text-sky-700 border border-sky-200'
                                             }`}>
                                                 {obs.pendingCount > 0 ? `${obs.pendingCount} menunggu` : 'selesai'}
                                             </span>
@@ -501,19 +501,19 @@ export default function Dashboard(props) {
                         </div>
 
                         {/* CALENDAR HEATMAP (Current Month Mon-Sun Grid) */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                    <Clock className="w-5 h-5 text-emerald-600" />
+                                    <Clock className="w-5 h-5 text-sky-600" />
                                     <span>Peta Panas Kelengkapan Input Observasi Bulanan</span>
                                 </h3>
 
                                 <div className="flex items-center space-x-2 text-xs font-semibold text-slate-600">
                                     <span>Skala:</span>
-                                    <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900">&lt;70%</span>
-                                    <span className="px-2 py-0.5 rounded bg-emerald-300 text-emerald-950">70-84%</span>
-                                    <span className="px-2 py-0.5 rounded bg-emerald-500 text-white">85-94%</span>
-                                    <span className="px-2 py-0.5 rounded bg-emerald-700 text-white">&gt;=95%</span>
+                                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">&lt;70%</span>
+                                    <span className="px-2 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-300">70-84%</span>
+                                    <span className="px-2 py-0.5 rounded bg-sky-600 text-white">85-94%</span>
+                                    <span className="px-2 py-0.5 rounded bg-blue-900 text-white">&gt;=95%</span>
                                 </div>
                             </div>
 
@@ -522,12 +522,12 @@ export default function Dashboard(props) {
                                     <div key={day} className="py-1">{day}</div>
                                 ))}
                                 {heatmapData.map(h => {
-                                    let bgClass = 'bg-slate-100 text-slate-400';
+                                    let bgClass = 'bg-slate-50 text-slate-400 border-slate-200';
                                     if (!h.isFuture && h.count > 0) {
-                                        if (h.percentage < 70) bgClass = 'bg-emerald-100 text-emerald-900';
-                                        else if (h.percentage < 85) bgClass = 'bg-emerald-300 text-emerald-950';
-                                        else if (h.percentage < 95) bgClass = 'bg-emerald-500 text-white';
-                                        else bgClass = 'bg-emerald-700 text-white';
+                                        if (h.percentage < 70) bgClass = 'bg-sky-50 text-sky-700 border-sky-200';
+                                        else if (h.percentage < 85) bgClass = 'bg-sky-100 text-sky-800 border-sky-300';
+                                        else if (h.percentage < 95) bgClass = 'bg-sky-600 text-white border-sky-600';
+                                        else bgClass = 'bg-blue-900 text-white border-blue-900';
                                     }
 
                                     return (
@@ -535,7 +535,7 @@ export default function Dashboard(props) {
                                             key={h.day}
                                             title={`Tanggal ${h.day}: ${h.count}/16 slot (${h.percentage}%)`}
                                             className={`rounded-xl p-3 flex flex-col items-center justify-center transition border ${bgClass} ${
-                                                h.isToday ? 'border-2 border-emerald-900 font-extrabold shadow-md' : 'border-transparent'
+                                                h.isToday ? 'border-2 border-sky-600 font-extrabold shadow-sm' : ''
                                             }`}
                                         >
                                             <span className="font-extrabold text-sm">{h.day}</span>
@@ -552,45 +552,36 @@ export default function Dashboard(props) {
                 {user.role === 'admin' && (
                     <div className="space-y-8">
                         {/* THREE NUMBER CARDS */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
                                     <span>Alat Aktif</span>
-                                    <Wrench className="w-4 h-4 text-emerald-600" />
+                                    <Wrench className="w-4 h-4 text-sky-600" />
                                 </div>
                                 <div className="text-3xl font-extrabold text-slate-900">{activeInstruments} <span className="text-sm font-bold text-slate-500">dari {totalInstruments} Alat</span></div>
                                 <p className="text-[11px] text-slate-400 font-medium">Status alat terkonfigurasi di Kelola Alat</p>
                             </div>
 
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
+                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
                                     <span>Pengguna Terdaftar</span>
-                                    <Users className="w-4 h-4 text-emerald-600" />
+                                    <Users className="w-4 h-4 text-sky-600" />
                                 </div>
                                 <div className="text-3xl font-extrabold text-slate-900">{roleBreakdown.pengamat + roleBreakdown.penyelia + roleBreakdown.admin} <span className="text-sm font-bold text-slate-500">Akun</span></div>
                                 <p className="text-[11px] text-slate-400 font-medium">
                                     {roleBreakdown.pengamat} Pengamat · {roleBreakdown.penyelia} Penyelia · {roleBreakdown.admin} Admin
                                 </p>
                             </div>
-
-                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
-                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Fenologi Hari Ini</span>
-                                    <Sprout className="w-4 h-4 text-emerald-600" />
-                                </div>
-                                <div className="text-3xl font-extrabold text-slate-900">{phenoTodayCount} <span className="text-sm font-bold text-slate-500">dari {totalPlants} Tanaman</span></div>
-                                <p className="text-[11px] text-slate-400 font-medium">Entri pengamatan fenologi hari berjalan</p>
-                            </div>
                         </div>
 
                         {/* INSTRUMENT STATUS GRID */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                    <Wrench className="w-5 h-5 text-emerald-600" />
+                                    <Wrench className="w-5 h-5 text-sky-600" />
                                     <span>Grid Status Alat Pengamatan</span>
                                 </h3>
-                                <Link href={route('admin.instruments.index')} className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center space-x-1">
+                                <Link href={route('admin.instruments.index')} className="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center space-x-1">
                                     <span>Kelola Alat</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
                                 </Link>
@@ -601,10 +592,10 @@ export default function Dashboard(props) {
                                     <div
                                         key={inst.id}
                                         onClick={() => window.location.href = route('admin.instruments.index')}
-                                        className="p-4 rounded-xl border border-slate-200 hover:border-emerald-300 bg-slate-50 hover:bg-white transition cursor-pointer flex items-start space-x-3"
+                                        className="p-4 rounded-xl border border-sky-100 hover:border-sky-300 bg-slate-50/50 hover:bg-white transition cursor-pointer flex items-start space-x-3"
                                     >
                                         <span className={`w-3 h-3 rounded-full mt-1 shrink-0 ${
-                                            inst.status === 'aktif' ? 'bg-emerald-500'
+                                            inst.status === 'aktif' ? 'bg-sky-500'
                                             : inst.status === 'perlu_perhatian' ? 'bg-amber-500'
                                             : 'bg-slate-400'
                                         }`} />
@@ -617,56 +608,13 @@ export default function Dashboard(props) {
                                 ))}
                             </div>
                         </div>
-
-                        {/* PHENOLOGY TRACKER */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-                            <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                <Sprout className="w-5 h-5 text-emerald-600" />
-                                <span>Pelacak Fase Fenologi Tanaman</span>
-                            </h3>
-
-                            <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                                {phenoTracker.map(pl => (
-                                    <div key={pl.plantId} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                        <div className="min-w-[140px]">
-                                            <div className="font-bold text-sm text-slate-900">{pl.plantNama}</div>
-                                            <div className="text-xs text-slate-500 font-medium mt-0.5">{pl.stageText}</div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 overflow-x-auto py-1">
-                                            {pl.phases.map((ph, idx) => (
-                                                <div key={ph.phaseId} className="flex items-center space-x-2 shrink-0">
-                                                    <div
-                                                        title={`${ph.phaseNama}: ${ph.tahap || 'belum'}`}
-                                                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                                                            ph.isReached ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-400'
-                                                        }`}
-                                                    >
-                                                        {idx + 1}
-                                                    </div>
-                                                    {idx < pl.phases.length - 1 && <span className="w-4 h-0.5 bg-slate-200"></span>}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        <div className="shrink-0 text-right">
-                                            <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                                                pl.isTodayFilled ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900 ring-2 ring-amber-400'
-                                            }`}>
-                                                {pl.isTodayFilled ? 'Terisi Hari Ini' : 'Belum Diisi Hari Ini'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 )}
 
                 {/* MODAL DETAIL OBSERVED SLOT (FOR PENGAMAT) */}
                 {selectedSlotModal && (
-                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-slate-200 space-y-4">
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl border border-sky-100 space-y-4">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                                 <div>
                                     <h3 className="font-extrabold text-base text-slate-900">
@@ -684,12 +632,18 @@ export default function Dashboard(props) {
                                 </div>
                                 <div className="flex justify-between py-1 border-b border-slate-100">
                                     <span className="font-bold text-slate-600">Status Observasi:</span>
-                                    <span className="uppercase font-bold text-emerald-700">{selectedSlotModal.status_pengamatan}</span>
+                                    <span className="uppercase font-bold text-sky-700">{selectedSlotModal.status_pengamatan}</span>
                                 </div>
                                 <div className="flex justify-between py-1 border-b border-slate-100">
                                     <span className="font-bold text-slate-600">Approval Penyelia:</span>
-                                    <span className="uppercase font-bold text-emerald-700">{selectedSlotModal.status_approval}</span>
+                                    <span className="uppercase font-bold text-sky-700">{selectedSlotModal.status_approval}</span>
                                 </div>
+                                {selectedSlotModal.status_approval === 'revision' && selectedSlotModal.catatan_supervisor && (
+                                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800">
+                                        <span className="font-bold">Catatan Revisi: </span>
+                                        "{selectedSlotModal.catatan_supervisor}"
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex justify-end space-x-3 pt-3">
@@ -699,11 +653,20 @@ export default function Dashboard(props) {
                                 >
                                     Tutup
                                 </button>
+                                {selectedSlotModal.status_approval === 'revision' && (
+                                    <Link
+                                        href={route('observations.edit', selectedSlotModal.id)}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-600/20 flex items-center space-x-1.5"
+                                    >
+                                        <Edit className="w-3.5 h-3.5" />
+                                        <span>Perbaiki Observasi</span>
+                                    </Link>
+                                )}
                                 <a
                                     href={route('observations.pdf', selectedSlotModal.id)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md flex items-center space-x-2"
+                                    className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/20 flex items-center space-x-2"
                                 >
                                     <FileText className="w-4 h-4" />
                                     <span>Unduh PDF</span>

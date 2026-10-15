@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { UserCheck, FileSpreadsheet, Users, LogOut, LayoutDashboard, FilePlus, Menu, X, Settings, Wrench, ChevronDown, Sprout, FileText } from 'lucide-react';
+import { UserCheck, FileSpreadsheet, Users, LogOut, LayoutDashboard, FilePlus, Menu, X, Settings, Wrench, ChevronDown, FileText } from 'lucide-react';
 
 export default function Navbar() {
     const { auth } = usePage().props;
@@ -53,18 +53,18 @@ export default function Navbar() {
 
     return (
         <>
-        <header className="sticky top-0 z-50 bg-[#0f4a2a]/95 backdrop-blur-md border-b border-emerald-700/50 shadow-sm transition-all duration-300">
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-sky-100 shadow-xs transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 xl:px-8 h-16 flex items-center justify-between gap-2">
                 {/* Brand */}
                 <Link href="/" className="flex items-center space-x-2.5 group shrink-0">
                     <img
-                        src="/images/logo putih.png"
+                        src="/images/logo hitam.webp"
                         alt="Logo BMKG"
                         className="h-8 sm:h-9 w-auto object-contain group-hover:scale-105 transition duration-300"
                     />
                     <div>
-                        <div className="font-extrabold text-white text-base sm:text-lg tracking-tight leading-none">SILAP-Kinerja</div>
-                        <p className="text-[10px] sm:text-[11px] text-emerald-200 font-medium mt-0.5">BMKG Staklim Jawa Tengah</p>
+                        <div className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight leading-none">SILAP-Kinerja</div>
+                        <p className="text-[10px] sm:text-[11px] text-sky-600 font-semibold mt-0.5">BMKG Staklim Jawa Tengah</p>
                     </div>
                 </Link>
 
@@ -77,7 +77,7 @@ export default function Navbar() {
                     >
                         {/* Sliding glass pill indicator */}
                         <div
-                            className="absolute top-0 bottom-0 rounded-full bg-white/20 shadow-sm border border-white/30 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                            className="absolute top-0 bottom-0 rounded-full bg-sky-100/70 shadow-xs border border-sky-200/80 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
                             style={{
                                 opacity: pillStyle.opacity,
                                 transform: `translateX(${pillStyle.left}px)`,
@@ -89,7 +89,7 @@ export default function Navbar() {
                             onMouseEnter={handleMouseEnter}
                             href={route('dashboard')}
                             className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                route().current('dashboard') ? 'text-white' : 'text-white/80 hover:text-white'
+                                route().current('dashboard') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                             }`}
                         >
                             <LayoutDashboard className="w-4 h-4" />
@@ -100,7 +100,7 @@ export default function Navbar() {
                             onMouseEnter={handleMouseEnter}
                             href={route('observations.index')}
                             className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                route().current('observations.index') ? 'text-white' : 'text-white/80 hover:text-white'
+                                route().current('observations.index') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                             }`}
                         >
                             <FileSpreadsheet className="w-4 h-4" />
@@ -109,20 +109,9 @@ export default function Navbar() {
 
                         <Link
                             onMouseEnter={handleMouseEnter}
-                            href={route('phenology.index')}
-                            className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                route().current('phenology.*') ? 'text-white' : 'text-white/80 hover:text-white'
-                            }`}
-                        >
-                            <Sprout className="w-4 h-4" />
-                            <span>Fenologi</span>
-                        </Link>
-
-                        <Link
-                            onMouseEnter={handleMouseEnter}
                             href={route('reports.monthly.index')}
                             className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                route().current('reports.monthly.*') ? 'text-white' : 'text-white/80 hover:text-white'
+                                route().current('reports.monthly.*') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                             }`}
                         >
                             <FileText className="w-4 h-4" />
@@ -134,7 +123,7 @@ export default function Navbar() {
                                 onMouseEnter={handleMouseEnter}
                                 href={route('observations.create')}
                                 className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                    route().current('observations.create') ? 'text-white' : 'text-white/80 hover:text-white'
+                                    route().current('observations.create') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                                 }`}
                             >
                                 <FilePlus className="w-4 h-4" />
@@ -148,7 +137,7 @@ export default function Navbar() {
                                     onMouseEnter={handleMouseEnter}
                                     href={route('supervisor.queue')}
                                     className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                        route().current('supervisor.queue') ? 'text-white' : 'text-white/80 hover:text-white'
+                                        route().current('supervisor.queue') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                                     }`}
                                 >
                                     <UserCheck className="w-4 h-4" />
@@ -158,7 +147,7 @@ export default function Navbar() {
                                     onMouseEnter={handleMouseEnter}
                                     href={route('supervisor.skp.index')}
                                     className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                        route().current('supervisor.skp.*') ? 'text-white' : 'text-white/80 hover:text-white'
+                                        route().current('supervisor.skp.*') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                                     }`}
                                 >
                                     <FileSpreadsheet className="w-4 h-4" />
@@ -173,7 +162,7 @@ export default function Navbar() {
                                     onMouseEnter={handleMouseEnter}
                                     href={route('supervisor.queue')}
                                     className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                        route().current('supervisor.queue') ? 'text-white' : 'text-white/80 hover:text-white'
+                                        route().current('supervisor.queue') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                                     }`}
                                 >
                                     <UserCheck className="w-4 h-4" />
@@ -183,7 +172,7 @@ export default function Navbar() {
                                     onMouseEnter={handleMouseEnter}
                                     href={route('supervisor.skp.index')}
                                     className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                        route().current('supervisor.skp.*') ? 'text-white' : 'text-white/80 hover:text-white'
+                                        route().current('supervisor.skp.*') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
                                     }`}
                                 >
                                     <FileSpreadsheet className="w-4 h-4" />
@@ -196,8 +185,8 @@ export default function Navbar() {
                                         onClick={() => setSettingsOpen(!settingsOpen)}
                                         className={`px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
                                             (route().current('admin.users.index') || route().current('admin.instruments.*'))
-                                                ? 'text-white bg-white/20'
-                                                : 'text-white/80 hover:text-white hover:bg-white/10'
+                                                ? 'text-sky-700 bg-sky-50'
+                                                : 'text-slate-600 hover:text-sky-700 hover:bg-sky-50/50'
                                         }`}
                                     >
                                         <Settings className="w-4 h-4" />
@@ -206,21 +195,21 @@ export default function Navbar() {
                                     </button>
 
                                     {settingsOpen && (
-                                        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                                        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden z-50">
                                             <Link
                                                 href={route('admin.users.index')}
                                                 onClick={() => setSettingsOpen(false)}
-                                                className="flex items-center space-x-2.5 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition"
+                                                className="flex items-center space-x-2.5 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                                             >
-                                                <Users className="w-4 h-4 text-emerald-600" />
+                                                <Users className="w-4 h-4 text-sky-600" />
                                                 <span>Kelola Pengguna</span>
                                             </Link>
                                             <Link
                                                 href={route('admin.instruments.index')}
                                                 onClick={() => setSettingsOpen(false)}
-                                                className="flex items-center space-x-2.5 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition border-t border-slate-100"
+                                                className="flex items-center space-x-2.5 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition border-t border-sky-100"
                                             >
-                                                <Wrench className="w-4 h-4 text-emerald-600" />
+                                                <Wrench className="w-4 h-4 text-sky-600" />
                                                 <span>Kelola Alat</span>
                                             </Link>
                                         </div>
@@ -235,8 +224,8 @@ export default function Navbar() {
                 {user && (
                     <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
                         <div className="text-right hidden sm:block">
-                            <div className="text-xs xl:text-sm font-bold text-white leading-snug">{user.nama}</div>
-                            <div className="text-[10px] xl:text-xs font-semibold capitalize" style={{ color: '#bbf7d0' }}>
+                            <div className="text-xs xl:text-sm font-bold text-slate-900 leading-snug">{user.nama}</div>
+                            <div className="text-[10px] xl:text-xs font-semibold capitalize text-sky-600">
                                 {user.role} (NIP: {user.nip})
                             </div>
                         </div>
@@ -244,7 +233,7 @@ export default function Navbar() {
                             href={route('logout')}
                             method="post"
                             as="button"
-                            className="hidden sm:flex p-2 rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/15 text-white/80 hover:text-rose-200 hover:scale-105 active:scale-95 border border-transparent hover:border-white/10 shrink-0"
+                            className="hidden sm:flex p-2 rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-rose-50 text-slate-500 hover:text-rose-600 hover:scale-105 active:scale-95 border border-transparent hover:border-rose-100 shrink-0"
                             title="Logout"
                         >
                             <LogOut className="w-5 h-5" />
@@ -253,7 +242,7 @@ export default function Navbar() {
                         {/* Mobile Hamburger Button */}
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="xl:hidden p-2 sm:p-2.5 rounded-2xl text-white hover:bg-white/15 active:scale-95 transition border border-white/20"
+                            className="xl:hidden p-2 sm:p-2.5 rounded-2xl text-slate-700 hover:bg-sky-50 active:scale-95 transition border border-sky-100"
                             aria-label="Toggle Navigation Menu"
                         >
                             {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
@@ -264,12 +253,12 @@ export default function Navbar() {
 
             {/* Mobile Navigation Drawer */}
             {mobileMenuOpen && (
-                <div className="md:hidden bg-[#0f4a2a] border-t border-emerald-700/50 px-4 pt-3 pb-6 space-y-2 shadow-2xl">
+                <div className="md:hidden bg-white border-t border-sky-100 px-4 pt-3 pb-6 space-y-2 shadow-xl">
                     {user && (
                         <>
-                            <div className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 mb-3">
-                                <div className="text-base font-bold text-white">{user.nama}</div>
-                                <div className="text-xs text-emerald-200 font-semibold capitalize mt-0.5">
+                            <div className="px-4 py-3 rounded-2xl bg-sky-50/60 border border-sky-100 mb-3">
+                                <div className="text-base font-bold text-slate-900">{user.nama}</div>
+                                <div className="text-xs text-sky-600 font-semibold capitalize mt-0.5">
                                     {user.role} (NIP: {user.nip})
                                 </div>
                             </div>
@@ -278,7 +267,7 @@ export default function Navbar() {
                                 href={route('dashboard')}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                    route().current('dashboard') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                    route().current('dashboard') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                 }`}
                             >
                                 <LayoutDashboard className="w-5 h-5" />
@@ -289,7 +278,7 @@ export default function Navbar() {
                                 href={route('observations.index')}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                    route().current('observations.index') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                    route().current('observations.index') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                 }`}
                             >
                                 <FileSpreadsheet className="w-5 h-5" />
@@ -301,7 +290,7 @@ export default function Navbar() {
                                     href={route('observations.create')}
                                     onClick={() => setMobileMenuOpen(false)}
                                     className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                        route().current('observations.create') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                        route().current('observations.create') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                     }`}
                                 >
                                     <FilePlus className="w-5 h-5" />
@@ -315,7 +304,7 @@ export default function Navbar() {
                                         href={route('supervisor.queue')}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                            route().current('supervisor.queue') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                            route().current('supervisor.queue') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                         }`}
                                     >
                                         <UserCheck className="w-5 h-5" />
@@ -325,7 +314,7 @@ export default function Navbar() {
                                         href={route('supervisor.skp.index')}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                            route().current('supervisor.skp.*') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                            route().current('supervisor.skp.*') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                         }`}
                                     >
                                         <FileSpreadsheet className="w-5 h-5" />
@@ -337,13 +326,13 @@ export default function Navbar() {
                             {user.role === 'admin' && (
                                 <>
                                     <div className="px-4 pt-2 pb-1">
-                                        <div className="text-[10px] uppercase tracking-widest font-bold text-white/40">Pengaturan</div>
+                                        <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Pengaturan</div>
                                     </div>
                                     <Link
                                         href={route('admin.users.index')}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                            route().current('admin.users.index') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                            route().current('admin.users.index') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                         }`}
                                     >
                                         <Users className="w-5 h-5" />
@@ -353,7 +342,7 @@ export default function Navbar() {
                                         href={route('admin.instruments.index')}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-bold transition ${
-                                            route().current('admin.instruments.*') ? 'bg-white/25 text-white shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                            route().current('admin.instruments.*') ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-700'
                                         }`}
                                     >
                                         <Wrench className="w-5 h-5" />
@@ -362,12 +351,12 @@ export default function Navbar() {
                                 </>
                             )}
 
-                            <div className="pt-3 border-t border-white/15 mt-2">
+                            <div className="pt-3 border-t border-sky-100 mt-2">
                                 <Link
                                     href={route('logout')}
                                     method="post"
                                     as="button"
-                                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-base transition shadow-md"
+                                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-base transition shadow-sm"
                                 >
                                     <LogOut className="w-5 h-5" />
                                     <span>Keluar / Logout</span>
@@ -380,12 +369,12 @@ export default function Navbar() {
         </header>
 
         {/* Floating Live Clock Widget at Bottom Right */}
-        <div className="fixed bottom-4 right-4 z-40 bg-emerald-950/95 text-emerald-100 backdrop-blur-md shadow-xl border border-emerald-700/60 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 select-none hover:bg-emerald-950 transition opacity-95 hover:opacity-100">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-sm shadow-emerald-400/50"></span>
+        <div className="fixed bottom-4 right-4 z-40 bg-white/95 text-slate-800 backdrop-blur-md shadow-md border border-sky-100 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 select-none hover:bg-white transition opacity-95 hover:opacity-100">
+            <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse shrink-0 shadow-xs"></span>
             <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold text-white tracking-tight">{liveTime.wib}</span>
-                <span className="text-emerald-400/60 font-mono text-xs">|</span>
-                <span className="text-emerald-200 font-bold tracking-tight">{liveTime.utc}</span>
+                <span className="font-extrabold text-slate-900 tracking-tight">{liveTime.wib}</span>
+                <span className="text-sky-300 font-mono text-xs">|</span>
+                <span className="text-slate-500 font-medium tracking-tight text-xs">{liveTime.utc}</span>
             </div>
         </div>
         </>

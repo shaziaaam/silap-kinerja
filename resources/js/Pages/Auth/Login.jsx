@@ -24,7 +24,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-slate-50 flex flex-col relative overflow-hidden">
             <Head title="Login Pegawai - SILAP-Kinerja BMKG" />
 
             {/* Background slideshow photos */}
@@ -32,7 +32,7 @@ export default function Login() {
                 <div
                     key={src}
                     className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
-                    style={{ opacity: i === bg ? 1 : 0, zIndex: 0 }}
+                    style={{ opacity: i === bg ? 0.35 : 0, zIndex: 0 }}
                 >
                     <img
                         src={src}
@@ -42,17 +42,17 @@ export default function Login() {
                 </div>
             ))}
 
-            {/* Dark overlay over photo */}
+            {/* Light Glass Overlay */}
             <div
-                className="absolute inset-0 z-[1]"
-                style={{ background: 'linear-gradient(135deg, rgba(10,40,20,0.72) 0%, rgba(15,74,42,0.65) 50%, rgba(10,30,15,0.80) 100%)' }}
+                className="absolute inset-0 z-[1] pointer-events-none"
+                style={{ background: 'linear-gradient(135deg, rgba(240,249,255,0.85) 0%, rgba(255,255,255,0.90) 50%, rgba(241,245,249,0.88) 100%)' }}
             />
 
-            {/* Back link - Styled Green Button */}
+            {/* Back link - Styled Light Sky Button */}
             <div className="absolute top-4 left-4 z-20">
                 <Link
                     href="/"
-                    className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-950/30 transition duration-200"
+                    className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full text-xs font-bold text-sky-700 bg-white hover:bg-sky-50 border border-sky-200 shadow-xs transition duration-200"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Kembali ke Beranda</span>
@@ -63,19 +63,19 @@ export default function Login() {
             <div className="relative z-10 flex flex-col flex-1 items-center justify-center px-4 py-10">
 
                 {/* Card */}
-                <div className="w-full max-w-sm bg-white/95 backdrop-blur-xl rounded-3xl p-7 sm:p-8 shadow-2xl shadow-black/40 border border-white/60">
+                <div className="w-full max-w-sm bg-white border border-sky-100 rounded-2xl p-7 sm:p-8 shadow-xl shadow-sky-100/50">
 
                     {/* Logo & Header */}
                     <div className="text-center mb-6">
                         <div className="flex flex-col items-center justify-center mb-3">
                             <img
-                                src="/images/logo putih.png"
+                                src="/images/logo hitam.webp"
                                 alt="Logo BMKG"
-                                className="h-16 w-auto object-contain drop-shadow-sm"
+                                className="h-16 w-auto object-contain"
                             />
                         </div>
                         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">SILAP-Kinerja</h1>
-                        <p className="text-xs font-bold text-emerald-700 mt-1">
+                        <p className="text-xs font-bold text-sky-600 mt-1">
                             Portal Kinerja Pegawai BMKG
                         </p>
                     </div>
@@ -83,15 +83,15 @@ export default function Login() {
                     <form onSubmit={submit} className="space-y-4">
                         <div>
                             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                NIP atau Email
+                                NIP atau email
                             </label>
                             <div className="relative">
-                                <UserCheck className="w-4 h-4 absolute left-3.5 top-3 text-emerald-600 pointer-events-none" />
+                                <UserCheck className="w-4 h-4 absolute left-3.5 top-3 text-sky-600 pointer-events-none" />
                                 <input
                                     type="text"
                                     value={data.nip}
                                     onChange={(e) => setData('nip', e.target.value)}
-                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition outline-none"
+                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition outline-none"
                                     placeholder="Masukkan NIP atau email"
                                     required
                                 />
@@ -104,12 +104,12 @@ export default function Login() {
                                 Kata Sandi
                             </label>
                             <div className="relative">
-                                <Lock className="w-4 h-4 absolute left-3.5 top-3 text-emerald-600 pointer-events-none" />
+                                <Lock className="w-4 h-4 absolute left-3.5 top-3 text-sky-600 pointer-events-none" />
                                 <input
                                     type="password"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
-                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition outline-none"
+                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition outline-none"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -120,23 +120,23 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full font-bold py-3 rounded-xl text-sm transition duration-200 shadow-lg shadow-emerald-600/25 text-white bg-gradient-to-r from-emerald-700 via-emerald-600 to-green-600 hover:from-emerald-800 hover:to-green-700 active:scale-[0.99] disabled:opacity-50 mt-2"
+                            className="w-full font-bold py-3.5 rounded-xl text-sm transition-all duration-300 shadow-md shadow-[#102B4E]/20 text-white bg-gradient-to-r from-[#102B4E] via-[#0E5284] to-[#168BC5] hover:from-[#0B213D] hover:via-[#105F99] hover:to-[#1A9BE0] hover:shadow-lg hover:shadow-[#168BC5]/30 active:scale-[0.99] disabled:opacity-50 mt-2"
                         >
                             {processing ? 'Memproses...' : 'Masuk ke Sistem'}
                         </button>
                     </form>
 
                     {/* Footer Notice */}
-                    <div className="mt-5 pt-4 border-t border-slate-100 space-y-2 text-center">
+                    <div className="mt-5 pt-4 border-t border-sky-100 space-y-2 text-center">
                         <p className="text-[10px] text-slate-500 flex items-center justify-center space-x-1.5">
                             <ShieldAlert className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                            <span>Sistem internal — hanya untuk ASN BMKG Staklim Jateng</span>
+                            <span>Sistem internal - hanya untuk ASN BMKG Staklim Jateng</span>
                         </p>
                         <a
                             href="https://staklim-jateng.bmkg.go.id/"
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center space-x-1 text-[10px] text-emerald-700 hover:text-emerald-900 font-semibold"
+                            className="inline-flex items-center space-x-1 text-[10px] text-sky-700 hover:text-sky-900 font-semibold"
                         >
                             <span>Bukan pegawai? Kunjungi Web Resmi BMKG Jateng</span>
                             <ExternalLink className="w-3 h-3" />
@@ -145,7 +145,7 @@ export default function Login() {
                 </div>
 
                 {/* Copyright */}
-                <p className="mt-4 text-[11px] text-white/50 z-10 font-medium">
+                <p className="mt-4 text-[11px] text-slate-500 z-10 font-medium">
                     © 2026 BMKG Stasiun Klimatologi Jawa Tengah
                 </p>
             </div>

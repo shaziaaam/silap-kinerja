@@ -18,8 +18,8 @@ Aplikasi menggunakan palet warna resmi BMKG yang elegan, bernuansa hijau alami k
 | **Main Page Background** | `#f0fdf4` (`emerald-50`) | Warna dasar seluruh latar belakang halaman utama |
 | **Card Container** | `#ffffff` / `bg-white` | Latar belakang modul form, tabel, dan card utama |
 | **Primary Action Button** | `from-emerald-600 to-green-600` | Tombol kirim, simpan, dan aksi utama (Pill Shape) |
-| **Shift Pagi Badge** | `bg-sky-100 text-sky-900 border-sky-300` | Indikator pengamatan Shift Pagi (07.00 - 14.30 WIB) |
-| **Shift Siang Badge** | `bg-amber-100 text-amber-900 border-amber-300` | Indikator pengamatan Shift Siang (14.30 - 22.00 WIB) |
+| **Shift Pagi Badge** | `bg-sky-100 text-sky-900 border-sky-300` | Indikator pengamatan Shift Pagi (07.00 - 15.00 WIB) |
+| **Shift Siang Badge** | `bg-amber-100 text-amber-900 border-amber-300` | Indikator pengamatan Shift Siang (15.00 - 22.00 WIB) |
 | **Validation Error State** | `bg-rose-50/70 border-rose-400` | Peringatan visual otomatis jika nilai parameter fisik salah |
 
 ---
@@ -52,8 +52,8 @@ Mengikuti prinsip desain *frosted glass* modern (seperti iOS & One UI), elemen n
 Tabel dibuat ringkas dan fokus pada pembuktian SKP & pengawasan operasional:
 1. **Tanggal & Jam:** Tanggal dan jam pengamatan (WIB / UTC).
 2. **Shift Observasi:**
-   - **Shift Pagi:** 07:00 WIB s.d. 14:30 WIB.
-   - **Shift Siang:** 14:30 WIB s.d. 22:00 WIB.
+   - **Shift Pagi:** 07:00 WIB s.d. 15:00 WIB.
+   - **Shift Siang:** 15:00 WIB s.d. 22:00 WIB.
 3. **Pengamat (Penginput):** Nama Petugas & NIP Pengamat.
 4. **Foto Watermark:** Link akses foto bukti dukung ber-watermark lokasi & timestamp.
 5. **Status Approval:** Status persetujuan Supervisor (Approved / Menunggu Validasi / Revisi).

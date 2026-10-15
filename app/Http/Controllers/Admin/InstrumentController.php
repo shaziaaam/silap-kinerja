@@ -34,7 +34,7 @@ class InstrumentController extends Controller
     {
         $validated = $request->validate([
             'nama'       => 'required|string|max:255|unique:instruments,nama',
-            'kategori'   => 'required|in:aws,taman_alat,fenologi',
+            'kategori'   => 'required|in:aws,taman_alat',
             'is_active'  => 'boolean',
             'urutan_form'=> 'integer|min:0',
         ]);
@@ -48,7 +48,7 @@ class InstrumentController extends Controller
     {
         $validated = $request->validate([
             'nama'        => ['required', 'string', 'max:255', Rule::unique('instruments', 'nama')->ignore($instrument->id)],
-            'kategori'    => 'required|in:aws,taman_alat,fenologi',
+            'kategori'    => 'required|in:aws,taman_alat',
             'is_active'   => 'boolean',
             'urutan_form' => 'integer|min:0',
         ]);

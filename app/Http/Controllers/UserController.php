@@ -31,7 +31,7 @@ class UserController extends Controller
         User::create([
             'nama' => $validated['nama'],
             'nip' => $validated['nip'],
-            'email' => $validated['email'] ?? null,
+            'email' => !empty($validated['email']) ? trim($validated['email']) : null,
             'role' => $validated['role'],
             'password' => Hash::make($validated['password']),
             'must_change_password' => true,
@@ -53,7 +53,7 @@ class UserController extends Controller
         $updateData = [
             'nama' => $validated['nama'],
             'nip' => $validated['nip'],
-            'email' => $validated['email'] ?? null,
+            'email' => !empty($validated['email']) ? trim($validated['email']) : null,
             'role' => $validated['role'],
         ];
 

@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         // Users list according to SRS / Discussion rules:
         // Admin: A001, Password: password123, must_change_password: true
         // Penyelia: P001 (Richardus Teguh Prayitno), Password: password123, must_change_password: true
-        // Pengamat: P002 to P007, Password: password123, must_change_password: true
+        // Pengamat: P002 to P007 (6 Pengamat: Achmad Sulistyo E.P, Edy Susanto, Eko Taufiq Suharmanto, Joko Cahyono, Muryanti, Shandy Al Mughozali)
         $users = [
             [
                 'nip' => 'A001',
@@ -49,12 +49,18 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'nip' => 'P005',
+                'nama' => 'Joko Cahyono',
+                'email' => 'joko@bmkg.go.id',
+                'role' => 'pengamat',
+            ],
+            [
+                'nip' => 'P006',
                 'nama' => 'Muryanti',
                 'email' => 'muryanti@bmkg.go.id',
                 'role' => 'pengamat',
             ],
             [
-                'nip' => 'P006',
+                'nip' => 'P007',
                 'nama' => 'Shandy Al Mughozali',
                 'email' => 'shandy@bmkg.go.id',
                 'role' => 'pengamat',
@@ -74,28 +80,46 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Seed Hourly UTC & WIB Schedules (07:00 WIB / 00:00 UTC to 22:00 WIB / 15:00 UTC)
-        // Mandatory photo hours: 07:00 WIB (00:00 UTC) & 17:00 WIB (10:00 UTC)
-        for ($utcHour = 0; $utcHour <= 15; $utcHour++) {
-            $wibHour = ($utcHour + 7) % 24;
-            $jamUtc = sprintf('%02d:00:00', $utcHour);
-            $jamWib = sprintf('%02d:00:00', $wibHour);
-            $isMandatoryPhoto = ($wibHour == 7 || $wibHour == 17);
+        // Seed Schedules (16 slot JAM_PENUH: 07:00 - 22:00 WIB & 3 slot AGM1B: 07:30, 13:30, 17:30 WIB)
+        // Foto HANYA 2 kali sehari: slot 07.00 WIB (shift pagi) dan 17.00 WIB (shift siang).
+        $slots = [
+            // JAM_PENUH
+            ['wib' => '07:00:00', 'utc' => '00:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => true],
+            ['wib' => '07:30:00', 'utc' => '00:30:00', 'kelompok' => 'AGM1B',     'shift' => 'pagi', 'foto' => false],
+            ['wib' => '08:00:00', 'utc' => '01:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '09:00:00', 'utc' => '02:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '10:00:00', 'utc' => '03:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '11:00:00', 'utc' => '04:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '12:00:00', 'utc' => '05:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '13:00:00', 'utc' => '06:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '13:30:00', 'utc' => '06:30:00', 'kelompok' => 'AGM1B',     'shift' => 'pagi', 'foto' => false],
+            ['wib' => '14:00:00', 'utc' => '07:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'pagi', 'foto' => false],
+            ['wib' => '15:00:00', 'utc' => '08:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+            ['wib' => '16:00:00', 'utc' => '09:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+            ['wib' => '17:00:00', 'utc' => '10:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => true],
+            ['wib' => '17:30:00', 'utc' => '10:30:00', 'kelompok' => 'AGM1B',     'shift' => 'siang', 'foto' => false],
+            ['wib' => '18:00:00', 'utc' => '11:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+            ['wib' => '19:00:00', 'utc' => '12:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+            ['wib' => '20:00:00', 'utc' => '13:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+            ['wib' => '21:00:00', 'utc' => '14:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+            ['wib' => '22:00:00', 'utc' => '15:00:00', 'kelompok' => 'JAM_PENUH', 'shift' => 'siang', 'foto' => false],
+        ];
 
+        foreach ($slots as $slot) {
             Schedule::updateOrCreate(
-                ['jam_utc' => $jamUtc],
+                ['jam_wib' => $slot['wib']],
                 [
-                    'jam_utc' => $jamUtc,
-                    'jam_wib' => $jamWib,
-                    'is_synoptic' => $isMandatoryPhoto,
+                    'jam_utc' => $slot['utc'],
+                    'jam_wib' => $slot['wib'],
+                    'kelompok' => $slot['kelompok'],
+                    'shift' => $slot['shift'],
+                    'is_mandatory_photo' => $slot['foto'],
+                    'is_synoptic' => $slot['foto'], // kompatibilitas
                 ]
             );
         }
 
         // Seed alat & parameter pengamatan
         $this->call(InstrumentSeeder::class);
-
-        // Seed master tanaman & fase fenologi
-        $this->call(PhenologySeeder::class);
     }
 }

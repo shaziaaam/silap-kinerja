@@ -98,8 +98,8 @@ export default function SkpReport({ pengamatList, recaps }) {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
                 {flash?.message && (
-                    <div className="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 text-sm font-semibold">
-                        <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                    <div className="flex items-center space-x-2 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl px-4 py-3 text-sm font-semibold">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-sky-600" />
                         <span>{flash.message}</span>
                     </div>
                 )}
@@ -118,7 +118,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                 </div>
 
                 {/* Main Filter & Generator Form */}
-                <div className="bg-white border border-emerald-100 rounded-2xl p-6 shadow-sm">
+                <div className="bg-white border border-sky-100/80 rounded-2xl p-6 shadow-sm shadow-sky-100/30">
                     <form onSubmit={handleGenerate} className="space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
                             {/* Jenis Periode Toggle */}
@@ -130,7 +130,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                         onClick={() => handleJenisPeriodeChange('triwulan')}
                                         className={`rounded-lg text-xs font-bold transition ${
                                             jenisPeriode === 'triwulan'
-                                                ? 'bg-emerald-600 text-white shadow-xs'
+                                                ? 'bg-sky-600 text-white shadow-xs'
                                                 : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                     >
@@ -141,7 +141,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                         onClick={() => handleJenisPeriodeChange('bulanan')}
                                         className={`rounded-lg text-xs font-bold transition ${
                                             jenisPeriode === 'bulanan'
-                                                ? 'bg-emerald-600 text-white shadow-xs'
+                                                ? 'bg-sky-600 text-white shadow-xs'
                                                 : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                     >
@@ -158,7 +158,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                 <select
                                     value={selectedPeriode}
                                     onChange={(e) => setSelectedPeriode(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                                 >
                                     {(jenisPeriode === 'bulanan' ? BULAN_OPTIONS : TRIWULAN_OPTIONS).map((opt) => (
                                         <option key={opt.value} value={opt.value}>
@@ -175,7 +175,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                     type="number"
                                     value={tahun}
                                     onChange={(e) => setTahun(parseInt(e.target.value))}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                                     required
                                 />
                             </div>
@@ -186,7 +186,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                 <select
                                     value={selectedUser}
                                     onChange={(e) => setSelectedUser(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-emerald-500 transition outline-none font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                                 >
                                     {user.role !== 'pengamat' && (
                                         <option value="all">Semua Pegawai (Paket ZIP)</option>
@@ -205,7 +205,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2 disabled:opacity-50"
+                                className="px-5 bg-sky-600 hover:bg-sky-700 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm shadow-sky-600/20 flex items-center space-x-2 disabled:opacity-50"
                             >
                                 <RefreshCw className="w-4 h-4" />
                                 <span>Hitung &amp; Generate SKP</span>
@@ -216,7 +216,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                     <button
                                         type="button"
                                         onClick={handleDownloadZip}
-                                        className="px-5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
+                                        className="px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
                                     >
                                         <Archive className="w-4 h-4" />
                                         <span>Unduh Paket ZIP (Semua Pegawai)</span>
@@ -226,10 +226,10 @@ export default function SkpReport({ pengamatList, recaps }) {
                                         href={route('supervisor.skp.pdf-direct', { user_id: selectedUser, tahun, periode: selectedPeriode })}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="px-5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
+                                        className="px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
                                     >
                                         <Download className="w-4 h-4" />
-                                        <span>Unduh PDF SKP (Pegawai Terpilih)</span>
+                                        <span>Cetak PDF SKP (Pegawai Terpilih)</span>
                                     </a>
                                 )
                             )}
@@ -238,51 +238,68 @@ export default function SkpReport({ pengamatList, recaps }) {
                 </div>
 
                 {/* Table of Generated SKP Recaps */}
-                <div className="bg-white border border-emerald-100 rounded-2xl overflow-hidden shadow-md">
-                    <div className="px-6 py-4 border-b border-emerald-100 font-extrabold text-sm text-slate-900 bg-emerald-50/50 flex items-center justify-between">
+                <div className="bg-white border border-sky-100/80 rounded-2xl overflow-hidden shadow-sm shadow-sky-100/30">
+                    <div className="px-6 py-4 border-b border-sky-100 font-extrabold text-sm text-slate-900 bg-sky-50/70 flex items-center justify-between">
                         <span>Daftar Rekap SKP Ter-Generate ({recaps.data.length} Data)</span>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs text-slate-700">
-                            <thead className="bg-emerald-50/80 text-emerald-950 uppercase font-bold text-[11px] tracking-wider border-b border-emerald-100">
+                            <thead className="bg-sky-50/70 text-slate-900 uppercase font-bold text-[11px] tracking-wider border-b border-sky-100">
                                 <tr>
-                                    <th className="px-5 py-4">Pengamat</th>
-                                    <th className="px-5 py-4">Periode SKP</th>
-                                    <th className="px-5 py-4">Total Observasi Valid</th>
-                                    <th className="px-5 py-4">Waktu Generate</th>
-                                    <th className="px-5 py-4 text-right">Aksi PDF</th>
+                                    <th className="px-5 py-3.5 whitespace-nowrap">Pengamat</th>
+                                    <th className="px-5 py-3.5 whitespace-nowrap">Periode SKP</th>
+                                    <th className="px-5 py-3.5 whitespace-nowrap">Total Observasi Valid</th>
+                                    <th className="px-5 py-3.5 whitespace-nowrap">Waktu Generate</th>
+                                    <th className="px-5 py-3.5 whitespace-nowrap text-right">Aksi PDF</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-emerald-50">
+                            <tbody className="divide-y divide-sky-50">
                                 {recaps.data.length > 0 ? (
                                     recaps.data.map((r) => (
-                                        <tr key={r.id} className="hover:bg-emerald-50/40 transition">
+                                        <tr key={r.id} className="hover:bg-sky-50/40 transition">
                                             <td className="px-5 py-4">
                                                 <div className="font-bold text-slate-900">{r.user?.nama}</div>
                                                 <div className="text-[11px] text-slate-500">NIP: {r.user?.nip}</div>
                                             </td>
                                             <td className="px-5 py-4">
-                                                <span className="font-bold text-emerald-700">{r.periode_label || r.triwulan}</span>
+                                                <span className="font-bold text-sky-700">{r.periode_label || r.triwulan}</span>
                                                 <span className="text-slate-500 font-medium ml-1">Tahun {r.tahun}</span>
                                             </td>
                                             <td className="px-5 py-4">
-                                                <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-bold text-xs">
-                                                    {r.total_pengamatan_valid} Observasi Valid
-                                                </span>
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="bg-sky-50 text-sky-700 border border-sky-200 px-3 py-1 rounded-full font-bold text-xs">
+                                                        {r.total_pengamatan_valid} Observasi Valid
+                                                    </span>
+                                                    {r.has_pending_revisions && (
+                                                        <span className="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-md font-bold text-[10px]" title="Ada data observasi yang perlu direvisi">
+                                                            Ada Revisi
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-5 py-4 text-slate-500 font-medium">
                                                 {new Date(r.tanggal_generate).toLocaleString('id-ID')}
                                             </td>
                                             <td className="px-5 py-4 text-right">
-                                                <a
-                                                    href={route('supervisor.skp.pdf', r.id)}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="inline-flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold transition"
-                                                >
-                                                    <Download className="w-3.5 h-3.5" />
-                                                    <span>Preview &amp; Unduh PDF</span>
-                                                </a>
+                                                {r.has_pending_revisions ? (
+                                                    <span
+                                                        className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold cursor-not-allowed"
+                                                        title="Pengesahan (ACC) SKP diblokir karena masih ada data observasi berstatus revisi yang belum diperbaiki."
+                                                    >
+                                                        <Download className="w-3.5 h-3.5" />
+                                                        <span>ACC Diblokir</span>
+                                                    </span>
+                                                ) : (
+                                                    <a
+                                                        href={route('supervisor.skp.pdf', r.id)}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex items-center space-x-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                                                    >
+                                                        <Download className="w-3.5 h-3.5" />
+                                                        <span>Cetak PDF</span>
+                                                    </a>
+                                                )}
                                             </td>
                                         </tr>
                                     ))

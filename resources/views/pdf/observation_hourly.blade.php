@@ -88,7 +88,7 @@
         <p>JL. Siliwangi No. 291 Semarang - Telp. (024) 7601633</p>
     </div>
 
-    <div class="title">CATATAN PENGAMATAN CUACA PER JAM</div>
+    <div class="title">CATATAN PENGAMATAN CUACA PER SLOT</div>
 
     <table class="meta-table">
         <tr>
@@ -98,8 +98,8 @@
             <td width="32%">: {{ $observation->user->nama ?? '-' }} (NIP: {{ $observation->user->nip ?? '-' }})</td>
         </tr>
         <tr>
-            <td><strong>Waktu Pengamatan</strong></td>
-            <td>: Pukul {{ substr($observation->schedule->jam_wib ?? '07:00', 0, 5) }} WIB ({{ substr($observation->schedule->jam_utc ?? '00:00', 0, 5) }} UTC)</td>
+            <td><strong>Slot Pengamatan</strong></td>
+            <td>: Pukul {{ substr($observation->schedule->jam_wib ?? '07:00', 0, 5) }} WIB (Shift {{ ucfirst($observation->shift ?? 'Pagi') }})</td>
             <td><strong>Status Pengamatan</strong></td>
             <td>: <span style="text-transform: uppercase; font-weight: bold;">{{ $observation->status_pengamatan }}</span></td>
         </tr>
@@ -109,10 +109,10 @@
         <thead>
             <tr>
                 <th width="5%" class="text-center">No</th>
-                <th width="45%">Parameter Pengamatan</th>
+                <th width="45%">Parameter Pengamatan (Form Nasional)</th>
                 <th width="12%" class="text-center">Satuan</th>
-                <th width="19%" class="text-center">Nilai AWS</th>
                 <th width="19%" class="text-center">Nilai Manual</th>
+                <th width="19%" class="text-center">Nilai AWS</th>
             </tr>
         </thead>
         <tbody>
@@ -120,15 +120,35 @@
             @foreach($parameters as $param)
                 @php
                     $valObj = $observation->values->where('parameter_id', $param->id)->first();
-                    $awsVal = $valObj->nilai_aws ?? '-';
-                    $manualVal = $valObj->nilai_manual ?? '-';
+                    $rawManual = $valObj->nilai_manual ?? null;
+                    $rawAws = $valObj->nilai_aws ?? null;
+
+                    // Aturan Sifat & 9999 Form Nasional
+                    if ($param->sifat === 'dihitung_nasional') {
+                        $displayManual = '<span style="color: #64748b; font-style: italic;">otomatis</span>';
+                    } elseif (!$param->is_active || $rawManual === null || $rawManual === '') {
+                        $displayManual = '<span style="color: #94a3b8;">9999</span>';
+                    } else {
+                        $displayManual = htmlspecialchars($rawManual);
+                    }
+
+                    if ($rawAws === null || $rawAws === '') {
+                        $displayAws = '<span style="color: #94a3b8;">9999</span>';
+                    } else {
+                        $displayAws = htmlspecialchars($rawAws);
+                    }
                 @endphp
                 <tr>
                     <td class="text-center">{{ $no++ }}</td>
-                    <td>{{ $param->label }}</td>
+                    <td>
+                        {{ $param->label }}
+                        @if(!$param->is_active)
+                            <span style="font-size: 8px; color: #94a3b8; font-style: italic;">(nonaktif)</span>
+                        @endif
+                    </td>
                     <td class="text-center">{{ $param->satuan ?? '-' }}</td>
-                    <td class="text-center font-mono">{{ $param->sumber === 'manual' ? '-' : $awsVal }}</td>
-                    <td class="text-center font-mono">{{ $param->sumber === 'aws' ? '-' : $manualVal }}</td>
+                    <td class="text-center font-mono">{!! $displayManual !!}</td>
+                    <td class="text-center font-mono">{!! $displayAws !!}</td>
                 </tr>
             @endforeach
         </tbody>

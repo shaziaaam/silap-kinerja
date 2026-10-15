@@ -15,12 +15,17 @@ class RekapSkpTriwulan extends Model
         'user_id',
         'tahun',
         'triwulan',
+        'status',
+        'approved_by',
+        'approved_at',
+        'catatan',
         'total_pengamatan_valid',
         'file_pdf_path',
         'tanggal_generate',
     ];
 
     protected $casts = [
+        'approved_at' => 'datetime',
         'tanggal_generate' => 'datetime',
     ];
 

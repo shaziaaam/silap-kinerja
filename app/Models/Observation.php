@@ -35,6 +35,31 @@ class Observation extends Model
         return $this->hasMany(ObservationValue::class)->with('parameter');
     }
 
+    protected $appends = ['foto_url', 'shift_name'];
+
+    public function getFotoUrlAttribute(): ?string
+    {
+        if (!empty($this->foto_gdrive_url)) {
+            return $this->foto_gdrive_url;
+        }
+
+        if (!empty($this->foto_path)) {
+            return str_starts_with($this->foto_path, 'http')
+                ? $this->foto_path
+                : '/' . ltrim($this->foto_path, '/');
+        }
+
+        return null;
+    }
+
+    public function getShiftNameAttribute(): string
+    {
+        if (!empty($this->shift)) {
+            return $this->shift === 'pagi' ? 'Shift Pagi' : 'Shift Siang';
+        }
+        return ($this->schedule?->shift ?? 'pagi') === 'pagi' ? 'Shift Pagi' : 'Shift Siang';
+    }
+
     /**
      * Get a specific parameter value by parameter code.
      */

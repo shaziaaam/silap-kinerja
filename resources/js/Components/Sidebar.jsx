@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutDashboard, FileSpreadsheet, FilePlus, UserCheck,
-    Wrench, Users, LogOut, Sprout, FileText,
+    Wrench, Users, LogOut, FileText,
     Menu, X, User, ChevronRight
 } from 'lucide-react';
 
@@ -11,20 +11,20 @@ function NavItem({ href, icon: Icon, label, active, onClick }) {
         <Link
             href={href}
             onClick={onClick}
-            className={`group relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            className={`group relative flex items-center gap-2.5 px-3 py-2 text-xs transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
                 active
-                    ? 'bg-gradient-to-r from-emerald-800 to-emerald-700/90 text-white font-bold shadow-md shadow-emerald-950/40 border border-emerald-600/60 translate-x-0.5'
-                    : 'text-emerald-100/75 font-medium hover:bg-white/10 hover:text-white hover:translate-x-1'
+                    ? 'bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/30 rounded-xl translate-x-0.5'
+                    : 'text-slate-600 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl hover:translate-x-1'
             }`}
         >
             <Icon
                 className={`w-4 h-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-110 ${
-                    active ? 'text-emerald-300' : 'text-emerald-200/60 group-hover:text-emerald-200'
+                    active ? 'text-white' : 'text-slate-400 group-hover:text-sky-600'
                 }`}
             />
             <span className="truncate">{label}</span>
             {active && (
-                <ChevronRight className="w-3.5 h-3.5 ml-auto text-emerald-300/80 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
+                <ChevronRight className="w-3.5 h-3.5 ml-auto text-white shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
             )}
         </Link>
     );
@@ -33,7 +33,7 @@ function NavItem({ href, icon: Icon, label, active, onClick }) {
 function SectionLabel({ label }) {
     return (
         <div className="px-3 pt-3.5 pb-1">
-            <span className="text-[10px] uppercase tracking-widest font-extrabold text-emerald-400/40">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
                 {label}
             </span>
         </div>
@@ -67,25 +67,25 @@ export default function Sidebar({ children }) {
     };
 
     const SidebarContent = () => (
-        <div className="flex flex-col h-full overflow-hidden bg-[#0a3d20]">
+        <div className="flex flex-col h-full overflow-hidden bg-white border-r border-sky-100/80">
             {/* Brand Header */}
             <Link
                 href="/"
-                className="group flex items-center gap-2.5 px-3.5 py-3.5 border-b border-emerald-900/50 shrink-0 transition-colors duration-300 hover:bg-white/5"
+                className="group flex items-center gap-2.5 px-3.5 py-3.5 border-b border-sky-100 shrink-0 transition-colors duration-300 hover:bg-sky-50/50"
             >
                 <img
-                    src="/images/logo putih.png"
+                    src="/images/logo hitam.webp"
                     alt="BMKG"
                     className="h-7 w-auto object-contain shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105"
                 />
                 <div className="min-w-0">
-                    <div className="font-extrabold text-white text-sm leading-tight tracking-tight truncate">SILAP-Kinerja</div>
-                    <div className="text-[10px] text-emerald-300/80 font-medium truncate">Staklim Jawa Tengah</div>
+                    <div className="font-extrabold text-slate-900 text-sm leading-tight tracking-tight truncate">SILAP-Kinerja</div>
+                    <div className="text-[10px] text-sky-600 font-semibold truncate">Staklim Jawa Tengah</div>
                 </div>
                 <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); close(); }}
-                    className="ml-auto lg:hidden p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition duration-200"
+                    className="ml-auto lg:hidden p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-sky-50 transition duration-200"
                     aria-label="Tutup Menu"
                 >
                     <X className="w-4 h-4" />
@@ -93,12 +93,12 @@ export default function Sidebar({ children }) {
             </Link>
 
             {/* Live Clock Bar */}
-            <div className="px-3.5 py-2 bg-[#062915] border-b border-emerald-900/50 shrink-0 select-none">
-                <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                    <span className="font-bold text-white font-mono tracking-tight">{liveTime.wib}</span>
-                    <span className="text-emerald-700">|</span>
-                    <span className="text-emerald-300/80 font-mono text-[10px] tracking-tight">{liveTime.utc}</span>
+            <div className="px-3.5 py-2 bg-sky-50 border-b border-sky-100 text-sky-900 text-xs font-mono font-bold shrink-0 select-none">
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-sky-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse shrink-0" />
+                    <span className="font-bold text-slate-900 font-mono tracking-tight">{liveTime.wib}</span>
+                    <span className="text-sky-300">|</span>
+                    <span className="text-slate-500 font-mono text-[10px] tracking-tight">{liveTime.utc}</span>
                 </div>
             </div>
 
@@ -114,9 +114,6 @@ export default function Sidebar({ children }) {
                     <NavItem href={route('observations.create')} icon={FilePlus} label="Input Observasi"
                         active={isActive('observations.create')} onClick={close} />
                 )}
-
-                <NavItem href={route('phenology.index')} icon={Sprout} label="Fenologi"
-                    active={isActive('phenology.*')} onClick={close} />
 
                 <NavItem href={route('reports.monthly.index')} icon={FileText} label="Laporan Bulanan"
                     active={isActive('reports.monthly.*')} onClick={close} />
@@ -146,15 +143,15 @@ export default function Sidebar({ children }) {
             </nav>
 
             {/* Bottom Logout Button */}
-            <div className="shrink-0 border-t border-emerald-900/50 p-2.5 bg-[#062915]/90">
+            <div className="shrink-0 border-t border-sky-100 p-2.5 bg-slate-50/50">
                 <Link
                     href={route('logout')}
                     method="post"
                     as="button"
                     onClick={close}
-                    className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-950/60 hover:text-rose-200 hover:translate-x-1 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                    className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 hover:translate-x-1 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
                 >
-                    <LogOut className="w-4 h-4 shrink-0 text-rose-400 group-hover:scale-110 transition-transform duration-300" />
+                    <LogOut className="w-4 h-4 shrink-0 text-rose-500 group-hover:scale-110 transition-transform duration-300" />
                     <span>Keluar</span>
                 </Link>
             </div>
@@ -162,16 +159,16 @@ export default function Sidebar({ children }) {
     );
 
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden">
+        <div className="flex h-screen bg-slate-50 overflow-hidden">
             {/* Desktop Sidebar (w-56) */}
-            <aside className="hidden lg:flex flex-col w-56 shrink-0 h-full border-r border-emerald-900/40 shadow-lg">
+            <aside className="hidden lg:flex flex-col w-56 shrink-0 h-full border-r border-sky-100 shadow-sm bg-white">
                 <SidebarContent />
             </aside>
 
             {/* Mobile Overlay */}
             {open && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                    className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs lg:hidden transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
                     onClick={close}
                     aria-hidden="true"
                 />
@@ -179,7 +176,7 @@ export default function Sidebar({ children }) {
 
             {/* Mobile Drawer */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden shadow-2xl ${
+                className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden shadow-xl ${
                     open ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
@@ -189,17 +186,17 @@ export default function Sidebar({ children }) {
             {/* Main Content Area */}
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 {/* Mobile Topbar */}
-                <header className="lg:hidden flex items-center gap-2.5 px-3.5 py-2.5 bg-[#0a3d20] border-b border-emerald-900/50 shrink-0">
+                <header className="lg:hidden flex items-center gap-2.5 px-3.5 py-2.5 bg-white border-b border-sky-100 shrink-0 shadow-xs">
                     <button
                         onClick={() => setOpen(true)}
-                        className="p-1.5 rounded-lg text-white hover:bg-white/10 active:scale-95 transition duration-200"
+                        className="p-1.5 rounded-lg text-slate-700 hover:bg-sky-50 active:scale-95 transition duration-200"
                         aria-label="Buka menu"
                     >
                         <Menu className="w-5 h-5" />
                     </button>
-                    <img src="/images/logo putih.png" alt="BMKG" className="h-6 w-auto object-contain" />
-                    <span className="font-extrabold text-white text-xs tracking-tight">SILAP-Kinerja</span>
-                    <div className="ml-auto text-[10px] text-emerald-300 font-mono font-semibold">{liveTime.wib}</div>
+                    <img src="/images/logo hitam.webp" alt="BMKG" className="h-6 w-auto object-contain" />
+                    <span className="font-extrabold text-slate-900 text-xs tracking-tight">SILAP-Kinerja</span>
+                    <div className="ml-auto text-[10px] text-slate-600 font-mono font-semibold">{liveTime.wib}</div>
                 </header>
 
                 {/* Page Content View */}

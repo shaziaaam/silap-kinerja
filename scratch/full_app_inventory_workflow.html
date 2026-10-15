@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dokumentasi Komprehensif: Seluruh Alur Kerja, Alat Otomatis & Manual, Serta Seluruh Fitur SILAP-Kinerja</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  @page {
+    size: A4;
+    margin: 10mm 10mm 10mm 10mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    font-size: 8.2pt;
+    line-height: 1.38;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page-container {
+    padding: 0;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Header Banner */
+  .header-banner {
+    background: linear-gradient(135deg, #09331d 0%, #0f4a2a 40%, #166534 75%, #15803d 100%);
+    color: #ffffff;
+    border-radius: 9px;
+    padding: 16px 20px;
+    margin-bottom: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px -3px rgba(15, 74, 42, 0.3);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 5px;
+    margin-bottom: 7px;
+  }
+
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #bbf7d0;
+  }
+
+  .header-date {
+    font-size: 7pt;
+    color: #bbf7d0;
+    font-weight: 500;
+  }
+
+  .header-title {
+    font-size: 17pt;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    line-height: 1.15;
+    margin-bottom: 3px;
+  }
+
+  .header-subtitle {
+    font-size: 8.8pt;
+    color: #dcfce7;
+    font-weight: 400;
+  }
+
+  .header-tags {
+    margin-top: 7px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .tag-pill {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 6.6pt;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  /* Section Card */
+  .section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin-bottom: 9px;
+    page-break-inside: avoid;
+  }
+
+  .section-title {
+    font-size: 10pt;
+    font-weight: 800;
+    color: #0f4a2a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid #dcfce7;
+  }
+
+  .section-title .number-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: #166534;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 7pt;
+    font-weight: 800;
+  }
+
+  p {
+    margin-bottom: 4px;
+    text-align: justify;
+  }
+
+  /* Grids */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-top: 5px;
+  }
+
+  .info-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 7px 9px;
+    page-break-inside: avoid;
+  }
+
+  .info-box.green {
+    border-color: #86efac;
+    background: #f0fdf4;
+  }
+
+  .info-box.blue {
+    border-color: #bae6fd;
+    background: #f0f9ff;
+  }
+
+  .info-box.amber {
+    border-color: #fde68a;
+    background: #fffbeb;
+  }
+
+  .info-box.purple {
+    border-color: #ddd6fe;
+    background: #f5f3ff;
+  }
+
+  .box-title {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: #0f4a2a;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .bullet-list {
+    list-style: none;
+    font-size: 7.5pt;
+    color: #334155;
+  }
+
+  .bullet-list li {
+    position: relative;
+    padding-left: 10px;
+    margin-bottom: 2px;
+    line-height: 1.32;
+  }
+
+  .bullet-list li::before {
+    content: "•";
+    position: absolute;
+    left: 1px;
+    color: #166534;
+    font-weight: bold;
+    font-size: 8pt;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-size: 7.2pt;
+    page-break-inside: avoid;
+  }
+
+  th {
+    background: #0f4a2a;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 4px 6px;
+    font-size: 7pt;
+    border: 1px solid #0f4a2a;
+  }
+
+  td {
+    padding: 4px 6px;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .code-font {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 6.8pt;
+    background: #f1f5f9;
+    padding: 1px 3px;
+    border-radius: 3px;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+  }
+
+  .badge-auto {
+    background: #dbeafe;
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 6.2pt;
+    padding: 1px 4px;
+    border-radius: 3px;
+    display: inline-block;
+    border: 1px solid #bfdbfe;
+  }
+
+  .badge-manual {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+    font-size: 6.2pt;
+    padding: 1px 4px;
+    border-radius: 3px;
+    display: inline-block;
+    border: 1px solid #fde68a;
+  }
+
+  .badge-app {
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 700;
+    font-size: 6.2pt;
+    padding: 1px 4px;
+    border-radius: 3px;
+    display: inline-block;
+    border: 1px solid #bbf7d0;
+  }
+
+  /* Step Flow */
+  .step-flow {
+    display: flex;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3.5px solid #166534;
+    border-radius: 5px;
+    padding: 5px 9px;
+    margin-bottom: 5px;
+    page-break-inside: avoid;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    background: #166534;
+    color: #ffffff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 8pt;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-header {
+    font-size: 8.2pt;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5px;
+  }
+
+  .step-badge {
+    font-size: 6.2pt;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .badge-pagi { background: #e0f2fe; color: #0369a1; }
+  .badge-siang { background: #fef3c7; color: #92400e; }
+  .badge-system { background: #dcfce7; color: #166534; }
+  .badge-guard { background: #ffe4e6; color: #9f1239; }
+
+  .step-desc {
+    font-size: 7.4pt;
+    color: #475569;
+    line-height: 1.32;
+  }
+
+  .highlight-callout {
+    background: #ecfdf5;
+    border-left: 3.5px solid #10b981;
+    padding: 5px 9px;
+    border-radius: 4px;
+    font-size: 7.3pt;
+    color: #065f46;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 6.5pt;
+    color: #94a3b8;
+    margin-top: 6px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-container">
+
+  <!-- ==================== HALAMAN 1: BANNER, TUJUAN & KLASIFIKASI ALAT ==================== -->
+  <div class="header-banner">
+    <div class="header-top">
+      <div class="brand-badge">
+        <span>⚡ BMKG JAWA TENGAH</span> · STASIUN KLIMATOLOGI SEMARANG
+      </div>
+      <div class="header-date">
+        DOKUMENTASI SISTEM RESMI &amp; INVENTARISASI PENUH
+      </div>
+    </div>
+    <div class="header-title">SILAP-Kinerja — Katalog Lengkap Sistem</div>
+    <div class="header-subtitle">
+      Inventarisasi Seluruh Alat (Otomatis &amp; Manual), Form Nasional FDIH, Logika Validasi Fisika, Alur Kerja Operasional, dan Seluruh Modul Aplikasi
+    </div>
+    <div class="header-tags">
+      <span class="tag-pill">Backend: Laravel 11 + MySQL</span>
+      <span class="tag-pill">Frontend: Inertia.js + React</span>
+      <span class="tag-pill">Penyelia: Richardus Teguh Prayitno</span>
+      <span class="tag-pill">6 Pengamat Stasiun</span>
+      <span class="tag-pill">Operasional 7 Hari (19 Slot Waktu)</span>
+      <span class="tag-pill">Google Drive Cloud Storage</span>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">
+      <span class="number-circle">1</span>
+      <span>Arsitektur &amp; Tujuan Operasional SILAP-Kinerja</span>
+    </div>
+    <p>
+      <strong>SILAP-Kinerja</strong> (Sistem Integrasi Laporan Pengamatan dan Bukti Dukung SKP) dibangun untuk mengintegrasikan proses pencatatan meteorologi multi-alat (baik sensor otomatis digital AWS &amp; Wind YOUNG maupun alat manual taman alat), memvalidasi keabsahan data fisika secara instan, mengarsipkan foto kegiatan ber-watermark lokasi/waktu ke Google Drive, dan menerbitkan dokumen bukti dukung SKP triwulanan pegawai secara otomatis.
+    </p>
+  </div>
+
+  <!-- KLASIFIKASI ALAT LENGKAP -->
+  <div class="section-card">
+    <div class="section-title">
+      <span class="number-circle">2</span>
+      <span>Daftar Lengkap Seluruh Alat yang Digunakan: Otomatis vs Manual</span>
+    </div>
+    <p>
+      Aplikasi SILAP-Kinerja mengadopsi model pembacaan ganda: <strong>Alat Otomatis Digital</strong> yang dibaca dari display monitor/logger, dan <strong>Alat Manual Konvensional</strong> yang diobservasi langsung oleh pengamat di Taman Alat BMKG.
+    </p>
+
+    <div class="grid-2">
+      <!-- ALAT OTOMATIS -->
+      <div class="info-box blue">
+        <div class="box-title">
+          <span>⚡ ALAT OTOMATIS (SENSOR ELEKTRONIK &amp; DISPLAY DIGITAL)</span>
+        </div>
+        <p style="font-size: 7.2pt; color: #1e3a8a; margin-bottom: 4px;">
+          Data diperoleh langsung secara instan dari panel display instrumen / data logger otomatis:
+        </p>
+        <ul class="bullet-list">
+          <li>
+            <strong>Automatic Weather Station (AWS):</strong>
+            Sistem pengamatan cuaca otomatis terintegrasi. Memiliki sensor digital suhu udara (<span class="code-font">TA_meas</span>), suhu maksimum (<span class="code-font">TA_Max</span>), suhu minimum (<span class="code-font">TA_Min</span>), kelembapan nisbi (<span class="code-font">RH_meas</span>), tekanan atmosfer stasiun &amp; permukaan laut (<span class="code-font">PA_QFE</span> &amp; <span class="code-font">PA_QFF</span>), penakar hujan otomatis (*tipping bucket*) per jam &amp; harian (<span class="code-font">rainHourly</span>, <span class="code-font">RainDaily</span>), serta solar radiometer (<span class="code-font">SR_Max</span>).
+          </li>
+          <li>
+            <strong>Wind YOUNG Model 26800 (Digital Wind Display &amp; Translator):</strong>
+            <strong>Instrumen Angin Otomatis Modern.</strong> Terhubung ke anemometer ultrasonik / propeler dan wind vane di tower. Menghasilkan output angka digital seketika pada display:
+            <br>• Kecepatan Angin Sesaat (*Wind Speed Instantaneous*) dalam satuan knot &amp; m/s.
+            <br>• Kecepatan Angin Rata-rata (*Average Wind Speed / AVG*).
+            <br>• Kecepatan Angin Maksimum (*Peak Wind Gust / MAX*).
+            <br>• Arah Angin Sesaat &amp; Rata-rata (*Wind Direction Instant &amp; AVG*) dalam derajat (°).
+            <br>• Deviasi Standar Arah Angin (*Standard Deviation of Wind Direction / SDV*).
+          </li>
+        </ul>
+      </div>
+
+      <!-- ALAT MANUAL -->
+      <div class="info-box amber">
+        <div class="box-title">
+          <span>🌿 ALAT MANUAL / KONVENSIONAL (TAMAN ALAT BMKG)</span>
+        </div>
+        <p style="font-size: 7.2pt; color: #78350f; margin-bottom: 4px;">
+          Instrumen fisik di taman alat yang memerlukan pembacaan manual langsung oleh pengamat:
+        </p>
+        <ul class="bullet-list">
+          <li><strong>Psikrometer Sangkar (1,2 m):</strong> Termometer Bola Kering (TBK) dan Bola Basah (TBB) di dalam sangkar meteorologi berventilasi alami.</li>
+          <li><strong>Psikrometer Assman (Bertingkat):</strong> Pengukuran suhu &amp; kelembapan vertikal dengan aspirasi mekanis di ketinggian 5, 10, 20, 50, 100, 150, dan 200 cm.</li>
+          <li><strong>Anemometer Cup Counter (0,5 m &amp; 10 m):</strong> Mangkok angin putar dengan pencatat angka kilometer (*counter*) jarak tempuh angin.</li>
+          <li><strong>Open Pan Evaporimeter (Panci Terbuka Klas A):</strong> Pengukur evaporasi air dengan mikrometer *Hook Gauge*, termometer apung maks-min, dan penakar hujan pendamping.</li>
+          <li><strong>Piche Evaporimeter:</strong> Tabung kaca berskala berselang $\text{cm}^3$ dengan piringan kertas saring untuk evaporasi udara dalam sangkar.</li>
+          <li><strong>Termometer Tanah (Gundul &amp; Berumput):</strong> Rangkaian termometer bersudut di kedalaman 0, 5, 10, 20, 50, 100 cm (kedalaman 2 cm dinonaktifkan di lapangan).</li>
+          <li><strong>Campbell-Stokes:</strong> Bola kaca pejal pemfokus cahaya matahari yang membakar pias kertas berskala jam (0,0–1,0 jam).</li>
+          <li><strong>Aktinograf / Gunn-Bellani:</strong> Sensor bola tembaga hitam kondensasi cairan dalam buret berskala.</li>
+          <li><strong>Microbarograf &amp; Termograf:</strong> Instrumen pencatat mekanis jarum tinta di atas kertas pias putar jam.</li>
+          <li><strong>Penakar Hujan Ombrometer (OBS):</strong> Penakar hujan manual tipe corong dengan gelas ukur kaca berskala mm.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PENGAMATAN VISUAL -->
+    <div class="info-box green" style="margin-top: 6px;">
+      <div class="box-title">👁️ PENGAMATAN VISUAL LANGIT &amp; LINGKUNGAN (KUALITATIF)</div>
+      <p style="font-size: 7.2pt; color: #064e3b; margin-bottom: 3px;">
+        Parameter yang diamati langsung menggunakan indra penglihatan pengamat di lapangan:
+      </p>
+      <div class="grid-3" style="margin-top: 2px;">
+        <div><strong>Jumlah Awan:</strong> 0 s.d. 8 okta (persentase luas tutupan kubah langit).</div>
+        <div><strong>Penglihatan Mendatar:</strong> Estimasi visibilitas objek patokan (satuan km).</div>
+        <div><strong>Keadaan Tanah &amp; Hujan:</strong> Kondisi permukaan tanah (Basah/Kering/Lembab) &amp; hujan (Ringan/Sedang/Lebat/Nihil).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ==================== HALAMAN 2: TABEL PARAMETER & PASANGAN MANUAL-OTOMATIS ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <span class="number-circle">3</span>
+      <span>Matriks Lengkap Parameter: Manual vs Otomatis vs Dihitung Sistem</span>
+    </div>
+    <p>
+      Di dalam database SILAP-Kinerja, setiap baris pengamatan parameter cuaca menyimpan pasangan nilai: <span class="code-font">nilai_manual</span> dan <span class="code-font">nilai_aws</span> (otomatis), serta nilai yang dihitung oleh formula aplikasi atau sistem nasional.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 14%;">Kartu / Kelompok</th>
+          <th style="width: 22%;">Nama Parameter Cuaca</th>
+          <th style="width: 9%;">Satuan</th>
+          <th style="width: 16%;">Sumber Nilai</th>
+          <th style="width: 17%;">Padanan Sensor Otomatis</th>
+          <th style="width: 22%;">Jadwal &amp; Logika Sistem</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- KARTU 1 -->
+        <tr>
+          <td rowspan="3"><strong>Kartu 1</strong><br>Psikrometer Sangkar (1,2 m)</td>
+          <td>Suhu Bola Kering (TBK)</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>AWS: <span class="code-font">TA_meas</span></td>
+          <td>AGM1B (07.30, 13.30, 17.30). Nilai dasar udara.</td>
+        </tr>
+        <tr>
+          <td>Suhu Bola Basah (TBB)</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. <strong>Validasi Wajib:</strong> $TBB \le TBK$.</td>
+        </tr>
+        <tr>
+          <td>Kelembapan Relatif (RH)</td>
+          <td>%</td>
+          <td><span class="badge-auto">Dihitung Sistem</span></td>
+          <td>AWS: <span class="code-font">RH_meas</span></td>
+          <td>AGM1B. Dihitung nasional dari selisih psikrometrik.</td>
+        </tr>
+
+        <!-- KARTU 2 -->
+        <tr>
+          <td rowspan="4"><strong>Kartu 2</strong><br>Angin (Anemometer 0,5m &amp; 10m)</td>
+          <td>Counter Angin Sebelum (0,5m)</td>
+          <td>km</td>
+          <td><span class="badge-app">Terisi Otomatis</span></td>
+          <td>—</td>
+          <td>AGM1B. Auto-fetch dari entri sebelumnya (bisa diedit).</td>
+        </tr>
+        <tr>
+          <td>Counter Angin Dibaca (0,5m)</td>
+          <td>km</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. Pembacaan angka meteran cup counter.</td>
+        </tr>
+        <tr>
+          <td>Counter Angin Rata-rata</td>
+          <td>km/jam</td>
+          <td><span class="badge-auto">Dihitung Sistem</span></td>
+          <td>—</td>
+          <td>AGM1B. $\frac{\text{Dibaca} - \text{Sebelum}}{\Delta \text{Jam}}$.</td>
+        </tr>
+        <tr>
+          <td>Kecepatan Angin Sesaat 10m</td>
+          <td>m/s, knot</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>Wind YOUNG / AWS <span class="code-font">WS_meas</span></td>
+          <td>AGM1B. Display anemometer 10 meter.</td>
+        </tr>
+
+        <!-- KARTU 3 -->
+        <tr>
+          <td rowspan="8"><strong>Kartu 3</strong><br>Open Pan Evaporimeter (Panci Penguapan)</td>
+          <td>Tinggi Air Sebelum</td>
+          <td>mm</td>
+          <td><span class="badge-app">Terisi Otomatis</span></td>
+          <td>—</td>
+          <td>AGM1B. Auto-fetch dari entri sebelumnya (bisa diedit).</td>
+        </tr>
+        <tr>
+          <td>Tinggi Air Dibaca</td>
+          <td>mm</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. Pembacaan ujung jarum mikrometer hook gauge.</td>
+        </tr>
+        <tr>
+          <td>Selisih Tinggi Air</td>
+          <td>mm</td>
+          <td><span class="badge-app">Dihitung Aplikasi</span></td>
+          <td>—</td>
+          <td>AGM1B. $\text{Sebelum} - \text{Dibaca}$ (Auto Realtime).</td>
+        </tr>
+        <tr>
+          <td>Suhu Air Maksimum</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. Termometer apung indeks max.</td>
+        </tr>
+        <tr>
+          <td>Suhu Air Minimum</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. <strong>Validasi:</strong> $T_{\min} \le T_{\max}$.</td>
+        </tr>
+        <tr>
+          <td>Suhu Rata-rata Air</td>
+          <td>°C</td>
+          <td><span class="badge-auto">Dihitung Sistem</span></td>
+          <td>—</td>
+          <td>AGM1B. Rata-rata suhu permukaan air panci.</td>
+        </tr>
+        <tr>
+          <td>Curah Hujan Diukur (CH)</td>
+          <td>mm</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>Penakar hujan pendamping</td>
+          <td>AGM1B. Bacaan air hujan sejak observasi panci sebelumnya.</td>
+        </tr>
+        <tr>
+          <td>Penguapan Open Pan</td>
+          <td>mm</td>
+          <td><span class="badge-app">Dihitung Aplikasi</span></td>
+          <td>—</td>
+          <td>AGM1B. $\text{Selisih Tinggi Air} + \text{CH Diukur}$ (Auto).</td>
+        </tr>
+
+        <!-- KARTU 4 -->
+        <tr>
+          <td><strong>Kartu 4</strong><br>Psikrometer Assman (7 Tingkat)</td>
+          <td>TBK &amp; TBB di Ketinggian 5, 10, 20, 50, 100, 150, 200 cm</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. Total 14 titik ukur. <strong>Validasi:</strong> $TBB \le TBK$ pada setiap undakan ketinggian.</td>
+        </tr>
+
+        <!-- KARTU 5 -->
+        <tr>
+          <td rowspan="3"><strong>Kartu 5</strong><br>Piche Evaporimeter</td>
+          <td>Pembacaan Sebelum</td>
+          <td>$\text{cm}^3$</td>
+          <td><span class="badge-app">Terisi Otomatis</span></td>
+          <td>—</td>
+          <td>AGM1B. Auto-fetch dari entri sebelumnya (bisa diedit).</td>
+        </tr>
+        <tr>
+          <td>Pembacaan Sekarang</td>
+          <td>$\text{cm}^3$</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. Pembacaan miniskus cairan buret tabung Piche.</td>
+        </tr>
+        <tr>
+          <td>Penguapan Piche</td>
+          <td>$\text{cm}^3$</td>
+          <td><span class="badge-app">Dihitung Aplikasi</span></td>
+          <td>—</td>
+          <td>AGM1B. $\text{Sekarang} - \text{Sebelum}$ (Auto Realtime).</td>
+        </tr>
+
+        <!-- KARTU 6 -->
+        <tr>
+          <td rowspan="3"><strong>Kartu 6</strong><br>Kualitatif Lingkungan</td>
+          <td>Keadaan Tanah</td>
+          <td>—</td>
+          <td><span class="badge-manual">Visual</span></td>
+          <td>—</td>
+          <td>AGM1B. Dropdown: *Basah / Kering / Lembab*.</td>
+        </tr>
+        <tr>
+          <td>Keadaan Hujan</td>
+          <td>—</td>
+          <td><span class="badge-manual">Visual</span></td>
+          <td>—</td>
+          <td>AGM1B. Dropdown: *Ringan / Sedang / Lebat / Nihil*.</td>
+        </tr>
+        <tr>
+          <td>Keterangan AGM 1-B</td>
+          <td>—</td>
+          <td><span class="badge-manual">Catatan</span></td>
+          <td>—</td>
+          <td>AGM1B. Teks catatan khusus kondisi cuaca lokal.</td>
+        </tr>
+
+        <!-- KARTU 7 -->
+        <tr>
+          <td><strong>Kartu 7</strong><br>Termometer Tanah</td>
+          <td>Suhu Tanah Gundul &amp; Berumput (Kedalaman 0, 5, 10, 20, 50, 100 cm)</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>AGM1B. Total 12 field aktif. <strong>Kedalaman 2 cm:</strong> dinonaktifkan di sistem &amp; otomatis kode <span class="code-font">9999</span>.</td>
+        </tr>
+
+        <!-- KARTU 8 (JAM PENUH) -->
+        <tr>
+          <td rowspan="5"><strong>Kartu 8</strong><br>Jam Penuh (16 Slot: 07.00 - 22.00)</td>
+          <td>Jumlah Awan</td>
+          <td>okta</td>
+          <td><span class="badge-manual">Visual</span></td>
+          <td>—</td>
+          <td>JAM_PENUH. Nilai rentang bulat 0 s.d. 8 okta.</td>
+        </tr>
+        <tr>
+          <td>Penglihatan Mendatar</td>
+          <td>km</td>
+          <td><span class="badge-manual">Visual</span></td>
+          <td>—</td>
+          <td>JAM_PENUH. Jarak pandang mendatar / visibilitas.</td>
+        </tr>
+        <tr>
+          <td>Arah Angin (Derajat)</td>
+          <td>°</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>Wind YOUNG / AWS <span class="code-font">WD_meas</span></td>
+          <td>JAM_PENUH. Arah sudut mata angin (0–360°).</td>
+        </tr>
+        <tr>
+          <td>Kecepatan Angin</td>
+          <td>m/s, knot</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>Wind YOUNG / AWS <span class="code-font">WS_meas</span></td>
+          <td>JAM_PENUH. Kecepatan angin sesaat dan rata-rata.</td>
+        </tr>
+        <tr>
+          <td>Curah Hujan Ombrometer</td>
+          <td>mm</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>AWS: <span class="code-font">rainHourly</span></td>
+          <td>JAM_PENUH. Hujan per jam dari gelas ukur OBS.</td>
+        </tr>
+
+        <!-- KARTU 8 (HARIAN 07.00) -->
+        <tr>
+          <td rowspan="4"><strong>Kartu 8</strong><br>Harian 07.00 WIB (Alat Pias)</td>
+          <td>Lama Penyinaran (Campbell-Stokes)</td>
+          <td>jam</td>
+          <td><span class="badge-manual">Manual</span></td>
+          <td>—</td>
+          <td>JAM_PENUH (07.00-18.00). Pembacaan pias terbakar (0,0-1,0 jam).</td>
+        </tr>
+        <tr>
+          <td>Gunn-Bellani (Radiasi Surya)</td>
+          <td>skala / kal</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>AWS: <span class="code-font">SR_Max</span></td>
+          <td>HARIAN_0700. Skala buret dikali faktor kalibrasi (20.8).</td>
+        </tr>
+        <tr>
+          <td>Microbarograf (Tekanan Udara)</td>
+          <td>mbar</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>AWS: <span class="code-font">PA_QFE</span> &amp; <span class="code-font">PA_QFF</span></td>
+          <td>HARIAN_0700. Pembacaan pias tekanan permukaan.</td>
+        </tr>
+        <tr>
+          <td>Termograf (Suhu Ekstrem Pias)</td>
+          <td>°C</td>
+          <td><span class="badge-manual">Manual</span> / <span class="badge-auto">Otomatis</span></td>
+          <td>AWS: <span class="code-font">TA_meas</span></td>
+          <td>HARIAN_0700. Grafik silinder suhu pias harian.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ==================== HALAMAN 3: OPERASIONAL SHIFT & WORKFLOW DETAIL ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <span class="number-circle">4</span>
+      <span>Operasional Shift &amp; Ketentuan Foto Watermark Cloud</span>
+    </div>
+    <p>
+      Pengamatan cuaca berlangsung <strong>7 hari dalam seminggu</strong> (Senin s.d. Minggu, termasuk hari libur) mencakup <strong>19 slot waktu per hari</strong>:
+    </p>
+
+    <div class="grid-2">
+      <div class="info-box blue">
+        <div class="box-title">Shift Pagi (07.00 – 15.00 WIB)</div>
+        <ul class="bullet-list">
+          <li><strong>Slot Wajib Foto:</strong> Jam <strong>07.00 WIB</strong> (Awal shift).</li>
+          <li><strong>Jadwal Baca:</strong> Harian 07.00 (Pias), AGM1B 07.30 (Kartu 1-7), Jam Penuh 08.00–14.00, AGM1B 13.30 (Kartu 1-7).</li>
+        </ul>
+      </div>
+
+      <div class="info-box amber">
+        <div class="box-title">Shift Siang (15.00 – 22.00 WIB)</div>
+        <ul class="bullet-list">
+          <li><strong>Slot Wajib Foto:</strong> Jam <strong>17.00 WIB</strong> (Sebelum malam).</li>
+          <li><strong>Jadwal Baca:</strong> Jam Penuh 15.00–17.00, AGM1B 17.30 (Kartu 1-7), Jam Penuh 18.00–22.00 (Penutupan harian).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-callout">
+      <strong>📸 Kebijakan Efisiensi Foto:</strong> Pengambilan foto hanya diwajibkan tepat <strong>2 kali sehari (07.00 dan 17.00 WIB)</strong>. Slot waktu lainnya tidak memunculkan field upload foto. Watermark otomatis dibakar langsung ke gambar dengan label teks *"Taman Alat, Stasiun Klimatologi Jawa Tengah"* dan stempel waktu presisi WIB &amp; UTC sebelum disimpan ke Google Drive instansi.
+    </div>
+  </div>
+
+  <!-- WORKFLOW DETAIL STEP-BY-STEP -->
+  <div class="section-card">
+    <div class="section-title">
+      <span class="number-circle">5</span>
+      <span>Alur Kerja Lengkap Step-by-Step (End-to-End Operational Workflow)</span>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Autentikasi &amp; Deteksi Shift Operasional</span>
+          <span class="step-badge badge-system">Autentikasi</span>
+        </div>
+        <div class="step-desc">
+          Pengamat login menggunakan NIP &amp; Password. Sistem mendeteksi jam waktu nyata (WIB &amp; UTC), mengidentifikasi shift berjalan (Pagi 07.00-15.00 atau Siang 15.00-22.00), menghitung slot target pengamatan terdekat, dan memuat status 16 jam harian.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Form Observasi Dinamis &amp; Pengisian Nilai Sebelum</span>
+          <span class="step-badge badge-pagi">Form Input</span>
+        </div>
+        <div class="step-desc">
+          Pengamat membuka form. Sistem memuat form dinamis berdasarkan alat yang aktif. Jika slot AGM1B (07.30, 13.30, 17.30), Kartu 1-7 dimuat. Nilai bacaan sebelumnya (counter anemometer, tinggi air panci, skala Piche) terisi otomatis dari data observasi terakhir yang lengkap.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Input Pembacaan &amp; Eksekusi Rumus Otomatis Realtime</span>
+          <span class="step-badge badge-system">Kalkulasi</span>
+        </div>
+        <div class="step-desc">
+          Pengamat memasukkan hasil bacaan alat manual dan monitor AWS/Wind YOUNG. Sistem langsung menghitung rumus secara real-time:
+          $\text{Selisih Tinggi Air} = \text{Sebelum} - \text{Dibaca}$; $\text{Penguapan Open Pan} = \text{Selisih} + \text{CH Diukur}$; $\text{Penguapan Piche} = \text{Sekarang} - \text{Sebelum}$.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Pemeriksaan Validasi Fisika Cuaca (Physics Guard)</span>
+          <span class="step-badge badge-guard">Validasi Ketat</span>
+        </div>
+        <div class="step-desc">
+          Sistem memeriksa keabsahan meteorologi sebelum pengiriman data:
+          <strong>(1) $TBB \le TBK$</strong> pada sangkar dan 7 tingkat ketinggian Assman; <strong>(2) $T_{\min} \le T_{\max}$</strong> pada air evaporimeter. Jika terjadi anomali, sistem menampilkan pesan error merah dan tombol simpan diblokir.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Upload Foto Bukti &amp; Realtime Watermark Cloud Burn</span>
+          <span class="step-badge badge-siang">Dokumentasi</span>
+        </div>
+        <div class="step-desc">
+          Di slot 07.00 dan 17.00 WIB, foto kegiatan taman alat diambil. Server membakar watermark permanen: teks lokasi *"Taman Alat, Stasiun Klimatologi Jawa Tengah"* dan stempel waktu WIB &amp; UTC, lalu mengunggahnya ke Google Drive via Google Service Account API.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Penyimpanan ke Basis Data &amp; Dasbor Riwayat</span>
+          <span class="step-badge badge-system">Status Pending</span>
+        </div>
+        <div class="step-desc">
+          Data tersimpan dengan status awal <span class="code-font">pending</span>. Riwayat pengamat langsung terbarui. Pengamat dapat langsung mengunduh lembar PDF observasi jam tersebut atau gambar PNG laporan shift.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Supervisi Penyelia &amp; Jalur Pengecualian Revisi</span>
+          <span class="step-badge badge-guard">Supervisi</span>
+        </div>
+        <div class="step-desc">
+          Penyelia memantau data di antrean verifikasi (<span class="code-font">/supervisor/queue</span>). Jika terdapat data anomali atau salah baca, penyelia menandai status <span class="code-font">revision</span> disertai catatan koreksi. Pengamat mengoreksi data dan mengirimkannya kembali.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">8</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Pengesahan Kolektif Triwulan (Triwulanan Approval Guard)</span>
+          <span class="step-badge badge-guard">Approval Rule</span>
+        </div>
+        <div class="step-desc">
+          Pada akhir triwulan (T1–T4), penyelia mengesahkan data per pegawai. <strong>Sistem memproteksi ketat:</strong> tombol ACC Triwulan otomatis terkunci jika pengamat masih memiliki observasi berstatus revisi yang belum dibenahi.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-num">9</div>
+      <div class="step-content">
+        <div class="step-header">
+          <span>Penerbitan Dokumen SKP Triwulan &amp; Multi-Format Export</span>
+          <span class="step-badge badge-system">Hasil Akhir</span>
+        </div>
+        <div class="step-desc">
+          Sistem mencetak berkas resmi: (1) Dokumen PDF bukti dukung SKP triwulanan pegawai, (2) Ekspor paket ZIP SKP seluruh pegawai, (3) Ekspor CSV form nasional dengan penanganan kode 9999, dan (4) Laporan bulanan stasiun.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ==================== HALAMAN 4: INVENTARISASI SEMUA FITUR & MODUL ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <span class="number-circle">6</span>
+      <span>Inventarisasi Lengkap Seluruh Modul &amp; Fitur di Dalam Aplikasi</span>
+    </div>
+    <p>
+      Berikut adalah katalog seluruh fitur, menu, logika sistem, dan format ekspor yang tersedia di SILAP-Kinerja:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 20%;">Kategori Modul</th>
+          <th style="width: 32%;">Fitur &amp; Kemampuan yang Tersedia</th>
+          <th style="width: 48%;">Bentuk Output / Hasil Konkret</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Dasbor Operasional Realtime</strong></td>
+          <td>
+            • Jam Digital Melayang WIB &amp; UTC (indikator denyut pulse).<br>
+            • Deteksi target slot waktu &amp; hitung mundur shift.<br>
+            • Monitoring curah hujan kumulatif harian &amp; diagram arah angin (*Wind Rose*).<br>
+            • Widget suhu udara &amp; tekanan QFE/QFF AWS terkini.<br>
+            • Timeline visual status 16 jam pengamatan.
+          </td>
+          <td>Dasbor visual interaktif per peran (Pengamat, Supervisor, Admin) dengan status operasional shift hari ini.</td>
+        </tr>
+        <tr>
+          <td><strong>2. Formulir Observasi Pintar</strong></td>
+          <td>
+            • Struktur form dinamis sesuai slot jadwal (AGM1B / Jam Penuh / Harian).<br>
+            • Pre-filling otomatis nilai bacaan sebelumnya (counter, panci, Piche).<br>
+            • Kalkulator instan selisih air &amp; penguapan.<br>
+            • Validator termodinamika cuaca ($TBB \le TBK$).<br>
+            • Status observasi *Lengkap* atau *Dibatalkan* (wajib alasan pembatalan).
+          </td>
+          <td>Penyimpanan data parameter cuaca bersih tanpa cacat fisik termodinamika.</td>
+        </tr>
+        <tr>
+          <td><strong>3. Modul Dokumentasi &amp; Watermark</strong></td>
+          <td>
+            • Form upload foto wajib di jam 07.00 &amp; 17.00 WIB.<br>
+            • Stempel otomatis teks statis *"Taman Alat, Stasiun Klimatologi Jawa Tengah"*.<br>
+            • Stempel timestamp realtime WIB &amp; UTC.<br>
+            • Integrasi Google Drive Shared Drive API via Service Account.
+          </td>
+          <td>Foto bukti ber-watermark permanen yang dapat diakses via tautan web atau diunduh langsung.</td>
+        </tr>
+        <tr>
+          <td><strong>4. Laporan Observasi Per Jam</strong></td>
+          <td>
+            • Rekap parameter yang dibaca pada jam tertentu.<br>
+            • Penandaan nilai manual vs otomatis.<br>
+            • Identitas pengamat &amp; tanggal observasi.
+          </td>
+          <td>File <span class="code-font">Observasi_{Jam}WIB_{Tanggal}.pdf</span> siap cetak.</td>
+        </tr>
+        <tr>
+          <td><strong>5. Gambar Grafis Laporan Shift</strong></td>
+          <td>
+            • Template grafis visual resmi BMKG Jateng.<br>
+            • Mengisi rekap data shift pagi / siang ke template dinamis.<br>
+            • Format gambar instan untuk dibagikan via grup komunikasi/pimpinan.
+          </td>
+          <td>File <span class="code-font">Laporan_Cuaca_Shift_{id}.png</span> kualitas tinggi.</td>
+        </tr>
+        <tr>
+          <td><strong>6. Ekspor CSV Form Nasional</strong></td>
+          <td>
+            • Susunan kolom mengikuti form nasional BMKGSoft v2.<br>
+            • Dukungan encoding UTF-8 BOM.<br>
+            • Nilai null/rusak otomatis dikonversi ke kode resmi BMKG <span class="code-font">9999</span>.
+          </td>
+          <td>File spreadsheet <span class="code-font">Observasi_FormNasional_{Tanggal}.csv</span>.</td>
+        </tr>
+        <tr>
+          <td><strong>7. Antrean Validasi &amp; Kontrol Kualitas</strong></td>
+          <td>
+            • Filter antrean berdasarkan tahun &amp; triwulan.<br>
+            • Rekap kelengkapan foto jam 07.00 &amp; 17.00 per pegawai.<br>
+            • Tombol persetujuan per-entri atau catatan revisi.<br>
+            • Proteksi blokir ACC triwulan jika ada revisi aktif.
+          </td>
+          <td>Antrean verifikasi terpusat untuk supervisor mengontrol kualitas data 6 pengamat.</td>
+        </tr>
+        <tr>
+          <td><strong>8. Generator Bukti Dukung SKP Triwulan</strong></td>
+          <td>
+            • Rekapitulasi total jam pengamatan valid triwulanan.<br>
+            • Perhitungan persentase keaktifan tugas pengamat.<br>
+            • Lampiran tautan bukti foto ber-watermark.<br>
+            • Lembar pengesahan tanda tangan penyelia resmi.
+          </td>
+          <td>File <span class="code-font">SKP_{Nama}_{NIP}.pdf</span> resmi siap diunggah ke aplikasi kinerja BKN/BMKG.</td>
+        </tr>
+        <tr>
+          <td><strong>9. Ekspor Paket ZIP SKP</strong></td>
+          <td>
+            • Pengemasan seluruh dokumen SKP pegawai dalam 1 paket ZIP.<br>
+            • Fitur khusus bagi Penyelia dan Admin.<br>
+            • Proteksi pencegahan unduh jika masih ada data revisi.
+          </td>
+          <td>File arsip <span class="code-font">SKP_Paket_{Triwulan}_{Tahun}.zip</span>.</td>
+        </tr>
+        <tr>
+          <td><strong>10. Laporan Bulanan Stasiun</strong></td>
+          <td>
+            • Rekapitulasi bulanan seluruh kegiatan pengamatan.<br>
+            • Mode laporan stasiun (gabungan) atau mode per pegawai.<br>
+            • Filter berdasarkan bulan dan tahun.
+          </td>
+          <td>Lembar rekapitulasi bulanan interaktif dan unduhan berkas PDF resmi.</td>
+        </tr>
+        <tr>
+          <td><strong>11. Manajemen Alat &amp; Parameter Dinamis</strong></td>
+          <td>
+            • Tambah, edit, hapus instrumen (kategori AWS / Taman Alat).<br>
+            • Konfigurasi parameter di bawah alat (kode, satuan, sifat, jadwal baca).<br>
+            • Mengatur jam mulai/selesai operasional stasiun.
+          </td>
+          <td>Form pengamatan beradaptasi otomatis secara real-time mengikuti status alat yang aktif.</td>
+        </tr>
+        <tr>
+          <td><strong>12. Manajemen Pengguna &amp; Keamanan</strong></td>
+          <td>
+            • CRUD akun pegawai (NIP, nama, peran).<br>
+            • Reset password akun.<br>
+            • Enforce *Force Change Password* saat login pertama kali.
+          </td>
+          <td>Sistem otentikasi internal aman dan tertutup dari akses publik.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer-note">
+      SILAP-Kinerja © 2026 BMKG Stasiun Klimatologi Jawa Tengah · Katalog Lengkap Alur Kerja, Alat Otomatis/Manual, &amp; Inventarisasi Fitur Aplikasi
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

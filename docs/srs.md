@@ -45,50 +45,15 @@ Nama pengamat (Achmad Sulistyo E.P, Edy Susanto, Eko Taufiq Suharmanto, Joko Cah
 
 Catatan: tabel `aws_data` terpisah yang ada di SRS resmi **tidak dibuat** — lihat bagian 10.
 
-## 6. Aturan Bisnis
+## 6. Aturan Bisnis & Keputusan Final (9 Oktober 2026)
 
-- Kamera wajib hanya di jam sinoptik UTC 00/03/06/09/12/15.
-- Validasi fisika: suhu bola basah harus ≤ suhu bola kering.
-- Pengamat **bebas memilih sumber data (manual atau otomatis AWS) per parameter, kapan saja** — bukan hanya saat force majeure/status "Tidak Dilakukan" seperti di SRS resmi. Data AWS dibaca langsung dari monitor alat oleh pengamat (tidak ada integrasi API/webhook otomatis untuk versi ini).
-- Sistem hanya menyimpan **satu nilai per parameter** (yang dipilih pengamat), bukan menyimpan nilai manual dan AWS sekaligus.
-- Lokasi GPS **tidak dipakai** — pengamatan selalu di lokasi tetap (taman alat), jadi tidak perlu field koordinat atau tracking lokasi live.
-- Watermark pada foto tetap dipakai sesuai brief awal: timestamp realtime dibakar ke foto (bukan sekadar keterangan terpisah). **Masih perlu konfirmasi ulang** apakah watermark juga perlu menampilkan label lokasi statis (teks tetap, bukan koordinat live) — lihat bagian 11.
-- Rekap SKP hanya menarik data dengan `status_approval = Approved`.
-
-## 7. Modul Input Observasi (Pengamat)
-
-- Form per parameter, masing-masing dengan toggle sumber data (manual/otomatis).
-- Perangkat yang dipakai: **HP pribadi lewat browser mobile** (bukan tablet/komputer kantor) — pengaruh ke desain kamera (`getUserMedia`) dan pertimbangan PWA offline-first kalau sinyal di taman alat kurang stabil.
-- Foto wajib di jam sinoptik, dengan watermark timestamp dibakar ke gambar via canvas overlay saat capture, sebelum upload.
-
-## 8. Modul Validasi (Penyelia)
-
-- Dashboard antrean validasi menampilkan data yang masuk.
-- Approve / Reject / beri catatan revisi. Kalau reject, alur balik ke Pengamat untuk direvisi dan disubmit ulang.
-
-## 9. Modul Rekap & Laporan PDF SKP
-
-Template lama (`Template_SKP_SILAP_Kinerja.docx`) dinilai kurang lengkap. Spesifikasi laporan final:
-
-- Menampilkan **semua parameter** pengamatan (bukan cuma 3 seperti template lama), dengan **layout tabel baris ganda** per entri supaya tetap terbaca meski portrait.
-- Kolom bukti dukung hanya **foto** (kolom koordinat GPS dihapus).
-- **Kop resmi** (logo BMKG + nama instansi) ditambahkan — gaya mengikuti dokumen "Bukti Kinerja Pemeliharaan/Kebersihan Lingkungan Taman Peralatan Triwulan III 2026" milik instansi: logo di tengah atas, judul tebal center-aligned, keterangan triwulan-tahun di bawah judul.
-- **Ringkasan performa** ditambahkan (mis. total pengamatan valid vs jadwal per triwulan).
-- **Ruang tanda tangan/NIP/tanggal** untuk pengesahan Penyelia ditambahkan.
-- **Tidak perlu** menandai sumber data (manual/AWS) per baris di laporan cetak, meskipun datanya tetap tersimpan di database.
-- Karena generate PDF pindah dari mekanisme merge-tag AppSheet/Google Docs (`<<[field]>>`), template baru harus didesain ulang sebagai Blade view (`resources/views/pdf/rekap-skp.blade.php`).
-
-## 10. Deviasi dari SRS Resmi (penting)
-
-SRS resmi dari mentor menyebut pseudocode dengan sintaks behavior kolom AppSheet (`Show_If`, `Required_If`, `Valid_If`), yang mengindikasikan rencana awal implementasi di AppSheet dengan basis data Google Spreadsheet. Setelah didiskusikan dengan mentor, proyek ini **berpindah ke stack Laravel + Inertia + React dengan database relasional**, karena stasiun punya divisi IT sendiri untuk maintain aplikasi setelah magang selesai. Perubahan lain dari SRS resmi:
-
-- Tabel `aws_data` terpisah dengan feed otomatis tiap 10 menit **tidak dibuat** — AWS dibaca manual dari monitor oleh pengamat.
-- Aturan "AWS jadi rujukan pengganti hanya saat status Tidak Dilakukan" **diubah** jadi pilihan bebas per parameter kapan saja.
-- Peringatan visual baterai AWS (`batt_volt < 11.5V`) dari SRS resmi **belum diimplementasi ulang** di rencana baru ini — karena tidak ada lagi integrasi otomatis ke data AWS, perlu diputuskan apakah fitur ini masih relevan atau dihapus.
-
-## 11. Hal yang Masih Terbuka
-
-- **Peringatan baterai AWS:** relevan atau tidak, mengingat AWS sekarang dibaca manual dari monitor, bukan lewat feed otomatis (lihat bagian 10) — tidak ada lagi sumber data live untuk memicu peringatan ini secara otomatis.
+- **Foto Kegiatan:** Wajib hanya pada 2 slot per hari: **07.00 WIB** (shift pagi) dan **17.00 WIB** (shift siang). Slot jam lain tanpa field foto. Aturan lama jam sinoptik UTC 00/03/06/09/12/15 dibatalkan.
+- **Persetujuan (Approval):** Penyelia meng-ACC **hanya per triwulan** per pegawai. Aksi revisi per entri observasi dipertahankan sebagai jalur pengecualian. ACC triwulan diblokir jika pegawai masih memiliki observasi berstatus revisi (`revision`).
+- **Validasi Fisika:** Suhu bola basah harus ≤ suhu bola kering (pada sangkar dan tiap ketinggian Assman); Suhu minimum ≤ suhu maksimum.
+- **Penyimpanan Foto:** Disimpan ke Google Drive via `PhotoStorageInterface` (driver `local` saat development, `drive` ke Shared Drive saat produksi).
+- **Format Form Nasional:** Kartu 1–7 (tab FDIH) aktif pada slot AGM1B (07.30, 13.30, 17.30 WIB). Kartu 8 aktif pada jam penuh (16 slot) dan harian 07.00 WIB.
+- **Nilai 9999:** Data tidak diukur atau dinonaktifkan (seperti suhu tanah 2 cm) disimpan NULL di database, dicetak `9999` di PDF dan CSV.
+- **Dihapus dari Scope:** Modul Fenologi dihapus total, kelembapan tanah dihapus, peringatan baterai AWS dibatalkan, GPS dihapus, SSO di luar scope. Watermark memakai teks lokasi statis "Taman Alat, Stasiun Klimatologi Jawa Tengah".
 - **NIP asli 7 pegawai** — masih dummy, perlu diminta ke bagian administrasi.
 
 ## 12. Riwayat Perubahan Dokumen

@@ -3,7 +3,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import Sidebar from '../../Components/Sidebar';
 import { User, Lock, Save, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
-const inputClass = "w-full border border-slate-200 rounded-lg px-3 h-8 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition font-medium bg-white";
+const inputClass = "w-full border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition font-medium bg-white";
 
 function Field({ label, error, children }) {
     return (
@@ -36,7 +36,7 @@ function PasswordInput({ value, onChange, placeholder, ...rest }) {
             <button
                 type="button"
                 onClick={() => setShow(s => !s)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition cursor-pointer"
                 tabIndex={-1}
             >
                 {show ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -76,8 +76,8 @@ export default function ProfileEdit({ user }) {
 
                 {/* Flash success */}
                 {flash?.success && (
-                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 text-xs font-semibold">
+                        <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
                         <span>{flash.success}</span>
                     </div>
                 )}
@@ -91,14 +91,14 @@ export default function ProfileEdit({ user }) {
                 </div>
 
                 {/* Single Combined Card */}
-                <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm shadow-sky-100/30 border border-sky-100/80 overflow-hidden">
                     <form onSubmit={submit} className="p-6 space-y-6">
 
                         {/* Section 1: Informasi Identitas */}
                         <div className="space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                <User className="w-4 h-4 text-emerald-600" />
-                                <h2 className="font-semibold text-sm text-slate-900">Informasi Pengguna</h2>
+                            <div className="flex items-center gap-2 pb-2 border-b border-sky-100">
+                                <User className="w-4 h-4 text-sky-600" />
+                                <h2 className="font-bold text-sm text-slate-900">Informasi Pengguna</h2>
                             </div>
 
                             <Field label="Nama Lengkap" error={form.errors.nama}>
@@ -140,12 +140,12 @@ export default function ProfileEdit({ user }) {
                             </Field>
 
                             {/* Role badge */}
-                            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
+                            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200">
                                 <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Peran Akun</span>
                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${
-                                    user.role === 'admin'    ? 'bg-violet-100 text-violet-700 border border-violet-200' :
-                                    user.role === 'penyelia' ? 'bg-amber-100 text-amber-700 border border-amber-200'   :
-                                                               'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                    user.role === 'admin'    ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                                    user.role === 'penyelia' ? 'bg-amber-50 text-amber-700 border border-amber-200'   :
+                                                               'bg-sky-50 text-sky-700 border border-sky-200'
                                 }`}>
                                     {user.role}
                                 </span>
@@ -153,10 +153,10 @@ export default function ProfileEdit({ user }) {
                         </div>
 
                         {/* Section 2: Ubah Kata Sandi (Opsional) */}
-                        <div className="space-y-4 pt-2 border-t border-slate-100">
-                            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                <Lock className="w-4 h-4 text-emerald-600" />
-                                <h2 className="font-semibold text-sm text-slate-900">Ubah Kata Sandi (Opsional)</h2>
+                        <div className="space-y-4 pt-2 border-t border-sky-100">
+                            <div className="flex items-center gap-2 pb-2 border-b border-sky-100">
+                                <Lock className="w-4 h-4 text-sky-600" />
+                                <h2 className="font-bold text-sm text-slate-900">Ubah Kata Sandi (Opsional)</h2>
                             </div>
                             <p className="text-xs text-slate-500 -mt-2">
                                 Kosongkan bagian ini jika tidak ingin mengubah kata sandi.
@@ -195,7 +195,7 @@ export default function ProfileEdit({ user }) {
                             <button
                                 type="submit"
                                 disabled={form.processing}
-                                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition shadow-xs disabled:opacity-60"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl transition shadow-sm shadow-sky-600/20 disabled:opacity-60 cursor-pointer"
                             >
                                 <Save className="w-3.5 h-3.5" />
                                 <span>{form.processing ? 'Menyimpan...' : 'Simpan Perubahan'}</span>

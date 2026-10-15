@@ -10,7 +10,6 @@ import {
 const KATEGORI_LABELS = {
     aws: 'AWS',
     taman_alat: 'Taman Alat',
-    fenologi: 'Fenologi',
 };
 
 const SUMBER_LABELS = {
@@ -37,10 +36,10 @@ function Modal({ open, title, onClose, children }) {
     if (!open) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={onClose} />
+            <div className="relative bg-white border border-sky-100 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                    <h3 className="font-bold text-base text-slate-800">{title}</h3>
+                    <h3 className="font-bold text-base text-slate-900">{title}</h3>
                     <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
                         <X className="w-4 h-4" />
                     </button>
@@ -61,7 +60,7 @@ function FormField({ label, error, children }) {
     );
 }
 
-const inputClass = "w-full border border-slate-200 rounded-lg px-3 h-8 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition font-medium bg-white";
+const inputClass = "w-full border border-slate-200 rounded-xl px-3 h-9 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition font-medium bg-white";
 const selectClass = inputClass;
 
 function JadwalPicker({ value, onChange, jamMulai = 7, jamSelesai = 22 }) {
@@ -93,8 +92,8 @@ function JadwalPicker({ value, onChange, jamMulai = 7, jamSelesai = 22 }) {
                         onClick={() => onChange(preset.val)}
                         className={`px-3 py-1 rounded-full text-xs font-bold border transition ${
                             JSON.stringify(value) === JSON.stringify(preset.val)
-                                ? 'bg-emerald-600 text-white border-emerald-600'
-                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-400'
+                                ? 'bg-sky-600 text-white border-sky-600'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-sky-400'
                         }`}
                     >
                         {preset.label}
@@ -109,8 +108,8 @@ function JadwalPicker({ value, onChange, jamMulai = 7, jamSelesai = 22 }) {
                         onClick={() => handleToggleHour(h)}
                         className={`w-12 h-8 rounded-lg text-xs font-bold border transition ${
                             isSelected(h)
-                                ? 'bg-emerald-500 text-white border-emerald-500'
-                                : 'bg-white text-slate-400 border-slate-200 hover:border-emerald-300'
+                                ? 'bg-sky-600 text-white border-sky-600'
+                                : 'bg-white text-slate-400 border-slate-200 hover:border-sky-300'
                         }`}
                     >
                         {h.toString().padStart(2, '0')}
@@ -251,10 +250,10 @@ export default function Instruments({ instruments, settings }) {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {flash && (
-                    <div className="mb-4 flex items-center space-x-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 text-sm font-semibold">
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <div className="mb-4 flex items-center space-x-2 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl px-4 py-3 text-sm font-semibold">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-sky-600" />
                         <span>{flash}</span>
-                        <button onClick={() => setFlash(null)} className="ml-auto text-emerald-600 hover:text-emerald-900"><X className="w-4 h-4" /></button>
+                        <button onClick={() => setFlash(null)} className="ml-auto text-sky-600 hover:text-sky-800"><X className="w-4 h-4" /></button>
                     </div>
                 )}
 
@@ -268,14 +267,14 @@ export default function Instruments({ instruments, settings }) {
                     <div className="flex items-center space-x-2 shrink-0">
                         <button
                             onClick={() => setSettingsModal(true)}
-                            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
                         >
                             <Clock className="w-3.5 h-3.5 text-slate-500" />
                             <span>Jam Operasional: {settings.jam_mulai.toString().padStart(2,'0')}:00–{settings.jam_selesai.toString().padStart(2,'0')}:00 WIB</span>
                         </button>
                         <button
                             onClick={openInstrCreate}
-                            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition shadow-xs"
+                            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition shadow-sm shadow-sky-600/20"
                         >
                             <Plus className="w-3.5 h-3.5" />
                             <span>Tambah Alat</span>
@@ -286,21 +285,21 @@ export default function Instruments({ instruments, settings }) {
                 <div className="space-y-4">
                     {instruments.length === 0 && (
                         <div className="text-center py-16 text-slate-400">
-                            <Wrench className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                            <Wrench className="w-12 h-12 mx-auto mb-3 opacity-30 text-sky-600" />
                             <p className="font-semibold">Belum ada alat. Tambahkan alat pertama.</p>
                         </div>
                     )}
 
                     {instruments.map(instr => (
-                        <div key={instr.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div key={instr.id} className="bg-white rounded-2xl border border-sky-100/80 shadow-sm shadow-sky-100/30 overflow-hidden">
                             <div
-                                className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-slate-50 transition"
+                                className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-sky-50/40 transition"
                                 onClick={() => setExpandedId(expandedId === instr.id ? null : instr.id)}
                             >
                                 <div className="flex items-center space-x-3 min-w-0">
-                                    <div className={`w-3 h-3 rounded-full shrink-0 ${instr.is_active ? 'bg-emerald-400' : 'bg-slate-300'}`} />
+                                    <div className={`w-3 h-3 rounded-full shrink-0 ${instr.is_active ? 'bg-sky-500' : 'bg-slate-300'}`} />
                                     <div className="min-w-0">
-                                        <div className="font-bold text-slate-800 text-sm truncate">{instr.nama}</div>
+                                        <div className="font-bold text-slate-900 text-sm truncate">{instr.nama}</div>
                                         <div className="text-xs text-slate-400 font-medium mt-0.5">
                                             {KATEGORI_LABELS[instr.kategori]} · {instr.parameters?.length ?? 0} parameter · Urutan kategori: {instr.urutan_form}
                                         </div>
@@ -313,7 +312,7 @@ export default function Instruments({ instruments, settings }) {
                                         onClick={e => { e.stopPropagation(); toggleActive(instr); }}
                                         title={instr.is_active ? 'Nonaktifkan alat ini' : 'Aktifkan alat ini'}
                                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                            instr.is_active ? 'bg-emerald-500' : 'bg-slate-300'
+                                            instr.is_active ? 'bg-sky-600' : 'bg-slate-300'
                                         }`}
                                     >
                                         <span
@@ -325,14 +324,14 @@ export default function Instruments({ instruments, settings }) {
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); openInstrEdit(instr); }}
-                                        className="p-1 text-blue-600 hover:text-blue-700 hover:scale-110 transition"
+                                        className="p-1 text-sky-600 hover:text-sky-800 hover:scale-110 transition cursor-pointer"
                                         title="Edit alat"
                                     >
                                         <Pencil className="w-5 h-5" strokeWidth={2.5} />
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); deleteInstr(instr); }}
-                                        className="p-1 text-rose-600 hover:text-rose-700 hover:scale-110 transition"
+                                        className="p-1 text-rose-600 hover:text-rose-700 hover:scale-110 transition cursor-pointer"
                                         title="Hapus alat"
                                     >
                                         <Trash2 className="w-5 h-5" strokeWidth={2.5} />
@@ -345,12 +344,12 @@ export default function Instruments({ instruments, settings }) {
                             </div>
 
                             {expandedId === instr.id && (
-                                <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-4">
+                                <div className="border-t border-sky-100 bg-sky-50/20 px-5 py-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <h4 className="text-xs font-semibold text-slate-700">Daftar Parameter</h4>
                                         <button
                                             onClick={() => openParamCreate(instr.id)}
-                                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition"
+                                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition shadow-sm shadow-sky-600/20"
                                         >
                                             <Plus className="w-3 h-3" />
                                             <span>Tambah Parameter</span>
@@ -363,17 +362,17 @@ export default function Instruments({ instruments, settings }) {
 
                                     <div className="space-y-2">
                                         {(instr.parameters ?? []).map(param => (
-                                            <div key={param.id} className={`bg-white rounded-xl border border-slate-100 px-4 py-3 flex items-start justify-between gap-3 transition ${param.is_active === false ? 'opacity-60 bg-slate-50/80 border-dashed' : ''}`}>
+                                            <div key={param.id} className={`bg-white rounded-xl border border-sky-100 px-4 py-3 flex items-start justify-between gap-3 transition ${param.is_active === false ? 'opacity-60 bg-slate-50/80 border-dashed' : ''}`}>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className={`font-bold text-sm ${param.is_active === false ? 'text-slate-500 line-through' : 'text-slate-800'}`}>{param.label}</span>
+                                                        <span className={`font-bold text-sm ${param.is_active === false ? 'text-slate-500 line-through' : 'text-slate-900'}`}>{param.label}</span>
                                                         {param.is_active === false && (
                                                             <span className="text-[10px] bg-rose-50 text-rose-600 border border-rose-200 px-1.5 py-0.2 rounded font-bold">Nonaktif</span>
                                                         )}
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                                                            param.sumber === 'aws' ? 'bg-blue-100 text-blue-700'
-                                                            : param.sumber === 'manual' ? 'bg-amber-100 text-amber-700'
-                                                            : 'bg-purple-100 text-purple-700'
+                                                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${
+                                                            param.sumber === 'aws' ? 'bg-sky-50 text-sky-700 border-sky-200'
+                                                            : param.sumber === 'manual' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                            : 'bg-indigo-50 text-indigo-700 border-indigo-200'
                                                         }`}>
                                                             {SUMBER_LABELS[param.sumber]}
                                                         </span>
@@ -385,7 +384,7 @@ export default function Instruments({ instruments, settings }) {
                                                             <span>batas: {param.batas_min ?? '–'} s/d {param.batas_max ?? '–'}</span>
                                                         )}
                                                         <span className="flex items-center space-x-1">
-                                                            <Clock className="w-3 h-3" />
+                                                            <Clock className="w-3 h-3 text-slate-400" />
                                                             <span>{formatJadwal(param.jadwal_baca)}</span>
                                                         </span>
                                                     </div>
@@ -396,7 +395,7 @@ export default function Instruments({ instruments, settings }) {
                                                         onClick={() => toggleParamActive(param)}
                                                         title={param.is_active !== false ? 'Nonaktifkan parameter ini' : 'Aktifkan parameter ini'}
                                                         className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                                            param.is_active !== false ? 'bg-emerald-500' : 'bg-slate-300'
+                                                            param.is_active !== false ? 'bg-sky-600' : 'bg-slate-300'
                                                         }`}
                                                     >
                                                         <span
@@ -408,14 +407,14 @@ export default function Instruments({ instruments, settings }) {
                                                     </button>
                                                     <button
                                                         onClick={() => openParamEdit(param)}
-                                                        className="p-1 text-blue-600 hover:text-blue-700 hover:scale-110 transition"
+                                                        className="p-1 text-sky-600 hover:text-sky-800 hover:scale-110 transition cursor-pointer"
                                                         title="Edit parameter"
                                                     >
                                                         <Pencil className="w-4 h-4" strokeWidth={2.5} />
                                                     </button>
                                                     <button
                                                         onClick={() => deleteParam(param)}
-                                                        className="p-1 text-rose-600 hover:text-rose-700 hover:scale-110 transition"
+                                                        className="p-1 text-rose-600 hover:text-rose-700 hover:scale-110 transition cursor-pointer"
                                                         title="Hapus parameter"
                                                     >
                                                         <Trash2 className="w-4 h-4" strokeWidth={2.5} />
@@ -455,7 +454,6 @@ export default function Instruments({ instruments, settings }) {
                         >
                             <option value="taman_alat">Taman Alat (Manual)</option>
                             <option value="aws">Data AWS</option>
-                            <option value="fenologi">Fenologi</option>
                         </select>
                     </FormField>
                     <FormField label="Urutan Card di Form" error={instrForm.errors.urutan_form}>
@@ -473,13 +471,13 @@ export default function Instruments({ instruments, settings }) {
                             id="is_active_instr"
                             checked={instrForm.data.is_active}
                             onChange={e => instrForm.setData('is_active', e.target.checked)}
-                            className="w-4 h-4 rounded accent-emerald-600"
+                            className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500"
                         />
                         <label htmlFor="is_active_instr" className="text-sm font-semibold text-slate-700">Alat aktif (tampil di form observasi)</label>
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
                         <button type="button" onClick={() => setInstrModal({ open: false })} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">Batal</button>
-                        <button type="submit" disabled={instrForm.processing} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition flex items-center space-x-2">
+                        <button type="submit" disabled={instrForm.processing} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition flex items-center space-x-2 shadow-sm shadow-sky-600/20">
                             <Save className="w-4 h-4" />
                             <span>{instrForm.processing ? 'Menyimpan...' : 'Simpan'}</span>
                         </button>
@@ -562,7 +560,7 @@ export default function Instruments({ instruments, settings }) {
                     </FormField>
                     <div className="flex justify-end space-x-3 pt-2">
                         <button type="button" onClick={() => setParamModal({ open: false })} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">Batal</button>
-                        <button type="submit" disabled={paramForm.processing} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition flex items-center space-x-2">
+                        <button type="submit" disabled={paramForm.processing} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition flex items-center space-x-2 shadow-sm shadow-sky-600/20">
                             <Save className="w-4 h-4" />
                             <span>{paramForm.processing ? 'Menyimpan...' : 'Simpan'}</span>
                         </button>
@@ -572,7 +570,7 @@ export default function Instruments({ instruments, settings }) {
 
             <Modal open={settingsModal} title="Pengaturan Jam Operasional" onClose={() => setSettingsModal(false)}>
                 <form onSubmit={submitSettings} className="space-y-4">
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 font-medium flex items-start space-x-2">
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 font-medium flex items-start space-x-2">
                         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>Jam operasional menentukan pilihan jam di form observasi dan validasi jadwal baca parameter.</span>
                     </div>
@@ -606,7 +604,7 @@ export default function Instruments({ instruments, settings }) {
                     <p className="text-xs text-slate-500">Standar: 07:00–22:00 WIB (16 slot per hari).</p>
                     <div className="flex justify-end space-x-3 pt-2">
                         <button type="button" onClick={() => setSettingsModal(false)} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">Batal</button>
-                        <button type="submit" disabled={settingsForm.processing} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition flex items-center space-x-2">
+                        <button type="submit" disabled={settingsForm.processing} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition flex items-center space-x-2 shadow-sm shadow-sky-600/20">
                             <Save className="w-4 h-4" />
                             <span>Simpan</span>
                         </button>
