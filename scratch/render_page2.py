@@ -78,8 +78,8 @@ def render_page2_lampiran():
     sheet.paste(p_siang_res, (col2_x, photos_y))
 
     # Captions
-    cap1 = 'Foto 1: Pengamatan Taman Alat — Shift Pagi 07:00 WIB'
-    cap2 = 'Foto 2: Pengamatan Operasional — Shift Siang 17:00 WIB'
+    cap1 = 'Foto 1: Pengamatan Taman Alat : Shift Pagi 07:00 WIB'
+    cap2 = 'Foto 2: Pengamatan Operasional : Shift Siang 17:00 WIB'
     c1_box = draw.textbbox((0, 0), cap1, font=font_italic)
     c2_box = draw.textbbox((0, 0), cap2, font=font_italic)
     draw.text((col1_x + (photo_w - (c1_box[2] - c1_box[0])) // 2, photos_y + photo_h + 8), cap1, font=font_italic, fill=(51, 65, 85))

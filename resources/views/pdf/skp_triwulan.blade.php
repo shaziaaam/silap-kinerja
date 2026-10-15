@@ -326,7 +326,7 @@
                     </td>
                     <td>
                         <div class="poster-head-title">LAPORAN KONDISI CUACA</div>
-                        <div class="poster-head-sub">Badan Meteorologi Klimatologi dan Geofisika — Stasiun Klimatologi Jawa Tengah</div>
+                        <div class="poster-head-sub">Badan Meteorologi Klimatologi dan Geofisika | Stasiun Klimatologi Jawa Tengah</div>
                     </td>
                     <td class="poster-head-time">
                         {{ $obs ? \Carbon\Carbon::parse($obs->tanggal)->translatedFormat('l, d F Y') : date('d F Y') }}<br>
@@ -420,7 +420,7 @@
     </div>
 
     <div class="photo-subtext">
-        Foto {{ $loop->iteration }}: Keterangan kegiatan pengamatan taman alat — Shift Pukul {{ $obs && $obs->schedule ? substr($obs->schedule->jam_wib, 0, 5) : '07:00' }} WIB
+        Foto {{ $loop->iteration }}: Keterangan kegiatan pengamatan taman alat (Shift Pukul {{ $obs && $obs->schedule ? substr($obs->schedule->jam_wib, 0, 5) : '07:00' }} WIB)
     </div>
 
     <div class="footer-line clearfix">

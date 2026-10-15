@@ -118,8 +118,8 @@ export default function Landing() {
             a: "Pengambilan foto hanya diwajibkan tepat 2 kali sehari: pada pukul 07.00 WIB (awal shift pagi) dan pukul 17.00 WIB (menjelang petang shift siang). Ke-17 slot waktu lainnya tidak memunculkan field upload foto. Watermark teks 'Taman Alat, Stasiun Klimatologi Jawa Tengah' serta stempel waktu WIB & UTC otomatis dibakar langsung sebelum diarsipkan ke Google Drive."
         },
         {
-            q: "Bagaimana dokumen bukti dukung SKP triwulan dapat diunduh?",
-            a: "Dokumen bukti dukung SKP triwulanan dicetak otomatis dari sistem dalam format PDF per pegawai (berisi rekap total jam pengamatan valid, persentase keaktifan tugas, tautan bukti foto, dan lembar tanda tangan penyelia). Pengemasan paket ZIP seluruh pegawai tersedia khusus bagi Penyelia dan Administrator."
+            q: "Bagaimana berkas bukti dukung SKP triwulan dapat diunduh?",
+            a: "Berkas bukti dukung SKP triwulanan diterbitkan otomatis dari sistem per pegawai (berisi rekap total jam pengamatan valid, persentase keaktifan tugas, tautan bukti foto, dan lembar pengesahan penyelia). Pengemasan paket berkas seluruh pegawai tersedia khusus bagi Penyelia dan Administrator."
         },
         {
             q: "Lupa kata sandi akun, harus bagaimana?",
@@ -127,7 +127,7 @@ export default function Landing() {
         }
     ];
 
-    // Matriks alat & parameter lengkap sesuai PDF Dokumen Resmi
+    // Matriks instrumen & parameter operasional lengkap
     const DETAILED_INSTRUMENTS = [
         {
             group: "Otomatis (Digital & Translator)",
@@ -146,7 +146,7 @@ export default function Landing() {
                 { name: "Anemometer Cup Counter", desc: "Mangkok angin 0,5 m dan 10 m pencatat kilometer jarak tempuh angin dengan kalkulasi kecepatan rata-rata otomatis." },
                 { name: "Open Pan Evaporimeter Klas A", desc: "Panci penguapan dengan Hook Gauge, termometer apung maks-min, dan rumus otomatis Penguapan = Selisih Air + CH Diukur." },
                 { name: "Piche Evaporimeter", desc: "Tabung kaca berskala berselang cm³ dengan piringan kertas saring (Penguapan = Sekarang - Sebelum)." },
-                { name: "Termometer Tanah", desc: "Tanah gundul & berumput pada kedalaman 0, 5, 10, 20, 50, dan 100 cm (kedalaman 2 cm dinonaktifkan di sistem & berkode 9999)." },
+                { name: "Termometer Tanah", desc: "Tanah gundul & berumput pada kedalaman 0, 5, 10, 20, 50, dan 100 cm sesuai standar operasional stasiun." },
                 { name: "Campbell-Stokes & Gunn-Bellani", desc: "Bola kaca pias terbakar surya (0,0-1,0 jam) dan radiometer bola tembaga hitam kondensasi buret (faktor kalibrasi 20.8)." },
                 { name: "Penakar Hujan Ombrometer (OBS)", desc: "Penakar hujan manual tipe corong dengan pembacaan gelas ukur kaca berskala mm setiap jam." }
             ]
@@ -164,7 +164,7 @@ export default function Landing() {
 
     return (
         <div className="min-h-screen bg-white text-[#2B3F5C] font-sans antialiased selection:bg-[#168BC5] selection:text-white">
-            <Head title="SILAP-Kinerja — Stasiun Klimatologi Jawa Tengah" />
+            <Head title="SILAP-Kinerja | Stasiun Klimatologi Jawa Tengah" />
 
             {/* --- NAVBAR --- */}
             <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-[#D3E6F4] transition-all">
@@ -294,11 +294,6 @@ export default function Landing() {
                                 transition={{ duration: 0.6, ease: 'easeOut' }}
                                 className="lg:col-span-5 xl:col-span-5 space-y-6 z-10"
                             >
-                                {/* Technical Eyebrow */}
-                                <div className="text-[12px] sm:text-[13px] font-mono tracking-wider uppercase font-semibold text-[#168BC5]">
-                                    / SISTEM INTEGRASI LAPORAN PENGAMATAN
-                                </div>
-
                                 {/* Main Headline: Matching user reference image */}
                                 <h1 className="text-[32px] sm:text-[38px] lg:text-[40px] xl:text-[44px] font-extrabold text-[#102B4E] tracking-tight leading-[1.12]">
                                     Pengamatan Cuaca<br className="hidden sm:inline" />
@@ -341,7 +336,7 @@ export default function Landing() {
                                 <div className="relative w-full max-w-[820px] lg:scale-105 xl:scale-110 origin-right transition-transform duration-500">
                                     {/* Equipment Graphic with integrated indicator and seamless blend */}
                                     <img
-                                        src="/images/hero_instruments.png?v=hero_v6"
+                                        src="/images/hero_instruments.png?v=hero_v7_flawless"
                                         alt="Instrumen Pengamatan Cuaca Otomatis AWS dan Sensor Meteorologi BMKG"
                                         className="w-full h-auto object-contain transform hover:scale-[1.01] transition-transform duration-500 ease-out select-none"
                                         draggable="false"
@@ -523,7 +518,7 @@ export default function Landing() {
                                         <ul className="space-y-2 text-[14px] text-[#4B5F7A] leading-relaxed">
                                             <li className="flex items-start gap-2">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-[#168BC5] mt-2 shrink-0" />
-                                                <span><strong>Psikrometer:</strong> Bola Kering (TBK) & Bola Basah (TBB) sangkar serta Assman 7 tingkat (5–200 cm).</span>
+                                                <span><strong>Psikrometer:</strong> Bola Kering (TBK) & Bola Basah (TBB) sangkar serta Assman 7 tingkat (5-200 cm).</span>
                                             </li>
                                             <li className="flex items-start gap-2">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-[#168BC5] mt-2 shrink-0" />
@@ -531,7 +526,7 @@ export default function Landing() {
                                             </li>
                                             <li className="flex items-start gap-2">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-[#168BC5] mt-2 shrink-0" />
-                                                <span><strong>Taman Alat:</strong> Termometer tanah (0–100 cm), Campbell-Stokes, Gunn-Bellani, OBS.</span>
+                                                <span><strong>Taman Alat:</strong> Termometer tanah (0-100 cm), Campbell-Stokes, Gunn-Bellani, OBS.</span>
                                             </li>
                                         </ul>
                                     </div>
@@ -591,7 +586,7 @@ export default function Landing() {
                                 onClick={() => setShowInstrumentsCatalog(!showInstrumentsCatalog)}
                                 className="inline-flex items-center gap-2 text-[15px] font-bold text-[#0F6C9E] hover:text-[#168BC5] px-6 py-2.5 rounded-lg border border-[#D3E6F4] bg-[#EAF6FF]/50 hover:bg-[#EAF6FF] transition-all"
                             >
-                                <span>{showInstrumentsCatalog ? "Tutup Rincian Alat & Formula" : "Lihat Semua Inventaris Alat & Parameter (PDF Dokumen)"}</span>
+                                <span>{showInstrumentsCatalog ? "Tutup Rincian Alat & Formula" : "Lihat Semua Inventaris Alat & Parameter Lengkap"}</span>
                                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showInstrumentsCatalog ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
@@ -775,9 +770,9 @@ export default function Landing() {
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <h4 className="text-[17px] font-bold text-[#102B4E]">Rekap & ekspor laporan multi-format</h4>
+                                            <h4 className="text-[17px] font-bold text-[#102B4E]">Rekap & pelaporan kinerja terpadu</h4>
                                             <p className="text-[14px] text-[#4B5F7A] leading-relaxed mt-0.5">
-                                                Dukungan ekspor dokumen PDF bukti dukung SKP triwulan, lembar observasi per jam, grafik laporan cuaca shift (PNG), ekspor form nasional BMKGSoft v2 (CSV kode 9999), dan arsip ZIP.
+                                                Penerbitan otomatis berkas bukti dukung SKP triwulan, lembar observasi per jam, ringkasan laporan cuaca per shift, serta pengarsipan data yang tertib dan akuntabel.
                                             </p>
                                         </div>
                                     </div>
@@ -878,7 +873,7 @@ export default function Landing() {
                                     </div>
                                     <h3 className="text-[18px] font-bold text-[#102B4E]">Pengesahan</h3>
                                     <p className="text-[13px] text-[#4B5F7A] leading-relaxed">
-                                        Data disahkan triwulanan dan berkas PDF SKP triwulan diterbitkan otomatis.
+                                        Data disahkan per triwulan dan berkas bukti dukung SKP diterbitkan otomatis.
                                     </p>
                                 </motion.div>
                             </div>
@@ -900,15 +895,15 @@ export default function Landing() {
                             >
                                 <div className="relative w-full max-w-[560px] group transition-transform duration-500 hover:scale-[1.02]">
                                     <img
-                                        src="/images/report_docs.png?v=selfie_aligned"
-                                        alt="Mockup Dokumen Resmi Laporan Observasi dan SKP BMKG"
+                                        src="/images/report_docs.png?v=no_dash"
+                                        alt="Mockup Berkas Laporan Observasi dan SKP BMKG"
                                         className="w-full h-auto object-contain"
                                     />
                                 </div>
                                 <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#D3E6F4] shadow-xs">
                                     <span className="w-2 h-2 rounded-full bg-[#168BC5] animate-pulse" />
                                     <span className="text-[11px] font-mono font-bold text-[#102B4E] uppercase tracking-wider">
-                                        Cover SKP Triwulan • Lampiran Shift Pagi • Lampiran Shift Siang (3 Lembar)
+                                        Cover SKP Triwulan • Lampiran Shift Pagi • Lampiran Shift Siang
                                     </span>
                                 </div>
                             </motion.div>
@@ -926,7 +921,7 @@ export default function Landing() {
                                         HASIL PELAPORAN
                                     </span>
                                     <h2 className="text-[32px] sm:text-[40px] font-bold text-[#102B4E] leading-tight tracking-tight">
-                                        Dokumen Siap Digunakan
+                                        Berkas Laporan Siap Digunakan
                                     </h2>
                                     <p className="text-[16px] text-[#4B5F7A] leading-relaxed pt-1">
                                         Laporan dan bukti dukung kinerja tersedia sesuai kebutuhan, memenuhi standar tata kelola data BMKG serta administrasi kepegawaian nasional.
@@ -938,25 +933,25 @@ export default function Landing() {
                                         <div className="w-5 h-5 rounded-full bg-[#EAF6FF] text-[#168BC5] flex items-center justify-center shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <span><strong>PDF SKP triwulanan (3 Lembar):</strong> Cover laporan (nama dummy & periode triwulan), lampiran shift pagi (07.00 WIB), dan shift siang (17.00 WIB) sesuai template gambar shift dan bukti dokumentasi lapangan.</span>
+                                        <span><strong>Berkas SKP triwulan:</strong> Format resmi lembar cover pengesahan serta rekap operasional shift pagi dan shift siang yang dilengkapi foto dokumentasi lapangan.</span>
                                     </li>
                                     <li className="flex items-center gap-3">
                                         <div className="w-5 h-5 rounded-full bg-[#EAF6FF] text-[#168BC5] flex items-center justify-center shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <span><strong>Laporan observasi per jam:</strong> Cetak lembar observasi resmi siap arsip per slot jam WIB.</span>
+                                        <span><strong>Lembar observasi per jam:</strong> Cetak rekap pengamatan cuaca terstruktur per slot jam pengamatan harian.</span>
                                     </li>
                                     <li className="flex items-center gap-3">
                                         <div className="w-5 h-5 rounded-full bg-[#EAF6FF] text-[#168BC5] flex items-center justify-center shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <span><strong>Grafik laporan cuaca per shift:</strong> Format gambar ringkas untuk koordinasi cepat antar-staf.</span>
+                                        <span><strong>Ringkasan laporan cuaca per shift:</strong> Visualisasi parameter cuaca harian untuk kemudahan koordinasi tim operasional stasiun.</span>
                                     </li>
                                     <li className="flex items-center gap-3">
                                         <div className="w-5 h-5 rounded-full bg-[#EAF6FF] text-[#168BC5] flex items-center justify-center shrink-0">
                                             <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <span><strong>Ekspor form nasional CSV:</strong> Format BMKGSoft v2 dengan penanganan kode standar 9999.</span>
+                                        <span><strong>Rekapitulasi data terstruktur:</strong> Integrasi pencatatan data yang tertib, siap verifikasi penyelia dan evaluasi kinerja berkala.</span>
                                     </li>
                                 </ul>
                             </motion.div>
@@ -1095,7 +1090,7 @@ export default function Landing() {
                                                     {faq.q}
                                                 </span>
                                                 <span className="text-[#168BC5] text-[20px] font-bold shrink-0 transition-transform duration-200">
-                                                    {isOpen ? '−' : '+'}
+                                                    {isOpen ? '-' : '+'}
                                                 </span>
                                             </button>
                                             <AnimatePresence>

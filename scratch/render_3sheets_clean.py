@@ -21,7 +21,7 @@ def render_attachment_sheet(shift_type='pagi', page_num=2, total_pages=3):
 
     # 1. Header
     title = 'LAMPIRAN BUKTI KINERJA (SKP)'
-    sub = f'Pengamatan Cuaca Harian — {shift_label} | Stasiun Klimatologi Jawa Tengah'
+    sub = f'Pengamatan Cuaca Harian ({shift_label}) | Stasiun Klimatologi Jawa Tengah'
     
     t_bbox = draw.textbbox((0, 0), title, font=font_bold)
     draw.text(((sheet_w - (t_bbox[2] - t_bbox[0])) // 2, 40), title, font=font_bold, fill=(15, 23, 42))
@@ -32,7 +32,7 @@ def render_attachment_sheet(shift_type='pagi', page_num=2, total_pages=3):
     draw.line([(margin_x, 110), (sheet_w - margin_x, 110)], fill=(148, 163, 184), width=2)
 
     # 2. Section A: Template Gambar Shift
-    sec_a_title = f'A. LAPORAN KONDISI CUACA — {shift_label.upper()}'
+    sec_a_title = f'A. LAPORAN KONDISI CUACA : {shift_label.upper()}'
     draw.text((margin_x, 130), sec_a_title, font=font_sec, fill=(15, 23, 42))
 
     poster_src = 'scratch/pagi_dummy_clean.png' if is_pagi else 'scratch/siang_dummy_clean.png'
@@ -67,7 +67,7 @@ def render_attachment_sheet(shift_type='pagi', page_num=2, total_pages=3):
     sheet.paste(photo_resized, (photo_x, photo_y))
 
     # Caption
-    caption = f'Foto: Pengamatan dan Pembacaan Instrumen Taman Alat — {shift_label}'
+    caption = f'Foto: Dokumentasi Pengamatan Taman Alat : {shift_label}'
     c_bbox = draw.textbbox((0, 0), caption, font=font_italic)
     draw.text(((sheet_w - (c_bbox[2] - c_bbox[0])) // 2, photo_y + photo_h + 8), caption, font=font_italic, fill=(71, 85, 105))
 
