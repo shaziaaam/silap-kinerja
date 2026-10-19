@@ -24,7 +24,7 @@ section[id] {
 body {
     background-color: var(--bg-surface);
     color: var(--color-text-main);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -126,3 +126,25 @@ body {
 .delay-400 { transition-delay: 400ms; }
 .delay-500 { transition-delay: 500ms; }
 
+
+/* Transisi halaman app: bagian-bagian halaman naik bertahap saat sebuah menu dibuka.
+   Berlaku pada anak langsung dari elemen akar halaman di dalam <main class="page-enter">. */
+@keyframes page-rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+}
+
+.page-enter > * > * {
+    animation: page-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.page-enter > * > *:nth-child(1) { animation-delay: 0.03s; }
+.page-enter > * > *:nth-child(2) { animation-delay: 0.09s; }
+.page-enter > * > *:nth-child(3) { animation-delay: 0.15s; }
+.page-enter > * > *:nth-child(4) { animation-delay: 0.21s; }
+.page-enter > * > *:nth-child(5) { animation-delay: 0.27s; }
+.page-enter > * > *:nth-child(6) { animation-delay: 0.33s; }
+.page-enter > * > *:nth-child(n + 7) { animation-delay: 0.39s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .page-enter > * > * { animation: none; }
+}

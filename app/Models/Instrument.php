@@ -15,11 +15,11 @@ class Instrument extends Model
 
     public function parameters()
     {
-        return $this->hasMany(InstrumentParameter::class)->orderBy('urutan_form');
+        return $this->hasMany(InstrumentParameter::class)->orderBy('urutan');
     }
 
     public function activeParameters()
     {
-        return $this->hasMany(InstrumentParameter::class)->orderBy('urutan_form');
+        return $this->hasMany(InstrumentParameter::class)->where('is_active', true)->orderBy('urutan');
     }
 }

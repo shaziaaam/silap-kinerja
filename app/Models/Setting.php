@@ -9,7 +9,8 @@ class Setting extends Model
     protected $primaryKey = 'key';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $guarded = ['key'];
+    // 'key' must stay fillable: set() creates rows through updateOrCreate().
+    protected $fillable = ['key', 'value'];
 
     /**
      * Get a setting value by key, with optional default.

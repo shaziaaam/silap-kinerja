@@ -37,19 +37,12 @@ class Observation extends Model
 
     protected $appends = ['foto_url', 'shift_name'];
 
+    /** Photos are private: always served through the authenticated route. */
     public function getFotoUrlAttribute(): ?string
     {
-        if (!empty($this->foto_gdrive_url)) {
-            return $this->foto_gdrive_url;
-        }
+        $adaFoto = $this->photo_ref || $this->foto_path || $this->foto_gdrive_id;
 
-        if (!empty($this->foto_path)) {
-            return str_starts_with($this->foto_path, 'http')
-                ? $this->foto_path
-                : '/' . ltrim($this->foto_path, '/');
-        }
-
-        return null;
+        return $adaFoto && $this->exists ? route('observations.photo', $this->id) : null;
     }
 
     public function getShiftNameAttribute(): string

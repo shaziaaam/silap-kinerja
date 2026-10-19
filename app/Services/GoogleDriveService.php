@@ -6,6 +6,7 @@ use Exception;
 use Google\Client as GoogleClient;
 use Google\Service\Drive as GoogleDrive;
 use Google\Service\Drive\DriveFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class GoogleDriveService
@@ -76,9 +77,10 @@ class GoogleDriveService
      * @param string $fileContents Binary contents of the image
      * @param string $fileName Target file name on Google Drive
      * @param string $mimeType MIME type (e.g. image/webp, image/jpeg)
+     * @param array<int, string> $folderPath Sub-folders under the photo root, e.g. ['2026', '10', '09']
      * @return array|null Returns ['id' => ..., 'web_view_link' => ..., 'web_content_link' => ...] or null
      */
-    public function uploadPhoto(string $fileContents, string $fileName, string $mimeType = 'image/webp'): ?array
+    public function uploadPhoto(string $fileContents, string $fileName, string $mimeType = 'image/webp', array $folderPath = []): ?array
     {
         if (!$this->isConfigured()) {
             Log::warning('Google Drive Service Account belum terkonfigurasi. Foto tidak dapat diunggah ke Shared Drive.');
@@ -87,6 +89,9 @@ class GoogleDriveService
 
         try {
             $parentId = $this->folderId;
+            foreach ($folderPath as $nama) {
+                $parentId = $this->folderAnak($parentId, (string) $nama);
+            }
 
             $fileMetadata = new DriveFile([
                 'name' => $fileName,
@@ -116,6 +121,47 @@ class GoogleDriveService
             Log::error('Error saat upload foto ke Google Workspace Shared Drive: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * ID of the sub-folder $nama under $parentId, created when missing. IDs are cached
+     * so a busy day does not search Drive for the same year/month/day folder each time.
+     */
+    protected function folderAnak(?string $parentId, string $nama): string
+    {
+        $kunci = 'gdrive-folder:' . sha1(($parentId ?? 'root') . '/' . $nama);
+
+        return Cache::rememberForever($kunci, function () use ($parentId, $nama) {
+            $q = sprintf(
+                "name = '%s' and mimeType = 'application/vnd.google-apps.folder' and trashed = false%s",
+                str_replace("'", "\\'", $nama),
+                $parentId ? " and '{$parentId}' in parents" : ''
+            );
+            $opt = [
+                'q' => $q,
+                'fields' => 'files(id)',
+                'pageSize' => 1,
+                'supportsAllDrives' => true,
+                'includeItemsFromAllDrives' => true,
+            ];
+            if ($this->sharedDriveId) {
+                $opt['corpora'] = 'drive';
+                $opt['driveId'] = $this->sharedDriveId;
+            }
+
+            $ada = $this->driveService->files->listFiles($opt)->getFiles();
+            if (!empty($ada)) {
+                return $ada[0]->id;
+            }
+
+            $folder = $this->driveService->files->create(new DriveFile([
+                'name' => $nama,
+                'mimeType' => 'application/vnd.google-apps.folder',
+                'parents' => $parentId ? [$parentId] : [],
+            ]), ['fields' => 'id', 'supportsAllDrives' => true]);
+
+            return $folder->id;
+        });
     }
 
     /**

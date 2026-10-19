@@ -12,7 +12,11 @@ return [
     */
 
     // Path to the downloaded service account JSON key file
-    'service_account_path' => env('GOOGLE_SERVICE_ACCOUNT_PATH', storage_path('app/google-service-account.json')),
+    // (a relative path is resolved from the project root, not the web server's cwd)
+    'service_account_path' => (function () {
+        $path = env('GOOGLE_SERVICE_ACCOUNT_PATH', storage_path('app/google-service-account.json'));
+        return preg_match('#^([a-zA-Z]:)?[\/]#', $path) ? $path : base_path($path);
+    })(),
 
     // Optional raw JSON credentials content (useful for CI/CD or docker env variables)
     'service_account_json' => env('GOOGLE_SERVICE_ACCOUNT_JSON'),

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Head, Link } from '@inertiajs/react';
-import { Lock, UserCheck, ShieldAlert, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Lock, UserCheck, ShieldAlert, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 const bgImages = ['/images/3.png', '/images/1.png', '/images/2.png'];
 
 export default function Login() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         nip: '',
         password: '',
         remember: false,
     });
 
     const [bg, setBg] = useState(0);
+    const [lihatSandi, setLihatSandi] = useState(false);
 
     useEffect(() => {
         const t = setInterval(() => setBg(p => (p + 1) % bgImages.length), 6000);
@@ -20,7 +21,8 @@ export default function Login() {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('login'));
+        // Never leave the password in the field after a failed attempt.
+        post(route('login'), { onFinish: () => reset('password') });
     };
 
     return (
@@ -89,9 +91,15 @@ export default function Login() {
                                 <UserCheck className="w-4 h-4 absolute left-3.5 top-3 text-sky-600 pointer-events-none" />
                                 <input
                                     type="text"
+                                    name="username"
+                                    autoComplete="username"
+                                    autoCapitalize="none"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    autoFocus
                                     value={data.nip}
                                     onChange={(e) => setData('nip', e.target.value)}
-                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition outline-none"
+                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-base sm:text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition outline-none"
                                     placeholder="Masukkan NIP atau email"
                                     required
                                 />
@@ -106,16 +114,36 @@ export default function Login() {
                             <div className="relative">
                                 <Lock className="w-4 h-4 absolute left-3.5 top-3 text-sky-600 pointer-events-none" />
                                 <input
-                                    type="password"
+                                    type={lihatSandi ? 'text' : 'password'}
+                                    name="password"
+                                    autoComplete="current-password"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
-                                    className="w-full rounded-xl pl-10 pr-3 py-2 bg-slate-50 text-slate-900 text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition outline-none"
+                                    className="w-full rounded-xl pl-10 pr-10 py-2 bg-slate-50 text-slate-900 text-base sm:text-xs placeholder:text-xs border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition outline-none"
                                     placeholder="••••••••"
                                     required
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setLihatSandi((v) => !v)}
+                                    className="absolute right-3 top-2.5 text-slate-400 hover:text-sky-700"
+                                    aria-label={lihatSandi ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                                >
+                                    {lihatSandi ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
                             </div>
                             {errors.password && <p className="text-rose-600 text-[11px] mt-1 font-medium">{errors.password}</p>}
                         </div>
+
+                        <label className="flex items-center gap-2 text-xs text-slate-600 select-none cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={data.remember}
+                                onChange={(e) => setData('remember', e.target.checked)}
+                                className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-200"
+                            />
+                            <span>Ingat saya di perangkat ini</span>
+                        </label>
 
                         <button
                             type="submit"
@@ -127,20 +155,12 @@ export default function Login() {
                     </form>
 
                     {/* Footer Notice */}
-                    <div className="mt-5 pt-4 border-t border-sky-100 space-y-2 text-center">
+                    <div className="mt-5 pt-4 border-t border-sky-100 space-y-1 text-center">
                         <p className="text-[10px] text-slate-500 flex items-center justify-center space-x-1.5">
                             <ShieldAlert className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                            <span>Sistem internal - hanya untuk ASN BMKG Staklim Jateng</span>
+                            <span>Sistem internal, khusus pegawai Stasiun Klimatologi Jawa Tengah</span>
                         </p>
-                        <a
-                            href="https://staklim-jateng.bmkg.go.id/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center space-x-1 text-[10px] text-sky-700 hover:text-sky-900 font-semibold"
-                        >
-                            <span>Bukan pegawai? Kunjungi Web Resmi BMKG Jateng</span>
-                            <ExternalLink className="w-3 h-3" />
-                        </a>
+                        <p className="text-[10px] text-slate-400">Lupa kata sandi? Hubungi admin untuk reset.</p>
                     </div>
                 </div>
 

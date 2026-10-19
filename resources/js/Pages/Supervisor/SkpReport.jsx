@@ -1,22 +1,7 @@
-import React, { useState } from 'react';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, useForm, usePage, router } from '@inertiajs/react';
 import Sidebar from '../../Components/Sidebar';
 import { Download, RefreshCw, Archive, CheckCircle2, FileSpreadsheet, Filter } from 'lucide-react';
-
-const BULAN_OPTIONS = [
-    { value: 'B1', label: 'Bulan 1 (Januari)' },
-    { value: 'B2', label: 'Bulan 2 (Februari)' },
-    { value: 'B3', label: 'Bulan 3 (Maret)' },
-    { value: 'B4', label: 'Bulan 4 (April)' },
-    { value: 'B5', label: 'Bulan 5 (Mei)' },
-    { value: 'B6', label: 'Bulan 6 (Juni)' },
-    { value: 'B7', label: 'Bulan 7 (Juli)' },
-    { value: 'B8', label: 'Bulan 8 (Agustus)' },
-    { value: 'B9', label: 'Bulan 9 (September)' },
-    { value: 'B10', label: 'Bulan 10 (Oktober)' },
-    { value: 'B11', label: 'Bulan 11 (November)' },
-    { value: 'B12', label: 'Bulan 12 (Desember)' },
-];
 
 const TRIWULAN_OPTIONS = [
     { value: 'T1', label: 'Triwulan 1 (Januari - Maret)' },
@@ -25,71 +10,38 @@ const TRIWULAN_OPTIONS = [
     { value: 'T4', label: 'Triwulan 4 (Oktober - Desember)' },
 ];
 
-export default function SkpReport({ pengamatList, recaps }) {
+export default function SkpReport({ pengamatList, recaps, skpExports = [] }) {
     const { auth, flash, errors } = usePage().props;
     const user = auth?.user;
 
-    const [jenisPeriode, setJenisPeriode] = useState('triwulan'); // 'bulanan' or 'triwulan'
-    const [selectedPeriode, setSelectedPeriode] = useState('T1');
+    const isPengamat = user?.role === 'pengamat';
+    const triwulanSekarang = `T${Math.floor(new Date().getMonth() / 3) + 1}`;
+    const [selectedPeriode, setSelectedPeriode] = useState(triwulanSekarang);
     const [tahun, setTahun] = useState(new Date().getFullYear());
-    const [selectedUser, setSelectedUser] = useState('all');
-
-    const handleJenisPeriodeChange = (jenis) => {
-        setJenisPeriode(jenis);
-        if (jenis === 'bulanan') {
-            setSelectedPeriode('B1');
-        } else {
-            setSelectedPeriode('T1');
-        }
-    };
+    // Pengamat can only ever pick themselves; the server enforces it as well.
+    const [selectedUser, setSelectedUser] = useState(isPengamat ? user.id : (pengamatList[0]?.id ?? ''));
 
     const { post, processing } = useForm();
 
-    const handleGenerate = (e) => {
-        e.preventDefault();
-        post(route('supervisor.skp.generate', {
-            user_id: selectedUser,
-            tahun: tahun,
-            periode: selectedPeriode,
-        }));
-    };
+    // Poll only while a package is still being built, then stop.
+    const adaEksporBerjalan = skpExports.some(e => e.sedang_berjalan);
+    useEffect(() => {
+        if (!adaEksporBerjalan) return;
+        const timer = setInterval(() => router.reload({ only: ['skpExports'] }), 8000);
+        return () => clearInterval(timer);
+    }, [adaEksporBerjalan]);
+
+    const pdfUrl = selectedUser
+        ? route('supervisor.skp.pdf-direct', { user_id: selectedUser, tahun, periode: selectedPeriode })
+        : null;
 
     const handleDownloadZip = (e) => {
         e.preventDefault();
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = route('supervisor.skp.zip');
-
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        if (csrfToken) {
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_token';
-            csrfInput.value = csrfToken;
-            form.appendChild(csrfInput);
-        }
-
-        const tahunInput = document.createElement('input');
-        tahunInput.type = 'hidden';
-        tahunInput.name = 'tahun';
-        tahunInput.value = tahun;
-        form.appendChild(tahunInput);
-
-        const periodeInput = document.createElement('input');
-        periodeInput.type = 'hidden';
-        periodeInput.name = 'periode';
-        periodeInput.value = selectedPeriode;
-        form.appendChild(periodeInput);
-
-        const userInput = document.createElement('input');
-        userInput.type = 'hidden';
-        userInput.name = 'user_id';
-        userInput.value = selectedUser;
-        form.appendChild(userInput);
-
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+        // The package is built on the queue; the file appears in the "Paket ZIP" list.
+        post(route('supervisor.skp.zip'), {
+            data: { tahun, periode: selectedPeriode },
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -111,136 +63,92 @@ export default function SkpReport({ pengamatList, recaps }) {
                 )}
 
                 <div>
-                    <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Generate Rekap SKP Pegawai</h1>
+                    <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Laporan Triwulan (Bukti Dukung SKP)</h1>
                     <p className="text-xs text-slate-500 mt-0.5">
-                        Perhitungan otomatis jumlah observasi valid (Approved) bulanan dan triwulanan sebagai bukti dukung fisik SKP pegawai BMKG.
+                        {isPengamat
+                            ? 'Unduh PDF laporan triwulan Anda. Laporan tersedia setelah triwulan di-ACC penyelia dan hanya memuat data yang disetujui.'
+                            : 'Unduh PDF laporan triwulan per pegawai, atau paket ZIP berisi PDF semua pegawai. Laporan tersedia setelah triwulan di-ACC.'}
                     </p>
                 </div>
 
-                {/* Main Filter & Generator Form */}
-                <div className="bg-white border border-sky-100/80 rounded-2xl p-6 shadow-sm shadow-sky-100/30">
-                    <form onSubmit={handleGenerate} className="space-y-5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                            {/* Jenis Periode Toggle */}
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Jenis Periode</label>
-                                <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 h-9">
-                                    <button
-                                        type="button"
-                                        onClick={() => handleJenisPeriodeChange('triwulan')}
-                                        className={`rounded-lg text-xs font-bold transition ${
-                                            jenisPeriode === 'triwulan'
-                                                ? 'bg-sky-600 text-white shadow-xs'
-                                                : 'text-slate-600 hover:text-slate-900'
-                                        }`}
-                                    >
-                                        Triwulanan
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleJenisPeriodeChange('bulanan')}
-                                        className={`rounded-lg text-xs font-bold transition ${
-                                            jenisPeriode === 'bulanan'
-                                                ? 'bg-sky-600 text-white shadow-xs'
-                                                : 'text-slate-600 hover:text-slate-900'
-                                        }`}
-                                    >
-                                        Bulanan
-                                    </button>
-                                </div>
-                            </div>
+                <div className="bg-white border border-sky-100/80 rounded-2xl p-6 shadow-sm shadow-sky-100/30 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Triwulan</label>
+                            <select
+                                value={selectedPeriode}
+                                onChange={(e) => setSelectedPeriode(e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
+                            >
+                                {TRIWULAN_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                            {/* Periode Dropdown */}
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                                    {jenisPeriode === 'bulanan' ? 'Pilih Bulan' : 'Pilih Triwulan'}
-                                </label>
-                                <select
-                                    value={selectedPeriode}
-                                    onChange={(e) => setSelectedPeriode(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
-                                >
-                                    {(jenisPeriode === 'bulanan' ? BULAN_OPTIONS : TRIWULAN_OPTIONS).map((opt) => (
-                                        <option key={opt.value} value={opt.value}>
-                                            {opt.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Tahun</label>
+                            <input
+                                type="number"
+                                value={tahun}
+                                onChange={(e) => setTahun(parseInt(e.target.value))}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
+                            />
+                        </div>
 
-                            {/* Tahun */}
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Tahun</label>
-                                <input
-                                    type="number"
-                                    value={tahun}
-                                    onChange={(e) => setTahun(parseInt(e.target.value))}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
-                                    required
-                                />
-                            </div>
-
-                            {/* Pilih Pegawai */}
+                        {isPengamat ? (
                             <div>
                                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">Pegawai</label>
+                                <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 h-9 flex items-center text-slate-700 text-xs font-semibold">
+                                    {user.nama}
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Pegawai (PDF per orang)</label>
                                 <select
                                     value={selectedUser}
                                     onChange={(e) => setSelectedUser(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition outline-none font-medium"
                                 >
-                                    {user.role !== 'pengamat' && (
-                                        <option value="all">Semua Pegawai (Paket ZIP)</option>
-                                    )}
                                     {pengamatList.map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.nama} ({p.nip})
-                                        </option>
+                                        <option key={p.id} value={p.id}>{p.nama} ({p.nip})</option>
                                     ))}
                                 </select>
                             </div>
-                        </div>
+                        )}
+                    </div>
 
-                        {/* Action Buttons Row */}
-                        <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-slate-100">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="px-5 bg-sky-600 hover:bg-sky-700 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm shadow-sky-600/20 flex items-center space-x-2 disabled:opacity-50"
+                    <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-slate-100">
+                        {pdfUrl && (
+                            <a
+                                href={pdfUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-5 bg-sky-600 hover:bg-sky-700 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
                             >
-                                <RefreshCw className="w-4 h-4" />
-                                <span>Hitung &amp; Generate SKP</span>
+                                <Download className="w-4 h-4" />
+                                <span>{isPengamat ? 'Unduh PDF Laporan Triwulan Saya' : 'Unduh PDF Pegawai Terpilih'}</span>
+                            </a>
+                        )}
+                        {!isPengamat && (
+                            <button
+                                type="button"
+                                onClick={handleDownloadZip}
+                                disabled={processing}
+                                className="px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2 disabled:opacity-50"
+                            >
+                                <Archive className="w-4 h-4" />
+                                <span>Buat Paket ZIP Semua Pegawai</span>
                             </button>
-
-                            {user.role !== 'pengamat' && (
-                                selectedUser === 'all' ? (
-                                    <button
-                                        type="button"
-                                        onClick={handleDownloadZip}
-                                        className="px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
-                                    >
-                                        <Archive className="w-4 h-4" />
-                                        <span>Unduh Paket ZIP (Semua Pegawai)</span>
-                                    </button>
-                                ) : (
-                                    <a
-                                        href={route('supervisor.skp.pdf-direct', { user_id: selectedUser, tahun, periode: selectedPeriode })}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2"
-                                    >
-                                        <Download className="w-4 h-4" />
-                                        <span>Cetak PDF SKP (Pegawai Terpilih)</span>
-                                    </a>
-                                )
-                            )}
-                        </div>
-                    </form>
+                        )}
+                    </div>
                 </div>
 
                 {/* Table of Generated SKP Recaps */}
                 <div className="bg-white border border-sky-100/80 rounded-2xl overflow-hidden shadow-sm shadow-sky-100/30">
                     <div className="px-6 py-4 border-b border-sky-100 font-extrabold text-sm text-slate-900 bg-sky-50/70 flex items-center justify-between">
-                        <span>Daftar Rekap SKP Ter-Generate ({recaps.data.length} Data)</span>
+                        <span>Daftar Laporan Triwulan ({recaps.data.length} Data)</span>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs text-slate-700">
@@ -249,7 +157,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                     <th className="px-5 py-3.5 whitespace-nowrap">Pengamat</th>
                                     <th className="px-5 py-3.5 whitespace-nowrap">Periode SKP</th>
                                     <th className="px-5 py-3.5 whitespace-nowrap">Total Observasi Valid</th>
-                                    <th className="px-5 py-3.5 whitespace-nowrap">Waktu Generate</th>
+                                    <th className="px-5 py-3.5 whitespace-nowrap">Waktu ACC</th>
                                     <th className="px-5 py-3.5 whitespace-nowrap text-right">Aksi PDF</th>
                                 </tr>
                             </thead>
@@ -278,10 +186,15 @@ export default function SkpReport({ pengamatList, recaps }) {
                                                 </div>
                                             </td>
                                             <td className="px-5 py-4 text-slate-500 font-medium">
-                                                {new Date(r.tanggal_generate).toLocaleString('id-ID')}
+                                                {r.approved_at ? new Date(r.approved_at).toLocaleString('id-ID') : '-'}
                                             </td>
                                             <td className="px-5 py-4 text-right">
-                                                {r.has_pending_revisions ? (
+                                                {r.status !== 'approved' ? (
+                                                    <span className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold cursor-not-allowed" title="Laporan tersedia setelah triwulan di-ACC penyelia.">
+                                                        <Download className="w-3.5 h-3.5" />
+                                                        <span>Belum di-ACC</span>
+                                                    </span>
+                                                ) : r.has_pending_revisions ? (
                                                     <span
                                                         className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold cursor-not-allowed"
                                                         title="Pengesahan (ACC) SKP diblokir karena masih ada data observasi berstatus revisi yang belum diperbaiki."
@@ -306,7 +219,7 @@ export default function SkpReport({ pengamatList, recaps }) {
                                 ) : (
                                     <tr>
                                         <td colSpan="5" className="text-center py-8 text-slate-500 italic font-medium">
-                                            Belum ada rekap SKP yang di-generate.
+                                            Belum ada triwulan yang di-ACC.
                                         </td>
                                     </tr>
                                 )}
@@ -314,6 +227,56 @@ export default function SkpReport({ pengamatList, recaps }) {
                         </table>
                     </div>
                 </div>
+
+                {user.role !== 'pengamat' && skpExports.length > 0 && (
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-100 flex items-center space-x-2">
+                            <Archive className="w-4 h-4 text-slate-500" />
+                            <h2 className="font-bold text-slate-900 text-sm">Paket ZIP</h2>
+                            <span className="text-[11px] text-slate-500">dibuat di latar belakang</span>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                            {skpExports.map((ex) => (
+                                <div key={ex.id} className="px-5 py-3 flex items-center justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <div className="text-sm font-semibold text-slate-900 truncate">
+                                            {ex.periode_label} {ex.tahun}
+                                            <span className="text-slate-500 font-normal">
+                                                {' · '}{ex.target_user ? ex.target_user.nama : 'Semua pegawai'}
+                                            </span>
+                                        </div>
+                                        <div className="text-[11px] text-slate-500">
+                                            Diminta {new Date(ex.created_at).toLocaleString('id-ID')}
+                                            {ex.status === 'selesai' && ex.jumlah_pegawai > 0 && ` · ${ex.jumlah_pegawai} berkas PDF`}
+                                        </div>
+                                        {ex.status === 'gagal' && ex.pesan_error && (
+                                            <div className="text-[11px] text-rose-600 mt-0.5">{ex.pesan_error}</div>
+                                        )}
+                                    </div>
+                                    <div className="shrink-0">
+                                        {ex.status === 'selesai' ? (
+                                            <a
+                                                href={route('supervisor.skp.export_download', ex.id)}
+                                                className="inline-flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                                            >
+                                                <Download className="w-3.5 h-3.5" />
+                                                <span>Unduh</span>
+                                            </a>
+                                        ) : ex.status === 'gagal' ? (
+                                            <span className="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg">Gagal</span>
+                                        ) : (
+                                            <span className="inline-flex items-center space-x-1.5 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-2.5 py-1 rounded-lg">
+                                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                                <span>{ex.status === 'antre' ? 'Mengantre' : 'Memproses'}</span>
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
             </main>
         </Sidebar>
     );

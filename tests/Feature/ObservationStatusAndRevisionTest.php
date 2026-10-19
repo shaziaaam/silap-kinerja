@@ -42,7 +42,6 @@ class ObservationStatusAndRevisionTest extends TestCase
         $this->schedule = Schedule::create([
             'jam_utc' => '00:00:00',
             'jam_wib' => '07:00:00',
-            'is_synoptic' => true,
         ]);
     }
 

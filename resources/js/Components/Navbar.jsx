@@ -107,17 +107,6 @@ export default function Navbar() {
                             <span>Riwayat Observasi</span>
                         </Link>
 
-                        <Link
-                            onMouseEnter={handleMouseEnter}
-                            href={route('reports.monthly.index')}
-                            className={`relative z-10 px-3 xl:px-3.5 py-2 rounded-full text-xs xl:text-sm font-bold whitespace-nowrap transition-colors duration-200 flex items-center space-x-1.5 ${
-                                route().current('reports.monthly.*') ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-sky-700'
-                            }`}
-                        >
-                            <FileText className="w-4 h-4" />
-                            <span>Laporan Bulanan</span>
-                        </Link>
-
                         {user.role === 'pengamat' && (
                             <Link
                                 onMouseEnter={handleMouseEnter}

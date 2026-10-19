@@ -1,4 +1,5 @@
 import os
+import cv2
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import numpy as np
 import scipy.ndimage as ndimage
@@ -72,33 +73,16 @@ def generate_flawless_hero():
     eq_crop = orig.crop((crop_x0, 0, min(orig.width, crop_x0 + crop_w), orig.height))
     arr_eq = np.array(eq_crop)
     
-    # Clean VAISALA text on the logger casing
-    # In eq_crop, logger is around x: 890 to 1200, y: 520 to 650
-    # VAISALA text is around x: 965 to 1045, y: 550 to 595
-    sub_x0, sub_x1 = 960, 1055
-    sub_y0, sub_y1 = 550, 600
-    sub = arr_eq[sub_y0:sub_y1, sub_x0:sub_x1]
-    
-    # Blue mask for VAISALA letters
+    # Seamless inpainting of the original VAISALA text on the casing using OpenCV Telea
+    sub_x0, sub_x1 = 970, 1060
+    sub_y0, sub_y1 = 560, 600
+    sub = arr_eq[sub_y0:sub_y1, sub_x0:sub_x1, :3].copy()
     b_diff = sub[:, :, 2].astype(np.int32) - sub[:, :, 0].astype(np.int32)
-    blue_mask = (b_diff > 35) & (sub[:, :, 2] > 120) & (np.arange(sub.shape[0])[:, None] > 5)
-    dil_mask = ndimage.binary_dilation(blue_mask, iterations=2)
-    
-    inpainted_sub = sub.copy()
-    for y in range(sub.shape[0]):
-        for x in range(sub.shape[1]):
-            if dil_mask[y, x]:
-                lx, rx = 0, sub.shape[1] - 1
-                while lx < x and dil_mask[y, lx]:
-                    lx += 1
-                while rx > x and dil_mask[y, rx]:
-                    rx -= 1
-                c_left = sub[y, max(0, lx-2)][:3]
-                c_right = sub[y, min(sub.shape[1]-1, rx+2)][:3]
-                t = (x - lx) / max(1, (rx - lx))
-                inpainted_sub[y, x, :3] = np.clip(c_left * (1 - t) + c_right * t, 0, 255)
-    
-    arr_eq[sub_y0:sub_y1, sub_x0:sub_x1] = inpainted_sub
+    mask = ((b_diff > 35) & (sub[:, :, 2] > 140)).astype(np.uint8) * 255
+    kernel = np.ones((3, 3), np.uint8)
+    dil_mask = cv2.dilate(mask, kernel, iterations=2)
+    inpainted_sub = cv2.inpaint(sub, dil_mask, 3, cv2.INPAINT_TELEA)
+    arr_eq[sub_y0:sub_y1, sub_x0:sub_x1, :3] = inpainted_sub
     
     # Clean the antenna box & stub on the right of the logger (around x: 1145 to end, y: 460 to end)
     # Behind the antenna box, the blue circle passes through.
@@ -111,31 +95,54 @@ def generate_flawless_hero():
             # Sample the master's clean full blue circle background
             arr_eq[y, x] = master.getpixel((x, my))
             
-    cleaned_eq = Image.fromarray(arr_eq)
-    
-    # 4. Render Natural BMKG Text Centered on Logger Casing
+    # 4. Render Realistic Upright BMKG Branding on Logger Casing
+    # Using DIN 1451 (Bahnschrift Bold SemiCondensed) - world standard for industrial meteorological equipment
     scale = 4
-    font = ImageFont.truetype('C:/Windows/Fonts/arialbi.ttf', size=int(24 * scale))
+    target_h = 19
+    font = ImageFont.truetype('C:/Windows/Fonts/bahnschrift.ttf', size=int(target_h * scale))
+    font.set_variation_by_name('Bold SemiCondensed')
+    
+    text = 'BMKG'
     txt_canvas = Image.new('RGBA', (300 * scale, 100 * scale), (0, 0, 0, 0))
     d_txt = ImageDraw.Draw(txt_canvas)
     
-    # Natural silk-screen cyan color matching physical equipment ink: #0090D4
-    d_txt.text((20 * scale, 20 * scale), 'BMKG', font=font, fill=(0, 144, 212, 235))
+    # Authentic industrial BMKG blue ink: #0070BA -> (0, 112, 186)
+    ink_color = (0, 112, 186, 255)
     
+    # Render upright letters (0 deg italic, no slant) with clean letter tracking
+    cur_x = 20 * scale
+    for ch in text:
+        d_txt.text((cur_x, 20 * scale), ch, font=font, fill=ink_color)
+        bbox_ch = d_txt.textbbox((cur_x, 20 * scale), ch, font=font)
+        cur_x = bbox_ch[2] + int(1.4 * scale)
+        
     txt_crop = txt_canvas.crop(txt_canvas.getbbox())
-    # Condensed aspect ratio: 86%
-    txt_cond = txt_crop.resize((int(txt_crop.width * 0.86), txt_crop.height), Image.Resampling.LANCZOS)
-    # Rotate 1.2 deg to match panel baseline tilt
-    txt_rot = txt_cond.rotate(1.2, expand=True, resample=Image.Resampling.BICUBIC)
+    # Rotate -2.35 deg (clockwise) to match casing perspective plane slope exactly
+    txt_rot = txt_crop.rotate(-2.35, expand=True, resample=Image.Resampling.BICUBIC)
     
-    target_h = 22
-    target_w = int(txt_rot.width * (target_h / txt_rot.height))
-    txt_final = txt_rot.resize((target_w, target_h), Image.Resampling.LANCZOS)
+    final_h = target_h
+    final_w = int(txt_rot.width * (final_h / txt_rot.height))
+    txt_final = txt_rot.resize((final_w, final_h), Image.Resampling.LANCZOS)
     
-    # Screen in eq_crop spans x ~ 875 to 1055, center is x ~ 965
-    bmkg_x = 965 - (target_w // 2)
-    bmkg_y = 567
-    cleaned_eq.paste(txt_final, (bmkg_x, bmkg_y), txt_final)
+    # Center perfectly in the equipment brand panel (x=1017)
+    bmkg_x = 1017 - (final_w // 2)
+    bmkg_y = 571
+    
+    # Silk-screen physical ink blending with casing lighting
+    alpha = np.array(txt_final)[:, :, 3].astype(np.float32) / 255.0 * 0.94
+    rgb_txt = np.array(txt_final)[:, :, :3].astype(np.float32)
+    
+    for y in range(final_h):
+        for x in range(final_w):
+            a = alpha[y, x]
+            if a > 0:
+                py = bmkg_y + y
+                px = bmkg_x + x
+                casing_lum = arr_eq[py, px, :3].astype(np.float32) / 255.0
+                ink_shaded = rgb_txt[y, x] * (0.86 + 0.14 * casing_lum)
+                arr_eq[py, px, :3] = np.clip(arr_eq[py, px, :3] * (1.0 - a) + ink_shaded * a, 0, 255)
+                
+    cleaned_eq = Image.fromarray(arr_eq)
     
     # 5. Composite Equipment onto the Full Blue Master Canvas
     arr_cleaned = np.array(cleaned_eq)
@@ -187,7 +194,7 @@ def generate_flawless_hero():
 
     # Brackets aligned neatly at x = 1235
     bracket_x = 1235
-    draw_bracket(bracket_x, 125 + top_pad, 245 + top_pad, "Otomatis", "(AWS & Wind YOUNG)")
+    draw_bracket(bracket_x, 125 + top_pad, 245 + top_pad, "Otomatis", "(AWS)")
     draw_bracket(bracket_x, 305 + top_pad, 395 + top_pad, "Manual", "(Taman Alat)")
     draw_bracket(bracket_x, 485 + top_pad, 565 + top_pad, "Visual", "(Pengamatan Langit)")
 

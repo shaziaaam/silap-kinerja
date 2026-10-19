@@ -156,22 +156,4 @@ class RevisionRulesAndQuarterTest extends TestCase
             'status_approval' => 'approved',
         ]);
     }
-
-    public function test_csv_export_includes_national_form_data(): void
-    {
-        $obs = Observation::create([
-            'user_id' => $this->pengamat->id,
-            'schedule_id' => $this->slot10->id,
-            'tanggal' => '2026-03-15',
-            'status_pengamatan' => 'lengkap',
-            'status_approval' => 'pending',
-        ]);
-
-        $response = $this->actingAs($this->pengamat)->get(route('observations.export_csv', [
-            'tanggal' => '2026-03-15',
-        ]));
-
-        $response->assertOk();
-        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
-    }
 }

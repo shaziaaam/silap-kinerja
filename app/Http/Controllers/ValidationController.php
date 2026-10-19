@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ValidationController extends Controller
@@ -23,6 +24,21 @@ class ValidationController extends Controller
         };
     }
 
+    /**
+     * Observations of one employee in one quarter. Uses a half-open date range
+     * [first day, first day of next quarter) so it runs the same on MySQL and SQLite
+     * (no MONTH()/QUARTER()) and keeps the quarter's last day even where the date is
+     * stored as "Y-m-d 00:00:00".
+     */
+    private function observasiTriwulan(int $userId, int $tahun, string $triwulan)
+    {
+        $awal = Carbon::create($tahun, min($this->getMonthsForTriwulan($triwulan)), 1)->startOfDay();
+
+        return Observation::where('user_id', $userId)
+            ->where('tanggal', '>=', $awal->format('Y-m-d'))
+            ->where('tanggal', '<', $awal->copy()->addMonths(3)->format('Y-m-d'));
+    }
+
     public function queue(Request $request)
     {
         $currentMonth = (int) now()->format('n');
@@ -35,26 +51,12 @@ class ValidationController extends Controller
 
         $tahun = (int) $request->input('tahun', now()->year);
         $triwulan = $request->input('triwulan', $defaultT);
-        $months = $this->getMonthsForTriwulan($triwulan);
 
         $pengamats = User::where('role', 'pengamat')->orderBy('nama')->get();
 
         $quarterSummary = [];
         foreach ($pengamats as $p) {
-            $obsQuery = Observation::where('user_id', $p->id)
-                ->whereYear('tanggal', $tahun)
-                ->whereIn(\DB::raw('MONTH(tanggal)'), $months);
-
-            // Fallback for SQLite testing where MONTH() doesn't exist
-            if (config('database.default') === 'sqlite') {
-                $obsQuery = Observation::where('user_id', $p->id)
-                    ->whereBetween('tanggal', [
-                        sprintf('%04d-%02d-01', $tahun, min($months)),
-                        Carbon::create($tahun, max($months))->endOfMonth()->format('Y-m-d')
-                    ]);
-            }
-
-            $allObs = $obsQuery->with(['schedule'])->get();
+            $allObs = $this->observasiTriwulan($p->id, $tahun, $triwulan)->with(['schedule'])->get();
             $totalObs = $allObs->count();
             $pendingCount = $allObs->where('status_approval', 'pending')->count();
             $revisionCount = $allObs->where('status_approval', 'revision')->count();
@@ -63,6 +65,10 @@ class ValidationController extends Controller
             // Photo completeness: 07:00 & 17:00 slots
             $foto07 = $allObs->filter(fn($o) => substr($o->schedule?->jam_wib ?? '', 0, 5) === '07:00' && !empty($o->foto_path))->count();
             $foto17 = $allObs->filter(fn($o) => substr($o->schedule?->jam_wib ?? '', 0, 5) === '17:00' && !empty($o->foto_path))->count();
+
+            // Photos picked from the gallery carry upload-time coordinates, not capture-time,
+            // so the supervisor should see how many of them are in the batch.
+            $fotoGaleri = $allObs->where('foto_sumber', 'galeri')->count();
 
             $recap = RekapSkpTriwulan::where('user_id', $p->id)
                 ->where('tahun', $tahun)
@@ -79,6 +85,7 @@ class ValidationController extends Controller
                 'approved_count' => $approvedCount,
                 'foto_07_count' => $foto07,
                 'foto_17_count' => $foto17,
+                'foto_galeri_count' => $fotoGaleri,
                 'status_acc' => $isAcc ? 'approved' : ($revisionCount > 0 ? 'revision' : 'pending'),
                 'can_acc' => $revisionCount === 0 && $totalObs > 0 && !$isAcc,
                 'recap' => $recap,
@@ -100,24 +107,32 @@ class ValidationController extends Controller
         ]);
     }
 
+    /**
+     * Per-observation exception path: the supervisor can only send an observation back
+     * for revision. Approval itself happens once per employee per quarter.
+     */
     public function action(Request $request, Observation $observation)
     {
         $validated = $request->validate([
-            'status_approval' => 'required|in:approved,revision',
-            'catatan_supervisor' => 'nullable|string',
+            'status_approval' => 'required|in:revision',
+            'catatan_supervisor' => 'required|string',
+        ], [
+            'catatan_supervisor.required' => 'Catatan revisi wajib diisi agar pengamat tahu apa yang harus diperbaiki.',
         ]);
 
+        if ($observation->status_approval === 'approved') {
+            return redirect()->back()->withErrors([
+                'error' => 'Observasi ini sudah terkunci karena triwulannya telah di-ACC. Minta admin membuka kunci triwulan terlebih dahulu.',
+            ]);
+        }
+
         $observation->update([
-            'status_approval' => $validated['status_approval'],
+            'status_approval' => 'revision',
             'catatan_supervisor' => $validated['catatan_supervisor'],
             'approved_by' => $request->user()->id,
         ]);
 
-        $message = $validated['status_approval'] === 'approved' 
-            ? 'Pengamatan berhasil disetujui.' 
-            : 'Catatan revisi telah dikirim ke pengamat.';
-
-        return redirect()->back()->with('message', $message);
+        return redirect()->back()->with('message', 'Catatan revisi telah dikirim ke pengamat.');
     }
 
     public function approveQuarter(Request $request)
@@ -129,78 +144,14 @@ class ValidationController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        $months = $this->getMonthsForTriwulan($validated['triwulan']);
-
-        // Check if user has observations with status revision
-        $hasRevision = Observation::where('user_id', $validated['user_id'])
-            ->where('status_approval', 'revision')
-            ->whereYear('tanggal', $validated['tahun'])
-            ->where(function ($q) use ($months, $validated) {
-                if (config('database.default') === 'sqlite') {
-                    $q->whereBetween('tanggal', [
-                        sprintf('%04d-%02d-01', $validated['tahun'], min($months)),
-                        Carbon::create($validated['tahun'], max($months))->endOfMonth()->format('Y-m-d')
-                    ]);
-                } else {
-                    $q->whereIn(\DB::raw('MONTH(tanggal)'), $months);
-                }
-            })
-            ->exists();
-
-        if ($hasRevision) {
-            return redirect()->back()->withErrors([
-                'error' => 'ACC triwulan ditolak: masih terdapat observasi yang berstatus revisi untuk pegawai ini. Harap tunggu pengamat memperbaiki observasi terlebih dahulu.'
-            ]);
-        }
-
-        // Approve all observations in this quarter
-        $obsQuery = Observation::where('user_id', $validated['user_id'])
-            ->whereYear('tanggal', $validated['tahun']);
-
-        if (config('database.default') === 'sqlite') {
-            $obsQuery->whereBetween('tanggal', [
-                sprintf('%04d-%02d-01', $validated['tahun'], min($months)),
-                Carbon::create($validated['tahun'], max($months))->endOfMonth()->format('Y-m-d')
-            ]);
-        } else {
-            $obsQuery->whereIn(\DB::raw('MONTH(tanggal)'), $months);
-        }
-
-        $obsQuery->update([
-            'status_approval' => 'approved',
-            'approved_by' => $request->user()->id,
-        ]);
-
-        $totalValid = Observation::where('user_id', $validated['user_id'])
-            ->where('status_approval', 'approved')
-            ->whereYear('tanggal', $validated['tahun'])
-            ->where(function ($q) use ($months, $validated) {
-                if (config('database.default') === 'sqlite') {
-                    $q->whereBetween('tanggal', [
-                        sprintf('%04d-%02d-01', $validated['tahun'], min($months)),
-                        Carbon::create($validated['tahun'], max($months))->endOfMonth()->format('Y-m-d')
-                    ]);
-                } else {
-                    $q->whereIn(\DB::raw('MONTH(tanggal)'), $months);
-                }
-            })
-            ->count();
-
-        RekapSkpTriwulan::updateOrCreate(
-            [
-                'user_id' => $validated['user_id'],
-                'tahun' => $validated['tahun'],
-                'triwulan' => $validated['triwulan'],
-            ],
-            [
-                'status' => 'approved',
-                'approved_by' => $request->user()->id,
-                'approved_at' => now(),
-                'catatan' => $validated['catatan'] ?? 'Disetujui Penyelia',
-                'total_pengamatan_valid' => $totalValid,
-                'tanggal_generate' => now(),
-            ]
+        $error = $this->accTriwulan(
+            (int) $validated['user_id'], (int) $validated['tahun'], $validated['triwulan'],
+            $request->user(), $validated['catatan'] ?? null
         );
+
+        if ($error) {
+            return redirect()->back()->withErrors(['error' => $error]);
+        }
 
         return redirect()->back()->with('message', "Seluruh observasi Triwulan {$validated['triwulan']} {$validated['tahun']} berhasil disetujui (ACC).");
     }
@@ -212,25 +163,101 @@ class ValidationController extends Controller
             'triwulan' => 'required|in:T1,T2,T3,T4',
         ]);
 
-        $pengamats = User::where('role', 'pengamat')->get();
-        $approvedCount = 0;
+        $disetujui = 0;
+        $dilewati = [];
 
-        foreach ($pengamats as $p) {
-            $subReq = new Request([
-                'user_id' => $p->id,
-                'tahun' => $validated['tahun'],
-                'triwulan' => $validated['triwulan'],
-            ]);
-            $subReq->setUserResolver(fn() => $request->user());
-
-            try {
-                $this->approveQuarter($subReq);
-                $approvedCount++;
-            } catch (\Throwable $e) {
-                // skip if has revisions
+        foreach (User::where('role', 'pengamat')->orderBy('nama')->get() as $p) {
+            $error = $this->accTriwulan($p->id, (int) $validated['tahun'], $validated['triwulan'], $request->user());
+            if ($error === null) {
+                $disetujui++;
+            } elseif ($this->observasiTriwulan($p->id, (int) $validated['tahun'], $validated['triwulan'])->exists()) {
+                $dilewati[] = $p->nama;
             }
         }
 
-        return redirect()->back()->with('message', "Persetujuan massal triwulan selesai diproses ({$approvedCount} pegawai di-ACC).");
+        $pesan = "Persetujuan massal triwulan selesai: {$disetujui} pegawai di-ACC.";
+        if ($dilewati) {
+            $pesan .= ' Dilewati karena masih ada revisi: ' . implode(', ', $dilewati) . '.';
+        }
+
+        return redirect()->back()->with('message', $pesan);
+    }
+
+    /**
+     * Admin-only: reopen an approved quarter so the observer can correct it. Every
+     * observation in the quarter goes back to pending and the reopening is recorded.
+     */
+    public function unlockQuarter(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'tahun' => 'required|integer',
+            'triwulan' => 'required|in:T1,T2,T3,T4',
+            'alasan' => 'required|string|min:5',
+        ], [
+            'alasan.required' => 'Alasan membuka kunci wajib diisi.',
+            'alasan.min' => 'Alasan membuka kunci terlalu singkat.',
+        ]);
+
+        $recap = RekapSkpTriwulan::where('user_id', $validated['user_id'])
+            ->where('tahun', $validated['tahun'])
+            ->where('triwulan', $validated['triwulan'])
+            ->first();
+
+        if (!$recap || $recap->status !== 'approved') {
+            return redirect()->back()->withErrors(['error' => 'Triwulan ini belum di-ACC, jadi tidak ada kunci yang perlu dibuka.']);
+        }
+
+        DB::transaction(function () use ($validated, $recap, $request) {
+            $this->observasiTriwulan((int) $validated['user_id'], (int) $validated['tahun'], $validated['triwulan'])
+                ->where('status_approval', 'approved')
+                ->update(['status_approval' => 'pending', 'approved_by' => null]);
+
+            $recap->update([
+                'status' => 'pending',
+                'approved_by' => null,
+                'approved_at' => null,
+                'dibuka_oleh' => $request->user()->id,
+                'dibuka_at' => now(),
+                'alasan_buka' => $validated['alasan'],
+            ]);
+        });
+
+        $nama = User::find($validated['user_id'])->nama;
+
+        return redirect()->back()->with('message', "Kunci Triwulan {$validated['triwulan']} {$validated['tahun']} untuk {$nama} telah dibuka. Data dapat diperbaiki lalu di-ACC ulang oleh penyelia.");
+    }
+
+    /**
+     * Approve one employee's quarter. Returns an error message, or null on success.
+     */
+    private function accTriwulan(int $userId, int $tahun, string $triwulan, User $penyetuju, ?string $catatan = null): ?string
+    {
+        $query = fn () => $this->observasiTriwulan($userId, $tahun, $triwulan);
+
+        if ($query()->where('status_approval', 'revision')->exists()) {
+            return 'ACC triwulan ditolak: masih terdapat observasi yang berstatus revisi untuk pegawai ini. Harap tunggu pengamat memperbaiki observasi terlebih dahulu.';
+        }
+        if (!$query()->exists()) {
+            return 'ACC triwulan ditolak: pegawai ini belum memiliki observasi pada triwulan tersebut.';
+        }
+
+        DB::transaction(function () use ($query, $userId, $tahun, $triwulan, $penyetuju, $catatan) {
+            $query()->update(['status_approval' => 'approved', 'approved_by' => $penyetuju->id]);
+
+            RekapSkpTriwulan::updateOrCreate(
+                ['user_id' => $userId, 'tahun' => $tahun, 'triwulan' => $triwulan],
+                [
+                    'status' => 'approved',
+                    'approved_by' => $penyetuju->id,
+                    'approved_at' => now(),
+                    'catatan' => $catatan ?? 'Disetujui Penyelia',
+                    'total_pengamatan_valid' => $query()->where('status_approval', 'approved')->count(),
+                    'tanggal_generate' => now(),
+                ]
+            );
+        });
+
+        return null;
     }
 }

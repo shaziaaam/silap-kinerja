@@ -446,7 +446,7 @@ class InstrumentSeeder extends Seeder
                 'instrument_id' => $instLuar->id,
                 'kode' => 'jumlah_awan_okta',
                 'label' => 'Jumlah Awan (Okta)',
-                'satuan' => 'okta (0-8)',
+                'satuan' => 'okta',
                 'kartu' => 8,
                 'sifat' => 'input',
                 'tipe_input' => 'integer',
@@ -511,7 +511,7 @@ class InstrumentSeeder extends Seeder
                 'instrument_id' => $instLuar->id,
                 'kode' => 'lama_penyinaran_jam',
                 'label' => 'Campbell-Stokes (Lama Penyinaran)',
-                'satuan' => 'jam (0,0 - 1,0)',
+                'satuan' => 'jam',
                 'kartu' => 8,
                 'sifat' => 'input',
                 'tipe_input' => 'number',
@@ -519,6 +519,18 @@ class InstrumentSeeder extends Seeder
                 'batas_max' => 1,
                 'jadwal_baca' => ['JAM_PENUH'],
                 'urutan' => 350,
+                'is_active' => true,
+            ],
+            [
+                'instrument_id' => $instLuar->id,
+                'kode' => 'gunn_bellani_kemarin',
+                'label' => 'Gunn-Bellani (Pembacaan Kemarin)',
+                'satuan' => 'skala',
+                'kartu' => 8,
+                'sifat' => 'sebelum',
+                'tipe_input' => 'number',
+                'jadwal_baca' => ['HARIAN_0700'],
+                'urutan' => 358,
                 'is_active' => true,
             ],
             [
@@ -533,6 +545,18 @@ class InstrumentSeeder extends Seeder
                 'koefisien' => 20.8,
                 'jadwal_baca' => ['HARIAN_0700'],
                 'urutan' => 360,
+                'is_active' => true,
+            ],
+            [
+                'instrument_id' => $instLuar->id,
+                'kode' => 'gunn_bellani_intensitas',
+                'label' => 'Gunn-Bellani (Intensitas Radiasi)',
+                'satuan' => 'kal/cm²',
+                'kartu' => 8,
+                'sifat' => 'dihitung_app',
+                'tipe_input' => 'number',
+                'jadwal_baca' => ['HARIAN_0700'],
+                'urutan' => 362,
                 'is_active' => true,
             ],
             [
@@ -561,6 +585,36 @@ class InstrumentSeeder extends Seeder
                 'urutan' => 380,
                 'is_active' => true,
             ],
+            // Nilai AWS tanpa padanan manual, tetap disimpan di nilai_aws (catatan revisi 2.1).
+            // Dibaca tiap jam dari monitor AWS; dipakai untuk suhu maks/min gambar laporan shift.
+            [
+                'instrument_id' => $instLuar->id,
+                'kode' => 'suhu_udara_maks',
+                'label' => 'Suhu Udara Maksimum (AWS)',
+                'satuan' => '°C',
+                'kartu' => 8,
+                'sifat' => 'input',
+                'sumber' => 'aws',
+                'tipe_input' => 'number',
+                'kode_aws' => 'TA_Max',
+                'jadwal_baca' => ['JAM_PENUH'],
+                'urutan' => 382,
+                'is_active' => true,
+            ],
+            [
+                'instrument_id' => $instLuar->id,
+                'kode' => 'suhu_udara_min',
+                'label' => 'Suhu Udara Minimum (AWS)',
+                'satuan' => '°C',
+                'kartu' => 8,
+                'sifat' => 'input',
+                'sumber' => 'aws',
+                'tipe_input' => 'number',
+                'kode_aws' => 'TA_Min',
+                'jadwal_baca' => ['JAM_PENUH'],
+                'urutan' => 384,
+                'is_active' => true,
+            ],
             [
                 'instrument_id' => $instLuar->id,
                 'kode' => 'hellmann_pias',
@@ -575,6 +629,50 @@ class InstrumentSeeder extends Seeder
                 'is_active' => false, // Nonaktif sesuai spesifikasi
             ],
         ];
+
+        // Batas wajar nilai manual [min, max] (null = tanpa batas). Ditolak backend dan
+        // ditandai di form bila di luar batas. Bisa diubah lewat Kelola Alat.
+        $batas = [
+            'suhu_bola_kering' => [0, 50],
+            'suhu_bola_basah' => [0, 50],
+            'counter_angin_sebelum' => [0, null],
+            'counter_angin_dibaca' => [0, null],
+            'kecepatan_angin_10m' => [0, 75],
+            'tinggi_air_sebelum' => [0, null],
+            'tinggi_air_dibaca' => [0, null],
+            'suhu_air_maks' => [0, 50],
+            'suhu_air_min' => [0, 50],
+            'ch_diukur_openpan' => [0, 500],
+            'piche_sebelum' => [0, null],
+            'piche_sekarang' => [0, null],
+            'jumlah_awan_okta' => [0, 8],
+            'jarak_pandang_km' => [0, 100],
+            'arah_angin_derajat' => [0, 360],
+            'kecepatan_angin_jam' => [0, 75],
+            'curah_hujan_ombrometer' => [0, 300],
+            'lama_penyinaran_jam' => [0, 1],
+            'gunn_bellani_kemarin' => [0, null],
+            'gunn_bellani_skala' => [0, null],
+            'tekanan_udara_barograf' => [900, 1100],
+            'suhu_udara_termograf' => [0, 50],
+            'hellmann_pias' => [0, 300],
+        ];
+        foreach ([5, 10, 20, 50, 100, 150, 200] as $h) {
+            // Dekat permukaan tanah siang hari bisa jauh lebih panas dari sangkar
+            $batas["assman_tbk_{$h}cm"] = [0, 60];
+            $batas["assman_tbb_{$h}cm"] = [0, 60];
+        }
+        foreach ([0, 2, 5, 10, 20, 50, 100] as $d) {
+            $batas["suhu_tanah_rumput_{$d}cm"] = [0, 70];
+            $batas["suhu_tanah_gundul_{$d}cm"] = [0, 70];
+        }
+
+        foreach ($params as &$p) {
+            if (isset($batas[$p['kode']])) {
+                [$p['batas_min'], $p['batas_max']] = $batas[$p['kode']];
+            }
+        }
+        unset($p);
 
         foreach ($params as $p) {
             InstrumentParameter::updateOrCreate(

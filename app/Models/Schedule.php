@@ -12,14 +12,12 @@ class Schedule extends Model
     protected $fillable = [
         'jam_utc',
         'jam_wib',
-        'is_synoptic',
         'kelompok',
         'shift',
         'is_mandatory_photo',
     ];
 
     protected $casts = [
-        'is_synoptic' => 'boolean',
         'is_mandatory_photo' => 'boolean',
     ];
 

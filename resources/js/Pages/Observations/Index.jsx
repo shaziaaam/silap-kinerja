@@ -1,9 +1,11 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import Sidebar from '../../Components/Sidebar';
-import { FilePlus, CheckCircle, Clock, AlertCircle, Eye, FileText, Image, Edit } from 'lucide-react';
+import { FilePlus, CheckCircle, Clock, AlertCircle, Eye, FileText, Edit } from 'lucide-react';
 
 export default function ObservationIndex({ observations }) {
+    // Input and corrections are done by observers only (enforced by the routes too)
+    const isPengamat = usePage().props.auth?.user?.role === 'pengamat';
     const getShiftInfo = (jamWib) => {
         if (!jamWib) return { name: 'Shift Pagi', range: '07:00 - 15:00 WIB' };
         const hour = parseInt(jamWib.substring(0, 2), 10);
@@ -26,6 +28,7 @@ export default function ObservationIndex({ observations }) {
                             Daftar observasi yang telah dicatat beserta status validasi penyelia BMKG.
                         </p>
                     </div>
+                    {isPengamat && (
                     <Link
                         href={route('observations.create')}
                         className="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition shadow-sm shadow-sky-600/20 flex items-center space-x-1.5 shrink-0"
@@ -33,6 +36,7 @@ export default function ObservationIndex({ observations }) {
                         <FilePlus className="w-3.5 h-3.5" />
                         <span>Input Observasi Baru</span>
                     </Link>
+                    )}
                 </div>
 
                 <div className="bg-white border border-sky-100/80 rounded-2xl overflow-hidden shadow-sm shadow-sky-100/30">
@@ -113,7 +117,7 @@ export default function ObservationIndex({ observations }) {
                                                 </td>
                                                 <td className="px-5 py-4 text-right whitespace-nowrap">
                                                     <div className="flex items-center justify-end space-x-2">
-                                                        {obs.status_approval === 'revision' && (
+                                                        {isPengamat && obs.status_approval === 'revision' && (
                                                             <Link
                                                                 href={route('observations.edit', obs.id)}
                                                                 className="inline-flex items-center space-x-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-2xs"
@@ -132,16 +136,6 @@ export default function ObservationIndex({ observations }) {
                                                         >
                                                             <FileText className="w-3.5 h-3.5 text-sky-600" />
                                                             <span>PDF</span>
-                                                        </a>
-                                                        <a
-                                                            href={route('observations.shift_image', obs.id)}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="inline-flex items-center space-x-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
-                                                            title="Generate Gambar Laporan Shift (GD Poppins)"
-                                                        >
-                                                            <Image className="w-3.5 h-3.5 text-amber-600" />
-                                                            <span>Gambar Shift</span>
                                                         </a>
                                                     </div>
                                                 </td>

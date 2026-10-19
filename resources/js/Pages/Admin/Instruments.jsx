@@ -4,8 +4,108 @@ import Sidebar from '../../Components/Sidebar';
 import {
     Wrench, Plus, Pencil, Trash2, ChevronDown, ChevronRight,
     Clock, ToggleLeft, ToggleRight, Save,
-    AlertCircle, CheckCircle2, X
+    AlertCircle, CheckCircle2, X, ListChecks
 } from 'lucide-react';
+
+/**
+ * Kelola Alat > Pilihan: choices of the dropdown fields (Keadaan Tanah, Keadaan Hujan),
+ * copied by the admin from the national system's dropdowns.
+ */
+function PanelPilihan({ parameterPilihan = [], pilihan = {}, onFlash }) {
+    const [baru, setBaru] = useState({});
+    const [edit, setEdit] = useState(null); // { id, nilai, urutan }
+    const [hapus, setHapus] = useState(null);
+    const [errors, setErrors] = useState({});
+
+    const tambah = (kode) => {
+        router.post(route('admin.instruments.options.store'), { parameter_kode: kode, nilai: baru[kode] || '' }, {
+            preserveScroll: true,
+            onSuccess: () => { setBaru((b) => ({ ...b, [kode]: '' })); setErrors({}); onFlash('Pilihan ditambahkan.'); },
+            onError: (e) => setErrors({ [kode]: e.nilai || e.parameter_kode }),
+        });
+    };
+    const simpan = () => {
+        router.put(route('admin.instruments.options.update', edit.id), { nilai: edit.nilai, urutan: edit.urutan }, {
+            preserveScroll: true,
+            onSuccess: () => { setEdit(null); setErrors({}); onFlash('Pilihan diperbarui.'); },
+            onError: (e) => setErrors({ [`edit${edit.id}`]: e.nilai || e.urutan }),
+        });
+    };
+    const hapusPilihan = (id) => {
+        router.delete(route('admin.instruments.options.destroy', id), {
+            preserveScroll: true,
+            onSuccess: () => { setHapus(null); onFlash('Pilihan dihapus.'); },
+        });
+    };
+
+    if (parameterPilihan.length === 0) return null;
+
+    const input = 'bg-white border border-slate-200 rounded-lg px-2.5 h-8 text-xs outline-none focus:border-sky-500';
+
+    return (
+        <div className="mt-8 bg-white border border-sky-100 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-sky-100 bg-sky-50/60 flex items-start space-x-2">
+                <ListChecks className="w-4 h-4 text-sky-700 mt-0.5" />
+                <div>
+                    <h2 className="text-sm font-bold text-slate-900">Pilihan Dropdown</h2>
+                    <p className="text-[11px] text-slate-500">Samakan dengan isi dropdown di BMKGSoft v2. Mengubah atau menghapus pilihan tidak mengubah data observasi yang sudah tersimpan.</p>
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-sky-50">
+                {parameterPilihan.map((p) => (
+                    <div key={p.id} className="p-5 space-y-3">
+                        <div className="text-xs font-bold text-slate-800">{p.label}</div>
+                        <ul className="space-y-1.5">
+                            {(pilihan[p.kode] || []).map((o) => (
+                                <li key={o.id} className="flex items-center gap-2 text-xs">
+                                    {edit?.id === o.id ? (
+                                        <>
+                                            <input type="number" min="0" className={`${input} w-16`} value={edit.urutan}
+                                                onChange={(e) => setEdit({ ...edit, urutan: e.target.value })} title="Urutan" />
+                                            <input className={`${input} flex-1`} value={edit.nilai}
+                                                onChange={(e) => setEdit({ ...edit, nilai: e.target.value })} />
+                                            <button type="button" onClick={simpan} className="p-1.5 rounded-lg bg-sky-600 text-white" title="Simpan"><Save className="w-3.5 h-3.5" /></button>
+                                            <button type="button" onClick={() => setEdit(null)} className="p-1.5 rounded-lg bg-slate-100 text-slate-600" title="Batal"><X className="w-3.5 h-3.5" /></button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="w-6 text-right text-slate-400 font-mono">{o.urutan}</span>
+                                            <span className="flex-1 font-semibold text-slate-800">{o.nilai}</span>
+                                            {hapus === o.id ? (
+                                                <>
+                                                    <span className="text-rose-600 font-semibold">Hapus?</span>
+                                                    <button type="button" onClick={() => hapusPilihan(o.id)} className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold">Ya</button>
+                                                    <button type="button" onClick={() => setHapus(null)} className="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold">Batal</button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button type="button" onClick={() => setEdit({ id: o.id, nilai: o.nilai, urutan: o.urutan })} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-700" title="Ubah"><Pencil className="w-3.5 h-3.5" /></button>
+                                                    <button type="button" onClick={() => setHapus(o.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600" title="Hapus"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </li>
+                            ))}
+                            {(pilihan[p.kode] || []).length === 0 && <li className="text-[11px] text-slate-400 italic">Belum ada pilihan.</li>}
+                        </ul>
+                        {errors[`edit${edit?.id}`] && <p className="text-[11px] text-rose-600">{errors[`edit${edit?.id}`]}</p>}
+                        <div className="flex items-center gap-2 pt-1">
+                            <input className={`${input} flex-1`} placeholder="Pilihan baru, salin dari BMKGSoft"
+                                value={baru[p.kode] || ''}
+                                onChange={(e) => setBaru({ ...baru, [p.kode]: e.target.value })}
+                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); tambah(p.kode); } }} />
+                            <button type="button" onClick={() => tambah(p.kode)} className="px-3 h-8 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-1">
+                                <Plus className="w-3.5 h-3.5" /> Tambah
+                            </button>
+                        </div>
+                        {errors[p.kode] && <p className="text-[11px] text-rose-600">{errors[p.kode]}</p>}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 const KATEGORI_LABELS = {
     aws: 'AWS',
@@ -63,67 +163,38 @@ function FormField({ label, error, children }) {
 const inputClass = "w-full border border-slate-200 rounded-xl px-3 h-9 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition font-medium bg-white";
 const selectClass = inputClass;
 
-function JadwalPicker({ value, onChange, jamMulai = 7, jamSelesai = 22 }) {
-    const allHours = Array.from({ length: jamSelesai - jamMulai + 1 }, (_, i) => jamMulai + i);
+const KELOMPOK_JADWAL = [
+    { val: 'JAM_PENUH',   label: 'Jam penuh',     hint: '07.00 - 22.00, tiap jam (16 slot)' },
+    { val: 'AGM1B',       label: 'AGM 1-B',       hint: '07.30, 13.30, 17.30 - kartu 1-7 tab FDIH' },
+    { val: 'HARIAN_0700', label: 'Harian 07.00',  hint: 'hanya slot 07.00' },
+];
 
-    const handleToggleHour = (h) => {
-        if (value === null) {
-            onChange(allHours.filter(x => x !== h));
-        } else {
-            const next = value.includes(h) ? value.filter(x => x !== h) : [...value, h].sort((a, b) => a - b);
-            onChange(next.length === 0 ? null : next);
-        }
-    };
-
-    const isSelected = (h) => value === null || value.includes(h);
+function JadwalPicker({ value, onChange }) {
+    // Stored as an array of group codes, read by InstrumentParameter::isScheduledForSlot().
+    const selected = Array.isArray(value) ? value[0] ?? null : value ?? null;
 
     return (
-        <div>
-            <div className="flex gap-2 mb-3 flex-wrap">
-                {[
-                    { label: 'Setiap jam', val: null },
-                    { label: '3x sehari (07,13,17)', val: [7, 13, 17] },
-                    { label: 'Harian (07)', val: [7] },
-                    { label: 'Hanya 17:00', val: [17] },
-                ].map(preset => (
-                    <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => onChange(preset.val)}
-                        className={`px-3 py-1 rounded-full text-xs font-bold border transition ${
-                            JSON.stringify(value) === JSON.stringify(preset.val)
-                                ? 'bg-sky-600 text-white border-sky-600'
-                                : 'bg-white text-slate-600 border-slate-200 hover:border-sky-400'
-                        }`}
-                    >
-                        {preset.label}
-                    </button>
-                ))}
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-                {allHours.map(h => (
-                    <button
-                        key={h}
-                        type="button"
-                        onClick={() => handleToggleHour(h)}
-                        className={`w-12 h-8 rounded-lg text-xs font-bold border transition ${
-                            isSelected(h)
-                                ? 'bg-sky-600 text-white border-sky-600'
-                                : 'bg-white text-slate-400 border-slate-200 hover:border-sky-300'
-                        }`}
-                    >
-                        {h.toString().padStart(2, '0')}
-                    </button>
-                ))}
-            </div>
-            <p className="text-xs text-slate-400 mt-2">
-                {value === null ? 'Semua jam operasional' : `Terpilih: ${value.map(j => j.toString().padStart(2,'0')+':00').join(', ')}`}
-            </p>
+        <div className="space-y-2">
+            {KELOMPOK_JADWAL.map(k => (
+                <button
+                    key={k.val}
+                    type="button"
+                    onClick={() => onChange([k.val])}
+                    className={`w-full text-left px-3 py-2 rounded-xl border transition ${
+                        selected === k.val
+                            ? 'bg-sky-600 text-white border-sky-600'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-sky-400'
+                    }`}
+                >
+                    <span className="block text-xs font-bold">{k.label}</span>
+                    <span className={`block text-[11px] ${selected === k.val ? 'text-sky-100' : 'text-slate-400'}`}>{k.hint}</span>
+                </button>
+            ))}
         </div>
     );
 }
 
-export default function Instruments({ instruments, settings }) {
+export default function Instruments({ instruments, settings, parameterPilihan = [], pilihan = {} }) {
     const [expandedId, setExpandedId] = useState(null);
     const [flash, setFlash] = useState(null);
 
@@ -176,7 +247,8 @@ export default function Instruments({ instruments, settings }) {
     const paramForm = useForm({
         kode: '', label: '', satuan: '', tipe_input: 'number',
         batas_min: '', batas_max: '', sumber: 'keduanya',
-        jadwal_baca: null, urutan: 0, faktor_konversi: '', is_active: true,
+        jadwal_baca: ['JAM_PENUH'], urutan: 0, faktor_konversi: '', is_active: true,
+        kartu: 8, sifat: 'input', kode_aws: '', koefisien: '', opsional: false,
     });
 
     const openParamCreate = (instrId) => {
@@ -184,7 +256,8 @@ export default function Instruments({ instruments, settings }) {
         paramForm.setData({
             kode: '', label: '', satuan: '', tipe_input: 'number',
             batas_min: '', batas_max: '', sumber: 'keduanya',
-            jadwal_baca: null, urutan: 0, faktor_konversi: '', is_active: true,
+            jadwal_baca: ['JAM_PENUH'], urutan: 0, faktor_konversi: '', is_active: true,
+            kartu: 8, sifat: 'input', kode_aws: '', koefisien: '', opsional: false,
         });
         setParamModal({ open: true, mode: 'create', data: null, instrId });
     };
@@ -197,6 +270,9 @@ export default function Instruments({ instruments, settings }) {
             jadwal_baca: param.jadwal_baca, urutan: param.urutan ?? 0,
             faktor_konversi: param.faktor_konversi ?? '',
             is_active: param.is_active ?? true,
+            kartu: param.kartu ?? 8, sifat: param.sifat ?? 'input',
+            kode_aws: param.kode_aws ?? '', koefisien: param.koefisien ?? '',
+            opsional: param.opsional ?? false,
         });
         setParamModal({ open: true, mode: 'edit', data: param, instrId: param.instrument_id });
     };
@@ -234,7 +310,7 @@ export default function Instruments({ instruments, settings }) {
     const settingsForm = useForm({
         jam_mulai: settings.jam_mulai,
         jam_selesai: settings.jam_selesai,
-        hujan_slot_awal: settings.hujan_slot_awal ?? 8,
+        hujan_slot_awal: settings.hujan_slot_awal ?? 7,
     });
 
     const submitSettings = (e) => {
@@ -428,6 +504,8 @@ export default function Instruments({ instruments, settings }) {
                         </div>
                     ))}
                 </div>
+
+                <PanelPilihan parameterPilihan={parameterPilihan} pilihan={pilihan} onFlash={setFlash} />
             </main>
 
             <Modal
@@ -552,6 +630,31 @@ export default function Instruments({ instruments, settings }) {
                             <input type="number" step="any" className={inputClass} value={paramForm.data.batas_max} onChange={e => paramForm.setData('batas_max', e.target.value)} placeholder="Kosong = tak terbatas" />
                         </FormField>
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Kartu (1-7 FDIH, 8 luar FDIH)" error={paramForm.errors.kartu}>
+                            <input type="number" min="1" max="8" className={inputClass} value={paramForm.data.kartu} onChange={e => paramForm.setData('kartu', parseInt(e.target.value) || 8)} />
+                        </FormField>
+                        <FormField label="Sifat Field" error={paramForm.errors.sifat}>
+                            <select className={selectClass} value={paramForm.data.sifat} onChange={e => paramForm.setData('sifat', e.target.value)}>
+                                <option value="input">Input pengamat</option>
+                                <option value="sebelum">Terisi dari pembacaan sebelumnya</option>
+                                <option value="dihitung_app">Dihitung aplikasi</option>
+                                <option value="dihitung_nasional">Dihitung sistem nasional</option>
+                            </select>
+                        </FormField>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Kode AWS (Opsional)" error={paramForm.errors.kode_aws}>
+                            <input type="text" className={inputClass} value={paramForm.data.kode_aws} onChange={e => paramForm.setData('kode_aws', e.target.value)} placeholder="mis: TA_meas, RH_meas" />
+                        </FormField>
+                        <FormField label="Koefisien Kalibrasi (Opsional)" error={paramForm.errors.koefisien}>
+                            <input type="number" step="any" className={inputClass} value={paramForm.data.koefisien} onChange={e => paramForm.setData('koefisien', e.target.value)} placeholder="Gunn-Bellani: 20.8" />
+                        </FormField>
+                    </div>
+                    <label className="flex items-center space-x-2 text-sm text-slate-600">
+                        <input type="checkbox" checked={paramForm.data.opsional} onChange={e => paramForm.setData('opsional', e.target.checked)} className="rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
+                        <span>Field opsional (boleh dikosongkan pengamat)</span>
+                    </label>
                     <FormField label="Jadwal Baca" error={paramForm.errors.jadwal_baca}>
                         <JadwalPicker
                             value={paramForm.data.jadwal_baca}

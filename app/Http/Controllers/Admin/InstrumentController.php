@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Instrument;
 use App\Models\InstrumentParameter;
+use App\Models\ParameterOption;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -21,12 +22,19 @@ class InstrumentController extends Controller
         $settings = [
             'jam_mulai'       => (int) Setting::get('jam_mulai', 7),
             'jam_selesai'     => (int) Setting::get('jam_selesai', 22),
-            'hujan_slot_awal' => (int) Setting::get('hujan_slot_awal', 8),
+            'hujan_slot_awal' => (int) Setting::get('hujan_slot_awal', 7),
         ];
 
+        // Dropdown parameters (Keadaan Tanah, Keadaan Hujan, ...) and their choices
+        $parameterPilihan = InstrumentParameter::where('tipe_input', 'select')
+            ->orderBy('kartu')->orderBy('urutan')->get(['id', 'kode', 'label']);
+        $pilihan = ParameterOption::orderBy('urutan')->orderBy('id')->get()->groupBy('parameter_kode');
+
         return Inertia::render('Admin/Instruments', [
-            'instruments' => $instruments,
-            'settings'    => $settings,
+            'instruments'      => $instruments,
+            'settings'         => $settings,
+            'parameterPilihan' => $parameterPilihan,
+            'pilihan'          => $pilihan,
         ]);
     }
 
@@ -75,10 +83,15 @@ class InstrumentController extends Controller
             'batas_max'       => 'nullable|numeric',
             'sumber'          => 'required|in:aws,manual,keduanya',
             'jadwal_baca'     => 'nullable|array',
-            'jadwal_baca.*'   => 'integer|min:0|max:23',
+            'jadwal_baca.*'   => 'string|in:AGM1B,JAM_PENUH,HARIAN_0700',
             'urutan'          => 'integer|min:0',
             'faktor_konversi' => 'nullable|numeric',
             'is_active'       => 'boolean',
+            'kartu'           => 'nullable|integer|min:1|max:8',
+            'sifat'           => 'nullable|in:input,sebelum,dihitung_app,dihitung_nasional',
+            'kode_aws'        => 'nullable|string|max:50',
+            'koefisien'       => 'nullable|numeric',
+            'opsional'        => 'boolean',
         ]);
 
         $instrument->parameters()->create($validated);
@@ -97,10 +110,15 @@ class InstrumentController extends Controller
             'batas_max'       => 'nullable|numeric',
             'sumber'          => 'required|in:aws,manual,keduanya',
             'jadwal_baca'     => 'nullable|array',
-            'jadwal_baca.*'   => 'integer|min:0|max:23',
+            'jadwal_baca.*'   => 'string|in:AGM1B,JAM_PENUH,HARIAN_0700',
             'urutan'          => 'integer|min:0',
             'faktor_konversi' => 'nullable|numeric',
             'is_active'       => 'boolean',
+            'kartu'           => 'nullable|integer|min:1|max:8',
+            'sifat'           => 'nullable|in:input,sebelum,dihitung_app,dihitung_nasional',
+            'kode_aws'        => 'nullable|string|max:50',
+            'koefisien'       => 'nullable|numeric',
+            'opsional'        => 'boolean',
         ]);
 
         $parameter->update($validated);
@@ -113,6 +131,61 @@ class InstrumentController extends Controller
         $label = $parameter->label;
         $parameter->delete();
         return redirect()->back()->with('message', "Parameter \"{$label}\" berhasil dihapus.");
+    }
+
+    /**
+     * Kelola Alat > Pilihan: choices of the dropdown fields, copied by the admin from
+     * the national system's dropdowns (catatan revisi 2.1, "Dropdown").
+     */
+    public function storeOption(Request $request)
+    {
+        $validated = $request->validate([
+            'parameter_kode' => ['required', Rule::exists('instrument_parameters', 'kode')->where('tipe_input', 'select')],
+            'nilai' => [
+                'required', 'string', 'max:100',
+                Rule::unique('parameter_options', 'nilai')->where('parameter_kode', $request->input('parameter_kode')),
+            ],
+            'urutan' => 'nullable|integer|min:0',
+        ], [
+            'nilai.required' => 'Isi pilihan wajib diisi.',
+            'nilai.unique' => 'Pilihan ini sudah ada.',
+        ]);
+
+        ParameterOption::create([
+            'parameter_kode' => $validated['parameter_kode'],
+            'nilai' => trim($validated['nilai']),
+            'label' => trim($validated['nilai']),
+            'urutan' => $validated['urutan']
+                ?? (int) ParameterOption::where('parameter_kode', $validated['parameter_kode'])->max('urutan') + 1,
+        ]);
+
+        return redirect()->back()->with('message', 'Pilihan berhasil ditambahkan.');
+    }
+
+    public function updateOption(Request $request, ParameterOption $option)
+    {
+        $validated = $request->validate([
+            'nilai' => [
+                'required', 'string', 'max:100',
+                Rule::unique('parameter_options', 'nilai')->where('parameter_kode', $option->parameter_kode)->ignore($option->id),
+            ],
+            'urutan' => 'required|integer|min:0',
+        ], [
+            'nilai.required' => 'Isi pilihan wajib diisi.',
+            'nilai.unique' => 'Pilihan ini sudah ada.',
+        ]);
+
+        // Stored observations keep the text they were saved with.
+        $option->update(['nilai' => trim($validated['nilai']), 'label' => trim($validated['nilai']), 'urutan' => $validated['urutan']]);
+
+        return redirect()->back()->with('message', 'Pilihan berhasil diperbarui.');
+    }
+
+    public function destroyOption(ParameterOption $option)
+    {
+        $option->delete();
+
+        return redirect()->back()->with('message', "Pilihan \"{$option->nilai}\" dihapus. Data observasi lama yang memakainya tidak berubah.");
     }
 
     public function updateSettings(Request $request)

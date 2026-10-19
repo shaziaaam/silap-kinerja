@@ -1,680 +1,458 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import Sidebar from '../Components/Sidebar';
 import {
-    CloudSun, FilePlus, CheckSquare, FileText, Users, ArrowRight,
-    ShieldCheck, Clock, Camera, Thermometer, Droplets, Gauge,
-    AlertCircle, CheckCircle2, RefreshCw, ChevronRight, Eye, Wrench, Edit
+    FilePlus, ShieldCheck, Camera, AlertCircle, CheckCircle2, Clock, Edit, Download,
+    UserCheck, CalendarDays, ImageOff, Server, KeyRound, Unlock, Settings2, CloudSun,
+    Thermometer, Droplets, Gauge, Wind, CloudRain, Sun, Cloud, ListChecks,
 } from 'lucide-react';
 
-// Custom SVG 8-Direction Wind Rose
-function WindRoseSVG({ windDirections }) {
-    const directions = [
-        { key: 'U', label: 'U', angle: 0 },
-        { key: 'TL', label: 'TL', angle: 45 },
-        { key: 'T', label: 'T', angle: 90 },
-        { key: 'BD', label: 'SE', angle: 135 },
-        { key: 'S', label: 'S', angle: 180 },
-        { key: 'BD2', label: 'SW', angle: 225 },
-        { key: 'B', label: 'B', angle: 270 },
-        { key: 'BL', label: 'NW', angle: 315 },
+const NAMA_HARI = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+const fmtTanggal = (t) => new Date(`${t}T00:00:00`).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const fmtTanggalPendek = (t) => new Date(`${t}T00:00:00`).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+const jamTitik = (j) => (j || '').replace(':', '.');
+
+function Kartu({ judul, ikon: Ikon, aksi, children, className = '' }) {
+    return (
+        <section className={`bg-white border border-sky-100 rounded-2xl shadow-sm overflow-hidden ${className}`}>
+            <div className="px-5 py-3.5 border-b border-sky-50 flex items-center justify-between gap-3">
+                <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                    {Ikon && <Ikon className="w-4 h-4 text-sky-600" />}
+                    <span>{judul}</span>
+                </h2>
+                {aksi}
+            </div>
+            <div className="p-5">{children}</div>
+        </section>
+    );
+}
+
+function Angka({ label, nilai, sub, warna = 'slate' }) {
+    const w = {
+        slate: 'text-slate-900', sky: 'text-sky-700', emerald: 'text-emerald-700', amber: 'text-amber-700', rose: 'text-rose-700',
+    }[warna];
+    return (
+        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{label}</div>
+            <div className={`text-2xl font-extrabold ${w}`}>{nilai}</div>
+            {sub && <div className="text-[11px] text-slate-500">{sub}</div>}
+        </div>
+    );
+}
+
+function BadgeAcc({ status }) {
+    return status === 'approved'
+        ? <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Sudah di-ACC</span>
+        : <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Belum di-ACC</span>;
+}
+
+// ---------------------------------------------------------------------------
+// Pengamat
+// ---------------------------------------------------------------------------
+
+function SlotHariIni({ slot }) {
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+            {slot.map((s) => {
+                const o = s.observasi;
+                const agm = s.kelompok === 'AGM1B';
+                let gaya = 'bg-white border-slate-200 text-slate-500';
+                let ket = s.lewat ? 'Belum diisi' : 'Belum waktunya';
+                if (o) {
+                    if (o.status === 'revision') { gaya = 'bg-rose-50 border-rose-200 text-rose-800'; ket = 'Perlu revisi'; }
+                    else if (o.dibatalkan) { gaya = 'bg-slate-100 border-slate-200 text-slate-600'; ket = 'Dibatalkan'; }
+                    else { gaya = 'bg-emerald-50 border-emerald-200 text-emerald-800'; ket = o.milikSaya ? 'Diisi Anda' : `Diisi ${o.oleh}`; }
+                } else if (s.lewat) {
+                    gaya = 'bg-amber-50 border-amber-200 text-amber-800';
+                }
+                return (
+                    <div key={s.id} className={`rounded-xl border px-3 py-2 ${gaya} ${agm ? 'ring-1 ring-sky-200' : ''}`}>
+                        <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-sm">{jamTitik(s.jam)}</span>
+                            <span className="flex items-center gap-1">
+                                {agm && <span className="text-[9px] font-bold text-sky-700 bg-sky-100 px-1 rounded">AGM</span>}
+                                {s.wajibFoto && <Camera className={`w-3.5 h-3.5 ${o?.adaFoto ? 'text-emerald-600' : 'text-amber-600'}`} title="Slot wajib foto" />}
+                            </span>
+                        </div>
+                        <div className="text-[10px] font-medium truncate" title={ket}>{ket}</div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+function RingkasanShift({ data, shift }) {
+    if (!data) {
+        return <p className="text-xs text-slate-500">Belum ada observasi pada shift {shift} hari ini.</p>;
+    }
+    const isi = [
+        { ikon: Thermometer, label: 'Suhu rata-rata', v: data.suhu_rata, u: '°C' },
+        { ikon: Thermometer, label: 'Suhu maks / min', v: `${data.suhu_maks} / ${data.suhu_min}`, u: '°C' },
+        { ikon: Droplets, label: 'Kelembaban', v: data.kelembaban, u: '%' },
+        { ikon: Gauge, label: 'Tekanan', v: data.tekanan, u: 'mb' },
+        { ikon: Droplets, label: 'Penguapan', v: data.penguapan, u: 'mm' },
+        { ikon: Cloud, label: 'Perawanan', v: data.awan, u: 'okta' },
+        { ikon: CloudRain, label: 'Curah hujan', v: data.hujan, u: 'mm' },
+        { ikon: Sun, label: 'Penyinaran', v: data.penyinaran, u: 'jam' },
+        { ikon: Wind, label: 'Angin', v: data.angin_knot === '-' ? '-' : `${data.angin_knot} knot`, u: data.arah_angin !== '-' ? `dari ${data.arah_angin}` : '' },
     ];
-
-    const maxFreq = Math.max(...Object.values(windDirections), 1);
-    const center = 110;
-    const maxRadius = 75;
-
     return (
-        <svg viewBox="0 0 220 220" className="w-full max-w-[220px] mx-auto drop-shadow-sm">
-            {/* Concentric circles */}
-            {[0.25, 0.5, 0.75, 1].map((r, i) => (
-                <circle
-                    key={i}
-                    cx={center}
-                    cy={center}
-                    r={maxRadius * r}
-                    fill="none"
-                    stroke="#e2e8f0"
-                    strokeWidth="1"
-                    strokeDasharray={i < 3 ? "2 2" : "none"}
-                />
-            ))}
+        <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                <CloudSun className="w-4 h-4 text-amber-500" />
+                <span>{data.keadaan_cuaca}</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {isi.map(({ ikon: I, label, v, u }) => (
+                    <div key={label} className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                        <div className="text-[10px] text-slate-500 flex items-center gap-1"><I className="w-3 h-3" />{label}</div>
+                        <div className="text-sm font-bold text-slate-900">{v} <span className="text-[11px] font-medium text-slate-500">{v === '-' ? '' : u}</span></div>
+                    </div>
+                ))}
+            </div>
+            <p className="text-[11px] text-slate-500">Angka ini sama dengan isi gambar Laporan Kondisi Cuaca di lampiran laporan triwulan.</p>
+        </div>
+    );
+}
 
-            {/* Axes lines */}
-            {directions.map(d => {
-                const rad = (d.angle - 90) * (Math.PI / 180);
-                const x2 = center + maxRadius * Math.cos(rad);
-                const y2 = center + maxRadius * Math.sin(rad);
-                return (
-                    <line key={d.key} x1={center} y1={center} x2={x2} y2={y2} stroke="#cbd5e1" strokeWidth="1" />
-                );
-            })}
+function DashboardPengamat(p) {
+    const k = p.kelengkapanHariIni;
+    const t = p.triwulanSaya;
+    return (
+        <div className="space-y-6">
+            <Kartu
+                judul={`Slot hari ini · ${k.jamPenuh.terisi}/${k.jamPenuh.total} jam penuh · AGM 1-B ${k.agm1b.terisi}/${k.agm1b.total}`}
+                ikon={Clock}
+                aksi={p.slotBerikutnya && (
+                    <Link href={route('observations.create')} className="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl">
+                        <FilePlus className="w-3.5 h-3.5" /> Isi slot {jamTitik(p.slotBerikutnya.jam)}
+                    </Link>
+                )}
+            >
+                <SlotHariIni slot={p.slotHariIni} />
+                <div className="flex flex-wrap gap-3 mt-3 text-[11px] text-slate-500">
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-200" /> terisi</span>
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-200" /> sudah lewat, belum diisi</span>
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-rose-200" /> perlu revisi</span>
+                    <span className="flex items-center gap-1"><Camera className="w-3 h-3" /> wajib foto</span>
+                    <span className="flex items-center gap-1"><span className="text-[9px] font-bold text-sky-700 bg-sky-100 px-1 rounded">AGM</span> tab FDIH</span>
+                </div>
+            </Kartu>
 
-            {/* Petals */}
-            {directions.map(d => {
-                const count = windDirections[d.key] || 0;
-                const len = (count / maxFreq) * maxRadius;
-                if (len <= 0) return null;
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Kartu judul={`Perlu diperbaiki (${p.perluDiperbaiki.length})`} ikon={AlertCircle}>
+                    {p.perluDiperbaiki.length === 0 ? (
+                        <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Tidak ada observasi yang dikembalikan penyelia.</p>
+                    ) : (
+                        <ul className="space-y-2">
+                            {p.perluDiperbaiki.map((r) => (
+                                <li key={r.id} className="rounded-xl border border-rose-100 bg-rose-50/50 px-3 py-2 flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <div className="text-xs font-bold text-slate-900">{fmtTanggalPendek(r.tanggal)} · {jamTitik(r.jam)} WIB</div>
+                                        <div className="text-[11px] text-rose-800">“{r.catatan || 'Tanpa catatan'}”</div>
+                                    </div>
+                                    <Link href={route('observations.edit', r.id)} className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-rose-700 bg-white border border-rose-200 px-2.5 py-1 rounded-lg">
+                                        <Edit className="w-3.5 h-3.5" /> Perbaiki
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </Kartu>
 
-                const rad = (d.angle - 90) * (Math.PI / 180);
-                const x = center + len * Math.cos(rad);
-                const y = center + len * Math.sin(rad);
+                <Kartu judul={`Ringkasan shift ${p.shiftSekarang} hari ini`} ikon={CloudSun}>
+                    <RingkasanShift data={p.ringkasanShift} shift={p.shiftSekarang} />
+                </Kartu>
+            </div>
 
-                const radLeft = (d.angle - 90 - 15) * (Math.PI / 180);
-                const radRight = (d.angle - 90 + 15) * (Math.PI / 180);
-                const p1x = center + (len * 0.7) * Math.cos(radLeft);
-                const p1y = center + (len * 0.7) * Math.sin(radLeft);
-                const p2x = center + (len * 0.7) * Math.cos(radRight);
-                const p2y = center + (len * 0.7) * Math.sin(radRight);
+            <Kartu
+                judul={`Triwulan saya · ${p.periodeLabel} ${p.tahun}`}
+                ikon={ShieldCheck}
+                aksi={<BadgeAcc status={t.statusAcc} />}
+            >
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Angka label="Kelengkapan" nilai={`${String(t.kelengkapan).replace('.', ',')}%`} sub={`${t.jumlahObservasi} dari ${t.jadwal} slot terjadwal`} warna="sky" />
+                    <Angka label="Foto shift" nilai={`${t.fotoTerpenuhi}/${t.fotoWajib}`} sub="shift dengan foto wajib" warna={t.fotoTerpenuhi < t.fotoWajib ? 'amber' : 'emerald'} />
+                    <Angka label="Perlu revisi" nilai={t.revisi} warna={t.revisi ? 'rose' : 'emerald'} />
+                    <Angka label="Foto galeri" nilai={t.fotoGaleri} sub="unggahan darurat" warna={t.fotoGaleri ? 'amber' : 'slate'} />
+                </div>
+                <div className="mt-4 flex justify-end">
+                    {t.recapId ? (
+                        <a href={route('supervisor.skp.pdf', t.recapId)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-xl">
+                            <Download className="w-3.5 h-3.5" /> Unduh PDF laporan triwulan
+                        </a>
+                    ) : (
+                        <span className="text-[11px] text-slate-500">PDF laporan triwulan tersedia setelah triwulan di-ACC penyelia.</span>
+                    )}
+                </div>
+            </Kartu>
+        </div>
+    );
+}
 
-                return (
-                    <g key={d.key}>
-                        <polygon
-                            points={`${center},${center} ${p1x},${p1y} ${x},${y} ${p2x},${p2y}`}
-                            fill="#0284c7"
-                            fillOpacity="0.75"
-                            stroke="#1e40af"
-                            strokeWidth="1.5"
-                        />
-                    </g>
-                );
-            })}
+// ---------------------------------------------------------------------------
+// Penyelia
+// ---------------------------------------------------------------------------
 
-            {/* Direction Labels */}
-            {directions.map(d => {
-                const labelRadius = maxRadius + 15;
-                const rad = (d.angle - 90) * (Math.PI / 180);
-                const lx = center + labelRadius * Math.cos(rad);
-                const ly = center + labelRadius * Math.sin(rad) + 4;
-                return (
-                    <text
-                        key={d.key}
-                        x={lx}
-                        y={ly}
-                        textAnchor="middle"
-                        className="text-[10px] font-extrabold fill-slate-700"
+function KalenderStasiun({ kalender }) {
+    const kosongAwal = (kalender.hari[0]?.hariMinggu ?? 1) - 1;
+    const warna = (h) => {
+        if (h.nanti) return 'bg-slate-50 text-slate-300 border-slate-100';
+        if (h.persen >= 100) return 'bg-emerald-500 text-white border-emerald-500';
+        if (h.persen >= 75) return 'bg-emerald-200 text-emerald-900 border-emerald-200';
+        if (h.persen > 0) return 'bg-amber-100 text-amber-900 border-amber-200';
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+    };
+    return (
+        <div>
+            <div className="grid grid-cols-7 gap-1.5 text-center">
+                {NAMA_HARI.map((n) => <div key={n} className="text-[10px] font-bold text-slate-400">{n}</div>)}
+                {Array.from({ length: kosongAwal }).map((_, i) => <div key={`k${i}`} />)}
+                {kalender.hari.map((h) => (
+                    <div
+                        key={h.tanggal}
+                        title={`${fmtTanggal(h.tanggal)}: jam penuh ${h.jamPenuh}/${kalender.totalJamPenuh}, AGM 1-B ${h.agm1b}/${kalender.totalAgm1b}`}
+                        className={`rounded-lg border py-1.5 ${warna(h)} ${h.hariIni ? 'ring-2 ring-sky-400' : ''}`}
                     >
-                        {d.label}
-                    </text>
-                );
-            })}
-        </svg>
+                        <div className="text-xs font-bold">{h.hari}</div>
+                        {!h.nanti && <div className="text-[9px] font-medium opacity-80">{h.jamPenuh}/{kalender.totalJamPenuh}</div>}
+                    </div>
+                ))}
+            </div>
+            <p className="text-[11px] text-slate-500 mt-2">Angka = slot jam penuh terisi. Arahkan kursor ke tanggal untuk melihat slot AGM 1-B.</p>
+        </div>
     );
 }
 
-// Custom SVG Soil Temperature Profile Chart
-function SoilTempSVG({ gundul, rumput }) {
-    const depths = [0, 5, 10, 20, 50, 100];
-    const width = 300;
-    const height = 180;
-    const padding = { top: 20, right: 30, bottom: 30, left: 45 };
-
-    const validVals = [...gundul, ...rumput].map(d => d.val).filter(v => v !== null && !isNaN(v));
-    const minTemp = validVals.length > 0 ? Math.min(...validVals) - 2 : 20;
-    const maxTemp = validVals.length > 0 ? Math.max(...validVals) + 2 : 40;
-
-    const getX = (val) => {
-        if (val === null || isNaN(val)) return padding.left;
-        return padding.left + ((val - minTemp) / (maxTemp - minTemp)) * (width - padding.left - padding.right);
-    };
-
-    const getY = (depthIndex) => {
-        return padding.top + (depthIndex / (depths.length - 1)) * (height - padding.top - padding.bottom);
-    };
-
-    const gundulPoints = gundul.map((d, i) => d.val !== null ? `${getX(d.val)},${getY(i)}` : null).filter(Boolean).join(' ');
-    const rumputPoints = rumput.map((d, i) => d.val !== null ? `${getX(d.val)},${getY(i)}` : null).filter(Boolean).join(' ');
-
+function DashboardPenyelia(p) {
+    const siap = p.statusTriwulan.filter((s) => s.siapAcc).length;
+    const revisi = p.statusTriwulan.reduce((n, s) => n + s.revisi, 0);
+    const sudah = p.statusTriwulan.filter((s) => s.statusAcc === 'approved').length;
     return (
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
-            {/* Horizontal Grid lines per depth */}
-            {depths.map((d, i) => (
-                <g key={d}>
-                    <line x1={padding.left} y1={getY(i)} x2={width - padding.right} y2={getY(i)} stroke="#e2e8f0" strokeDasharray="2 2" />
-                    <text x={padding.left - 6} y={getY(i) + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-500">
-                        {d} cm
-                    </text>
-                </g>
-            ))}
+        <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Angka label="Siap di-ACC" nilai={siap} sub="pegawai" warna="sky" />
+                <Angka label="Sudah di-ACC" nilai={`${sudah}/${p.statusTriwulan.length}`} sub="pegawai" warna="emerald" />
+                <Angka label="Observasi revisi" nilai={revisi} sub="menunggu perbaikan" warna={revisi ? 'rose' : 'emerald'} />
+                <Angka label="Shift tanpa foto" nilai={p.shiftTanpaFoto.length} sub="bulan ini" warna={p.shiftTanpaFoto.length ? 'amber' : 'emerald'} />
+            </div>
 
-            {/* Polyline Gundul (Orange) */}
-            {gundulPoints && (
-                <polyline points={gundulPoints} fill="none" stroke="#f97316" strokeWidth="2.5" />
-            )}
-            {gundul.map((d, i) => d.val !== null && (
-                <circle key={`g-${i}`} cx={getX(d.val)} cy={getY(i)} r="4" fill="#f97316" />
-            ))}
+            <Kartu
+                judul={`Status triwulan per pegawai · ${p.periodeLabel} ${p.tahun}`}
+                ikon={UserCheck}
+                aksi={<Link href={route('supervisor.queue')} className="text-xs font-bold text-sky-700 hover:underline">Buka antrean validasi →</Link>}
+            >
+                <div className="overflow-x-auto -mx-5 -my-5">
+                    <table className="w-full text-xs">
+                        <thead className="bg-sky-50/60 text-slate-600 text-[11px] uppercase">
+                            <tr>
+                                <th className="px-4 py-2.5 text-left">Pegawai</th>
+                                <th className="px-4 py-2.5 text-center">Kelengkapan</th>
+                                <th className="px-4 py-2.5 text-center">Foto shift</th>
+                                <th className="px-4 py-2.5 text-center">Revisi</th>
+                                <th className="px-4 py-2.5 text-center">Foto galeri</th>
+                                <th className="px-4 py-2.5 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {p.statusTriwulan.map((s) => (
+                                <tr key={s.pegawai.id}>
+                                    <td className="px-4 py-2.5">
+                                        <div className="font-bold text-slate-900">{s.pegawai.nama}</div>
+                                        <div className="text-[10px] text-slate-500">{s.jumlahObservasi} observasi</div>
+                                    </td>
+                                    <td className="px-4 py-2.5 text-center font-semibold">{String(s.kelengkapan).replace('.', ',')}%</td>
+                                    <td className={`px-4 py-2.5 text-center font-semibold ${s.fotoTerpenuhi < s.fotoWajib ? 'text-amber-700' : 'text-slate-700'}`}>{s.fotoTerpenuhi}/{s.fotoWajib}</td>
+                                    <td className={`px-4 py-2.5 text-center font-semibold ${s.revisi ? 'text-rose-700' : 'text-slate-400'}`}>{s.revisi || '–'}</td>
+                                    <td className={`px-4 py-2.5 text-center font-semibold ${s.fotoGaleri ? 'text-amber-700' : 'text-slate-400'}`}>{s.fotoGaleri || '–'}</td>
+                                    <td className="px-4 py-2.5 text-center">
+                                        {s.statusAcc === 'approved' ? <BadgeAcc status="approved" />
+                                            : s.siapAcc ? <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">Siap di-ACC</span>
+                                                : s.revisi ? <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Ada revisi</span>
+                                                    : <span className="text-[11px] text-slate-400">Belum ada data</span>}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Kartu>
 
-            {/* Polyline Rumput (Blue) */}
-            {rumputPoints && (
-                <polyline points={rumputPoints} fill="none" stroke="#0284c7" strokeWidth="2.5" />
-            )}
-            {rumput.map((d, i) => d.val !== null && (
-                <circle key={`r-${i}`} cx={getX(d.val)} cy={getY(i)} r="4" fill="#0284c7" />
-            ))}
-        </svg>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Kartu judul="Kelengkapan stasiun bulan ini" ikon={CalendarDays}>
+                    <KalenderStasiun kalender={p.kalender} />
+                </Kartu>
+
+                <Kartu judul={`Shift tanpa foto wajib (${p.shiftTanpaFoto.length})`} ikon={ImageOff}>
+                    {p.shiftTanpaFoto.length === 0 ? (
+                        <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Semua slot foto bulan ini sudah berfoto.</p>
+                    ) : (
+                        <ul className="divide-y divide-slate-100 max-h-72 overflow-y-auto -my-2">
+                            {p.shiftTanpaFoto.map((f) => (
+                                <li key={`${f.tanggal}${f.jam}`} className="py-2 flex items-center justify-between gap-3 text-xs">
+                                    <span className="font-semibold text-slate-800">{fmtTanggalPendek(f.tanggal)} · {jamTitik(f.jam)} <span className="text-slate-500 font-normal">(shift {f.shift})</span></span>
+                                    <span className="text-[11px] text-amber-700">{f.keterangan}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </Kartu>
+            </div>
+        </div>
     );
 }
 
-// Custom SVG Rain Hourly Bar + Cumulative Line Chart
-function RainChartSVG({ rainData }) {
-    const width = 560;
-    const height = 180;
-    const padding = { top: 20, right: 30, bottom: 30, left: 40 };
+// ---------------------------------------------------------------------------
+// Admin
+// ---------------------------------------------------------------------------
 
-    const maxVal = Math.max(...rainData.map(d => Math.max(d.rain, d.cumulative || 0)), 10);
-    const chartW = width - padding.left - padding.right;
-    const chartH = height - padding.top - padding.bottom;
+function Status({ ok, teksOk, teksTidak }) {
+    return ok
+        ? <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700"><CheckCircle2 className="w-3.5 h-3.5" />{teksOk}</span>
+        : <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700"><AlertCircle className="w-3.5 h-3.5" />{teksTidak}</span>;
+}
 
-    const getX = (index) => padding.left + (index / (rainData.length - 1 || 1)) * chartW;
-    const getY = (val) => height - padding.bottom - (val / maxVal) * chartH;
-
-    const cumulativePoints = rainData
-        .filter(d => d.isAccumulated && d.cumulative !== null)
-        .map(d => {
-            const idx = rainData.findIndex(x => x.hour === d.hour);
-            return `${getX(idx)},${getY(d.cumulative)}`;
-        }).join(' ');
-
-    const lastCum = rainData.filter(d => d.isAccumulated && d.cumulative !== null).pop();
-    const lastCumIdx = lastCum ? rainData.findIndex(x => x.hour === lastCum.hour) : -1;
-
+function DashboardAdmin(p) {
+    const s = p.sistem;
+    const k = p.konfigurasi;
     return (
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
-            {/* Grid Y lines */}
-            {[0, maxVal * 0.5, maxVal].map((val, i) => (
-                <g key={i}>
-                    <line x1={padding.left} y1={getY(val)} x2={width - padding.right} y2={getY(val)} stroke="#f1f5f9" strokeWidth="1" />
-                    <text x={padding.left - 6} y={getY(val) + 4} textAnchor="end" className="text-[9px] font-bold fill-slate-400">
-                        {Math.round(val)} mm
-                    </text>
-                </g>
-            ))}
+        <div className="space-y-6">
+            <Kartu judul="Antrean & penyimpanan foto" ikon={Server}>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Angka label="Penyimpanan foto" nilai={s.driveAktif ? 'Google Drive' : 'Server'} sub={`PHOTO_DISK=${s.photoDisk}`} warna="sky" />
+                    <Angka label="Foto menunggu upload" nilai={s.fotoMenungguUpload} sub={s.driveAktif ? 'masih di server' : 'mode server'} warna={s.fotoMenungguUpload ? 'amber' : 'emerald'} />
+                    <Angka label="Job antre" nilai={s.jobAntre} sub={`queue: ${s.queueConnection}`} />
+                    <Angka label="Job gagal" nilai={s.jobGagal} warna={s.jobGagal ? 'rose' : 'emerald'} />
+                </div>
+                <div className="mt-3 space-y-1">
+                    {s.driveAktif && <Status ok={s.driveTerkonfigurasi} teksOk="Kredensial Google Drive terpasang" teksTidak="Kredensial Google Drive belum terpasang: foto tertahan di server" />}
+                    {s.driveAktif && s.queueConnection === 'sync' && <Status ok={false} teksTidak="QUEUE_CONNECTION=sync: upload Drive berjalan langsung saat simpan, bukan di latar belakang" />}
+                </div>
+                {s.jobGagalTerbaru.length > 0 && (
+                    <ul className="mt-3 divide-y divide-slate-100 text-xs">
+                        {s.jobGagalTerbaru.map((j) => (
+                            <li key={j.id} className="py-2">
+                                <div className="font-bold text-slate-800">{j.job} <span className="font-normal text-slate-500">· {j.waktu}</span></div>
+                                <div className="text-[11px] text-rose-700 truncate" title={j.pesan}>{j.pesan}</div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </Kartu>
 
-            {/* Bars */}
-            {rainData.map((d, i) => {
-                const x = getX(i);
-                const barW = Math.max(10, chartW / rainData.length - 6);
-                const barH = (d.rain / maxVal) * chartH;
-                const y = height - padding.bottom - barH;
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Kartu
+                    judul={`Belum mengganti password awal (${p.akunBelumGantiPassword.length})`}
+                    ikon={KeyRound}
+                    aksi={<Link href={route('admin.users.index')} className="text-xs font-bold text-sky-700 hover:underline">Kelola pengguna →</Link>}
+                >
+                    {p.akunBelumGantiPassword.length === 0 ? (
+                        <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Semua akun sudah mengganti password.</p>
+                    ) : (
+                        <ul className="divide-y divide-slate-100 text-xs -my-2">
+                            {p.akunBelumGantiPassword.map((u) => (
+                                <li key={u.id} className="py-2 flex justify-between gap-3">
+                                    <span className="font-semibold text-slate-800">{u.nama}</span>
+                                    <span className="text-slate-500">{u.role} · {u.nip}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </Kartu>
 
-                return (
-                    <g key={d.hour}>
-                        <rect
-                            x={x - barW / 2}
-                            y={y}
-                            width={barW}
-                            height={barH}
-                            fill={d.isAccumulated ? "#38bdf8" : "#cbd5e1"}
-                            rx="3"
-                        />
-                        <text x={x} y={height - 10} textAnchor="middle" className="text-[9px] font-bold fill-slate-500">
-                            {d.label.substring(0, 2)}
-                        </text>
-                    </g>
-                );
-            })}
+                <Kartu judul="Riwayat buka kunci triwulan" ikon={Unlock}>
+                    {p.riwayatBukaKunci.length === 0 ? (
+                        <p className="text-xs text-slate-500">Belum pernah ada triwulan yang dibuka kuncinya.</p>
+                    ) : (
+                        <ul className="divide-y divide-slate-100 text-xs -my-2">
+                            {p.riwayatBukaKunci.map((r, i) => (
+                                <li key={i} className="py-2">
+                                    <div className="font-semibold text-slate-800">{r.pegawai} · {r.periode}</div>
+                                    <div className="text-[11px] text-slate-500">oleh {r.oleh}, {r.waktu}</div>
+                                    <div className="text-[11px] text-slate-700">“{r.alasan}”</div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </Kartu>
+            </div>
 
-            {/* Cumulative Line (Orange) */}
-            {cumulativePoints && (
-                <polyline points={cumulativePoints} fill="none" stroke="#f97316" strokeWidth="2.5" strokeDasharray="none" />
-            )}
-
-            {/* Marked end point on cumulative line */}
-            {lastCumIdx >= 0 && (
-                <g>
-                    <circle cx={getX(lastCumIdx)} cy={getY(lastCum.cumulative)} r="5" fill="#f97316" stroke="#ffffff" strokeWidth="2" />
-                    <text x={getX(lastCumIdx)} y={getY(lastCum.cumulative) - 8} textAnchor="middle" className="text-[10px] font-extrabold fill-amber-700">
-                        {lastCum.cumulative.toFixed(1)} mm
-                    </text>
-                </g>
-            )}
-        </svg>
+            <Kartu
+                judul="Konfigurasi"
+                ikon={Settings2}
+                aksi={<Link href={route('admin.instruments.index')} className="text-xs font-bold text-sky-700 hover:underline">Kelola alat →</Link>}
+            >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+                    <div>
+                        <div className="font-bold text-slate-800 mb-1.5 flex items-center gap-1.5"><ListChecks className="w-3.5 h-3.5 text-sky-600" />Dropdown tanpa pilihan</div>
+                        {k.pilihanKosong.length === 0
+                            ? <Status ok teksOk="Semua dropdown punya pilihan" />
+                            : <ul className="space-y-0.5 text-amber-700">{k.pilihanKosong.map((x) => <li key={x.kode}>{x.label}</li>)}</ul>}
+                    </div>
+                    <div>
+                        <div className="font-bold text-slate-800 mb-1.5">Parameter nonaktif ({k.parameterNonaktif.length})</div>
+                        <ul className="space-y-0.5 text-slate-600 max-h-36 overflow-y-auto">
+                            {k.parameterNonaktif.map((x) => <li key={x.id}>Kartu {x.kartu}: {x.label}</li>)}
+                            {k.parameterNonaktif.length === 0 && <li className="text-slate-400">–</li>}
+                        </ul>
+                    </div>
+                    <div>
+                        <div className="font-bold text-slate-800 mb-1.5">Pengguna & alat</div>
+                        <ul className="space-y-0.5 text-slate-600">
+                            <li>{k.jumlahPengguna.pengamat ?? 0} pengamat · {k.jumlahPengguna.penyelia ?? 0} penyelia · {k.jumlahPengguna.admin ?? 0} admin</li>
+                            <li>Alat nonaktif: {k.alatNonaktif.length ? k.alatNonaktif.map((a) => a.nama).join(', ') : '–'}</li>
+                        </ul>
+                    </div>
+                </div>
+            </Kartu>
+        </div>
     );
 }
+
+// ---------------------------------------------------------------------------
 
 export default function Dashboard(props) {
-    const {
-        user, settings, today, currentWibHour, nextSchedule, schedules,
-        todayObservations, rainHourlyData, totalRainToday, latestRainHour,
-        latestSuhuAws, latestSuhuHour, latestQff, latestQffHour,
-        soilTempGundul, soilTempRumput, windDirections,
-        pendingCount, approvedTodayCount, revisionCount, observerQueue, heatmapData,
-        totalInstruments, activeInstruments, roleBreakdown,
-        instrumentStatusGrid
-    } = props;
-
-    const [selectedSlotModal, setSelectedSlotModal] = useState(null);
-
-    const isPhotoSlot = (h) => [7, 17].includes(h);
+    const { user, hariIni } = props;
+    const peran = { pengamat: 'Pengamat', penyelia: 'Penyelia', admin: 'Admin' }[user.role] || user.role;
 
     return (
         <Sidebar>
             <Head title="Dashboard - SILAP-Kinerja" />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-
-                {/* HEADER / WELCOME BANNER */}
                 <div className="relative rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-sky-700 via-blue-700 to-sky-800 text-white shadow-sm overflow-hidden border border-sky-600/20">
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-sky-100 border border-white/20 mb-2">
                                 <ShieldCheck className="w-3.5 h-3.5" />
-                                <span>BMKG Stasiun Klimatologi Jawa Tengah</span>
+                                <span>BMKG Stasiun Klimatologi Jawa Tengah · {peran}</span>
                             </div>
-                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-                                Halo, {user.nama}!
-                            </h1>
+                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Halo, {user.nama}!</h1>
                             <p className="text-xs text-sky-100 font-medium mt-0.5">
-                                {today} · Slot berikutnya jam <strong className="text-white font-bold">{nextSchedule ? nextSchedule.jam_wib.substring(0, 5) : '07:00'} WIB</strong>
+                                {fmtTanggal(hariIni)}
+                                {user.role === 'pengamat' && props.slotBerikutnya && (
+                                    <> · Slot berikutnya pukul <strong className="text-white">{jamTitik(props.slotBerikutnya.jam)} WIB</strong></>
+                                )}
                             </p>
                         </div>
 
-                        {user.role === 'pengamat' && (
+                        {user.role === 'pengamat' && props.slotBerikutnya && (
                             <Link
                                 href={route('observations.create')}
                                 className="inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl bg-white hover:bg-sky-50 text-sky-900 font-bold text-sm transition shadow-sm shrink-0"
                             >
                                 <FilePlus className="w-5 h-5 text-sky-600" />
-                                <span>Input Observasi Pukul {nextSchedule ? nextSchedule.jam_wib.substring(0, 5) : '07:00'} WIB</span>
+                                <span>Input Observasi Pukul {jamTitik(props.slotBerikutnya.jam)} WIB</span>
                             </Link>
                         )}
                     </div>
                 </div>
 
-                {/* ROLE A: PENGAMAT DASHBOARD */}
-                {user.role === 'pengamat' && (
-                    <div className="space-y-8">
-                        {/* 16-SLOT TIMELINE */}
-                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                    <Clock className="w-5 h-5 text-sky-600" />
-                                    <span>Garis Waktu 16 Slot Pengamatan (07.00 - 22.00 WIB)</span>
-                                </h2>
-                                <span className="text-xs text-slate-500 font-medium">
-                                    📷 Slot Foto Wajib: 07.00 & 17.00 WIB
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-16 gap-2">
-                                {schedules.map((s) => {
-                                    const h = parseInt(s.jam_wib.substring(0, 2), 10);
-                                    const obs = todayObservations.find(o => o.schedule_id === s.id);
-                                    const isCurrent = h === currentWibHour;
-                                    const isPhoto = isPhotoSlot(h);
-
-                                    return (
-                                        <div
-                                            key={s.id}
-                                            onClick={() => {
-                                                if (obs) setSelectedSlotModal(obs);
-                                                else window.location.href = route('observations.create');
-                                            }}
-                                            className={`relative rounded-xl p-2.5 text-center cursor-pointer transition flex flex-col items-center justify-between min-h-[72px] border ${
-                                                obs
-                                                    ? 'bg-sky-50 border-sky-200 text-sky-900 hover:bg-sky-100/80'
-                                                    : isCurrent
-                                                    ? 'bg-white border-2 border-sky-600 text-slate-900 shadow-sm ring-2 ring-sky-100'
-                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                                            }`}
-                                        >
-                                            <span className="font-bold text-xs">{s.jam_wib.substring(0, 5)}</span>
-                                            {isPhoto && (
-                                                <Camera className={`w-3.5 h-3.5 my-1 ${obs ? 'text-sky-700' : 'text-slate-400'}`} title="Slot Foto Wajib (07.00 & 17.00)" />
-                                            )}
-                                            <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full border ${
-                                                obs ? 'bg-sky-600 text-white border-sky-600' : isCurrent ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-slate-100 text-slate-500 border-slate-200'
-                                            }`}>
-                                                {obs ? 'Terisi' : isCurrent ? 'Jam Ini' : 'Belum'}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* THREE NUMBER CARDS */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
-                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Hujan Hari Ini (Akumulasi)</span>
-                                    <Droplets className="w-4 h-4 text-sky-600" />
-                                </div>
-                                <div className="text-3xl font-extrabold text-sky-800">
-                                    {totalRainToday.toFixed(1)} <span className="text-base font-bold text-slate-500">mm</span>
-                                </div>
-                                <p className="text-[11px] text-slate-400 font-medium">
-                                    Penjumlahan slot 08.00 s/d slot {latestRainHour ? sprintf('%02d.00', latestRainHour) : 'terakhir'} (tidak mencakup 22.00-07.00)
-                                </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
-                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Suhu Udara AWS (Input Terakhir)</span>
-                                    <Thermometer className="w-4 h-4 text-sky-600" />
-                                </div>
-                                <div className="text-3xl font-extrabold text-slate-900">
-                                    {latestSuhuAws !== null ? latestSuhuAws.toFixed(1) : '–'} <span className="text-base font-bold text-slate-500">°C</span>
-                                </div>
-                                <p className="text-[11px] text-slate-400 font-medium">
-                                    {latestSuhuHour ? `Diinput pada slot pukul ${sprintf('%02d:00', latestSuhuHour)} WIB` : 'Belum ada input hari ini'}
-                                </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
-                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Tekanan Udara QFF</span>
-                                    <Gauge className="w-4 h-4 text-sky-600" />
-                                </div>
-                                <div className="text-3xl font-extrabold text-slate-900">
-                                    {latestQff !== null ? latestQff.toFixed(1) : '–'} <span className="text-base font-bold text-slate-500">mbar</span>
-                                </div>
-                                <p className="text-[11px] text-slate-400 font-medium">
-                                    {latestQffHour ? `Diinput pada slot pukul ${sprintf('%02d:00', latestQffHour)} WIB` : 'Belum ada input hari ini'}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* THREE CHARTS */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Chart 1: Rain Bar + Accumulation Line */}
-                            <div className="lg:col-span-2 bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                                        <Droplets className="w-4 h-4 text-sky-600" />
-                                        <span>Curah Hujan 1 Jam Terakhir &amp; Akumulasi Harian</span>
-                                    </h3>
-                                    <div className="flex items-center space-x-3 text-xs font-semibold">
-                                        <span className="flex items-center space-x-1">
-                                            <span className="w-3 h-3 rounded bg-sky-400 inline-block"></span>
-                                            <span>Curah Hujan (mm)</span>
-                                        </span>
-                                        <span className="flex items-center space-x-1">
-                                            <span className="w-3 h-1 bg-amber-500 inline-block"></span>
-                                            <span>Akumulasi (mm)</span>
-                                        </span>
-                                    </div>
-                                </div>
-                                <RainChartSVG rainData={rainHourlyData} />
-                                <p className="text-[11px] text-slate-400 font-medium">
-                                    * Batang slot 07.00 (hujan 06.00-07.00) tidak masuk penjumlahan akumulasi harian (milik hari klimatologi sebelumnya).
-                                </p>
-                            </div>
-
-                            {/* Chart 2: Wind Rose SVG */}
-                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4 flex flex-col justify-between">
-                                <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                                    <CloudSun className="w-4 h-4 text-sky-600" />
-                                    <span>Wind Rose Frekuensi Arah Angin</span>
-                                </h3>
-                                <WindRoseSVG windDirections={windDirections} />
-                                <p className="text-[11px] text-slate-400 text-center font-medium">
-                                    Mewakili distribusi frekuensi arah angin 8 mata angin hari ini.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Chart 3: Soil Temperature Profile */}
-                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                                    <Thermometer className="w-4 h-4 text-sky-600" />
-                                    <span>Profil Kedalaman Suhu Tanah (°C)</span>
-                                </h3>
-                                <div className="flex items-center space-x-4 text-xs font-semibold">
-                                    <span className="flex items-center space-x-1.5">
-                                        <span className="w-3 h-3 rounded-full bg-orange-500"></span>
-                                        <span>Tanah Gundul</span>
-                                    </span>
-                                    <span className="flex items-center space-x-1.5">
-                                        <span className="w-3 h-3 rounded-full bg-sky-500"></span>
-                                        <span>Tanah Berumput</span>
-                                    </span>
-                                </div>
-                            </div>
-                            <SoilTempSVG gundul={soilTempGundul} rumput={soilTempRumput} />
-                        </div>
-                    </div>
-                )}
-
-                {/* ROLE B: PENYELIA DASHBOARD */}
-                {user.role === 'penyelia' && (
-                    <div className="space-y-8">
-                        {/* THREE NUMBER CARDS */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-2xl border border-amber-200/80 p-6 shadow-sm shadow-amber-100/20 space-y-2">
-                                <div className="text-xs font-bold text-amber-700 uppercase tracking-wider">Menunggu Validasi</div>
-                                <div className="text-3xl font-extrabold text-amber-800">{pendingCount} <span className="text-sm font-bold text-amber-700">Observasi</span></div>
-                                <p className="text-[11px] text-amber-700 font-medium">Antrean observasi yang belum ditinjau</p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-emerald-200/80 p-6 shadow-sm shadow-emerald-100/20 space-y-2">
-                                <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Disetujui Hari Ini</div>
-                                <div className="text-3xl font-extrabold text-emerald-800">{approvedTodayCount} <span className="text-sm font-bold text-emerald-700">Observasi</span></div>
-                                <p className="text-[11px] text-emerald-700 font-medium">Data observasi approved hari berjalan</p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-rose-200/80 p-6 shadow-sm shadow-rose-100/20 space-y-2">
-                                <div className="text-xs font-bold text-rose-700 uppercase tracking-wider">Perlu Revisi</div>
-                                <div className="text-3xl font-extrabold text-rose-800">{revisionCount} <span className="text-sm font-bold text-rose-700">Observasi</span></div>
-                                <p className="text-[11px] text-rose-700 font-medium">Dikembalikan ke pengamat untuk perbaikan</p>
-                            </div>
-                        </div>
-
-                        {/* OBSERVER QUEUE (Bordered Rows) */}
-                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
-                            <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                <Users className="w-5 h-5 text-sky-600" />
-                                <span>Antrean Input Per Pengamat</span>
-                            </h3>
-
-                            <div className="divide-y divide-slate-100 border border-sky-100 rounded-xl overflow-hidden">
-                                {observerQueue.map(obs => (
-                                    <div
-                                        key={obs.id}
-                                        onClick={() => window.location.href = route('supervisor.queue') + `?user_id=${obs.id}`}
-                                        className="flex items-center justify-between p-4 hover:bg-sky-50/50 cursor-pointer transition"
-                                    >
-                                        <div className="flex items-center space-x-3 min-w-0">
-                                            <div className="font-bold text-sm text-slate-800">{obs.nama}</div>
-                                            <span className="text-xs text-slate-400 font-mono">({obs.nip})</span>
-                                        </div>
-
-                                        <div className="flex items-center space-x-4">
-                                            <div className="w-32 bg-slate-100 rounded-full h-2 overflow-hidden">
-                                                <div
-                                                    className="bg-sky-600 h-full rounded-full transition-all"
-                                                    style={{ width: `${(obs.todaySlots / 16) * 100}%` }}
-                                                />
-                                            </div>
-                                            <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${
-                                                obs.pendingCount > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-sky-50 text-sky-700 border border-sky-200'
-                                            }`}>
-                                                {obs.pendingCount > 0 ? `${obs.pendingCount} menunggu` : 'selesai'}
-                                            </span>
-                                            <ChevronRight className="w-4 h-4 text-slate-400" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* CALENDAR HEATMAP (Current Month Mon-Sun Grid) */}
-                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                    <Clock className="w-5 h-5 text-sky-600" />
-                                    <span>Peta Panas Kelengkapan Input Observasi Bulanan</span>
-                                </h3>
-
-                                <div className="flex items-center space-x-2 text-xs font-semibold text-slate-600">
-                                    <span>Skala:</span>
-                                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">&lt;70%</span>
-                                    <span className="px-2 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-300">70-84%</span>
-                                    <span className="px-2 py-0.5 rounded bg-sky-600 text-white">85-94%</span>
-                                    <span className="px-2 py-0.5 rounded bg-blue-900 text-white">&gt;=95%</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-500">
-                                {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(day => (
-                                    <div key={day} className="py-1">{day}</div>
-                                ))}
-                                {heatmapData.map(h => {
-                                    let bgClass = 'bg-slate-50 text-slate-400 border-slate-200';
-                                    if (!h.isFuture && h.count > 0) {
-                                        if (h.percentage < 70) bgClass = 'bg-sky-50 text-sky-700 border-sky-200';
-                                        else if (h.percentage < 85) bgClass = 'bg-sky-100 text-sky-800 border-sky-300';
-                                        else if (h.percentage < 95) bgClass = 'bg-sky-600 text-white border-sky-600';
-                                        else bgClass = 'bg-blue-900 text-white border-blue-900';
-                                    }
-
-                                    return (
-                                        <div
-                                            key={h.day}
-                                            title={`Tanggal ${h.day}: ${h.count}/16 slot (${h.percentage}%)`}
-                                            className={`rounded-xl p-3 flex flex-col items-center justify-center transition border ${bgClass} ${
-                                                h.isToday ? 'border-2 border-sky-600 font-extrabold shadow-sm' : ''
-                                            }`}
-                                        >
-                                            <span className="font-extrabold text-sm">{h.day}</span>
-                                            <span className="text-[10px] mt-0.5 font-medium">{h.isFuture ? '–' : `${h.percentage}%`}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* ROLE C: ADMIN DASHBOARD */}
-                {user.role === 'admin' && (
-                    <div className="space-y-8">
-                        {/* THREE NUMBER CARDS */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
-                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Alat Aktif</span>
-                                    <Wrench className="w-4 h-4 text-sky-600" />
-                                </div>
-                                <div className="text-3xl font-extrabold text-slate-900">{activeInstruments} <span className="text-sm font-bold text-slate-500">dari {totalInstruments} Alat</span></div>
-                                <p className="text-[11px] text-slate-400 font-medium">Status alat terkonfigurasi di Kelola Alat</p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-2">
-                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Pengguna Terdaftar</span>
-                                    <Users className="w-4 h-4 text-sky-600" />
-                                </div>
-                                <div className="text-3xl font-extrabold text-slate-900">{roleBreakdown.pengamat + roleBreakdown.penyelia + roleBreakdown.admin} <span className="text-sm font-bold text-slate-500">Akun</span></div>
-                                <p className="text-[11px] text-slate-400 font-medium">
-                                    {roleBreakdown.pengamat} Pengamat · {roleBreakdown.penyelia} Penyelia · {roleBreakdown.admin} Admin
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* INSTRUMENT STATUS GRID */}
-                        <div className="bg-white rounded-2xl border border-sky-100/80 p-6 shadow-sm shadow-sky-100/30 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-bold text-base text-slate-900 flex items-center space-x-2">
-                                    <Wrench className="w-5 h-5 text-sky-600" />
-                                    <span>Grid Status Alat Pengamatan</span>
-                                </h3>
-                                <Link href={route('admin.instruments.index')} className="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center space-x-1">
-                                    <span>Kelola Alat</span>
-                                    <ArrowRight className="w-3.5 h-3.5" />
-                                </Link>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {instrumentStatusGrid.map(inst => (
-                                    <div
-                                        key={inst.id}
-                                        onClick={() => window.location.href = route('admin.instruments.index')}
-                                        className="p-4 rounded-xl border border-sky-100 hover:border-sky-300 bg-slate-50/50 hover:bg-white transition cursor-pointer flex items-start space-x-3"
-                                    >
-                                        <span className={`w-3 h-3 rounded-full mt-1 shrink-0 ${
-                                            inst.status === 'aktif' ? 'bg-sky-500'
-                                            : inst.status === 'perlu_perhatian' ? 'bg-amber-500'
-                                            : 'bg-slate-400'
-                                        }`} />
-                                        <div>
-                                            <div className="font-bold text-sm text-slate-900">{inst.nama}</div>
-                                            <div className="text-xs text-slate-500 font-medium mt-0.5">{inst.statusText}</div>
-                                            <div className="text-[11px] text-slate-400 mt-1">{inst.paramCount} Parameter</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* MODAL DETAIL OBSERVED SLOT (FOR PENGAMAT) */}
-                {selectedSlotModal && (
-                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl border border-sky-100 space-y-4">
-                            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                                <div>
-                                    <h3 className="font-extrabold text-base text-slate-900">
-                                        Detail Observasi Pukul {selectedSlotModal.schedule?.jam_wib.substring(0, 5)} WIB
-                                    </h3>
-                                    <p className="text-xs text-slate-500 font-medium">Tanggal: {selectedSlotModal.tanggal}</p>
-                                </div>
-                                <button onClick={() => setSelectedSlotModal(null)} className="text-slate-400 hover:text-slate-700">✕</button>
-                            </div>
-
-                            <div className="space-y-2 text-xs">
-                                <div className="flex justify-between py-1 border-b border-slate-100">
-                                    <span className="font-bold text-slate-600">Pengamat:</span>
-                                    <span>{user.nama}</span>
-                                </div>
-                                <div className="flex justify-between py-1 border-b border-slate-100">
-                                    <span className="font-bold text-slate-600">Status Observasi:</span>
-                                    <span className="uppercase font-bold text-sky-700">{selectedSlotModal.status_pengamatan}</span>
-                                </div>
-                                <div className="flex justify-between py-1 border-b border-slate-100">
-                                    <span className="font-bold text-slate-600">Approval Penyelia:</span>
-                                    <span className="uppercase font-bold text-sky-700">{selectedSlotModal.status_approval}</span>
-                                </div>
-                                {selectedSlotModal.status_approval === 'revision' && selectedSlotModal.catatan_supervisor && (
-                                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800">
-                                        <span className="font-bold">Catatan Revisi: </span>
-                                        "{selectedSlotModal.catatan_supervisor}"
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex justify-end space-x-3 pt-3">
-                                <button
-                                    onClick={() => setSelectedSlotModal(null)}
-                                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
-                                >
-                                    Tutup
-                                </button>
-                                {selectedSlotModal.status_approval === 'revision' && (
-                                    <Link
-                                        href={route('observations.edit', selectedSlotModal.id)}
-                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-600/20 flex items-center space-x-1.5"
-                                    >
-                                        <Edit className="w-3.5 h-3.5" />
-                                        <span>Perbaiki Observasi</span>
-                                    </Link>
-                                )}
-                                <a
-                                    href={route('observations.pdf', selectedSlotModal.id)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/20 flex items-center space-x-2"
-                                >
-                                    <FileText className="w-4 h-4" />
-                                    <span>Unduh PDF</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {user.role === 'pengamat' && <DashboardPengamat {...props} />}
+                {user.role === 'penyelia' && <DashboardPenyelia {...props} />}
+                {user.role === 'admin' && <DashboardAdmin {...props} />}
             </main>
         </Sidebar>
     );

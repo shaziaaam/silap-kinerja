@@ -19,6 +19,9 @@ class RekapSkpTriwulan extends Model
         'approved_by',
         'approved_at',
         'catatan',
+        'dibuka_oleh',
+        'dibuka_at',
+        'alasan_buka',
         'total_pengamatan_valid',
         'file_pdf_path',
         'tanggal_generate',
@@ -26,6 +29,7 @@ class RekapSkpTriwulan extends Model
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'dibuka_at' => 'datetime',
         'tanggal_generate' => 'datetime',
     ];
 

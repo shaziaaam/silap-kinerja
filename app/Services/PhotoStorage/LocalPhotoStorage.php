@@ -4,10 +4,17 @@ namespace App\Services\PhotoStorage;
 
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Photos on the server's private disk (storage/app/private), never under a public URL;
+ * they are served through the authenticated observations.photo route. Also the
+ * temporary holding place before a photo is moved to Google Drive.
+ */
 class LocalPhotoStorage implements PhotoStorageInterface
 {
-    protected string $disk = 'public';
-    protected string $directory = 'watermarked_photos';
+    protected string $disk = 'local';
+    protected string $directory = 'foto_observasi';
+    // Rows saved before photos went private live on the public disk.
+    protected string $legacyDisk = 'public';
 
     public function store(string $fileContents, string $fileName, string $mimeType = 'image/webp'): array
     {
@@ -16,16 +23,20 @@ class LocalPhotoStorage implements PhotoStorageInterface
 
         return [
             'ref' => $path,
-            'url' => '/storage/' . ltrim($path, '/'),
+            'url' => null,
             'disk' => 'local',
         ];
     }
 
     public function get(string $ref): ?string
     {
-        if (Storage::disk($this->disk)->exists($ref)) {
-            return Storage::disk($this->disk)->get($ref);
+        foreach ([$this->disk, $this->legacyDisk] as $disk) {
+            $path = $disk === $this->legacyDisk ? ltrim(str_replace('/storage/', '', $ref), '/') : $ref;
+            if (Storage::disk($disk)->exists($path)) {
+                return Storage::disk($disk)->get($path);
+            }
         }
+
         return null;
     }
 
@@ -39,6 +50,12 @@ class LocalPhotoStorage implements PhotoStorageInterface
 
     public function getUrl(string $ref): ?string
     {
-        return '/storage/' . ltrim($ref, '/');
+        return null; // served only through the authenticated route
+    }
+
+    /** True when $ref points at a file on this server (a Drive file ID has no slash). */
+    public static function isLocalRef(?string $ref): bool
+    {
+        return $ref !== null && str_contains($ref, '/');
     }
 }
