@@ -57,31 +57,31 @@ function PanelPilihan({ parameterPilihan = [], pilihan = {}, onFlash }) {
                         <div className="text-xs font-bold text-slate-800">{p.label}</div>
                         <ul className="space-y-1.5">
                             {(pilihan[p.kode] || []).map((o) => (
-                                <li key={o.id} className="flex items-center gap-2 text-xs">
+                                <li key={o.id} className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs py-1">
                                     {edit?.id === o.id ? (
                                         <>
                                             <input type="number" min="0" className={`${input} w-16`} value={edit.urutan}
                                                 onChange={(e) => setEdit({ ...edit, urutan: e.target.value })} title="Urutan" />
-                                            <input className={`${input} flex-1`} value={edit.nilai}
+                                            <input className={`${input} flex-1 min-w-[120px]`} value={edit.nilai}
                                                 onChange={(e) => setEdit({ ...edit, nilai: e.target.value })} />
-                                            <button type="button" onClick={simpan} className="p-1.5 rounded-lg bg-sky-600 text-white" title="Simpan"><Save className="w-3.5 h-3.5" /></button>
-                                            <button type="button" onClick={() => setEdit(null)} className="p-1.5 rounded-lg bg-slate-100 text-slate-600" title="Batal"><X className="w-3.5 h-3.5" /></button>
+                                            <button type="button" onClick={simpan} className="p-2 rounded-lg bg-sky-600 text-white min-h-[32px] min-w-[32px] flex items-center justify-center" title="Simpan"><Save className="w-3.5 h-3.5" /></button>
+                                            <button type="button" onClick={() => setEdit(null)} className="p-2 rounded-lg bg-slate-100 text-slate-600 min-h-[32px] min-w-[32px] flex items-center justify-center" title="Batal"><X className="w-3.5 h-3.5" /></button>
                                         </>
                                     ) : (
                                         <>
-                                            <span className="w-6 text-right text-slate-400 font-mono">{o.urutan}</span>
-                                            <span className="flex-1 font-semibold text-slate-800">{o.nilai}</span>
+                                            <span className="w-6 text-right text-slate-400 font-mono shrink-0">{o.urutan}</span>
+                                            <span className="flex-1 font-semibold text-slate-800 break-words">{o.nilai}</span>
                                             {hapus === o.id ? (
-                                                <>
-                                                    <span className="text-rose-600 font-semibold">Hapus?</span>
-                                                    <button type="button" onClick={() => hapusPilihan(o.id)} className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold">Ya</button>
-                                                    <button type="button" onClick={() => setHapus(null)} className="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold">Batal</button>
-                                                </>
+                                                <div className="flex items-center space-x-1 shrink-0">
+                                                    <span className="text-rose-600 font-semibold text-[11px]">Hapus?</span>
+                                                    <button type="button" onClick={() => hapusPilihan(o.id)} className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold text-xs">Ya</button>
+                                                    <button type="button" onClick={() => setHapus(null)} className="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs">Batal</button>
+                                                </div>
                                             ) : (
-                                                <>
+                                                <div className="flex items-center space-x-1 shrink-0">
                                                     <button type="button" onClick={() => setEdit({ id: o.id, nilai: o.nilai, urutan: o.urutan })} className="p-1.5 rounded-lg hover:bg-sky-50 text-sky-700" title="Ubah"><Pencil className="w-3.5 h-3.5" /></button>
                                                     <button type="button" onClick={() => setHapus(o.id)} className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600" title="Hapus"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                </>
+                                                </div>
                                             )}
                                         </>
                                     )}
@@ -90,12 +90,12 @@ function PanelPilihan({ parameterPilihan = [], pilihan = {}, onFlash }) {
                             {(pilihan[p.kode] || []).length === 0 && <li className="text-[11px] text-slate-400 italic">Belum ada pilihan.</li>}
                         </ul>
                         {errors[`edit${edit?.id}`] && <p className="text-[11px] text-rose-600">{errors[`edit${edit?.id}`]}</p>}
-                        <div className="flex items-center gap-2 pt-1">
+                        <div className="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 pt-1">
                             <input className={`${input} flex-1`} placeholder="Pilihan baru, salin dari BMKGSoft"
                                 value={baru[p.kode] || ''}
                                 onChange={(e) => setBaru({ ...baru, [p.kode]: e.target.value })}
                                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); tambah(p.kode); } }} />
-                            <button type="button" onClick={() => tambah(p.kode)} className="px-3 h-8 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-1">
+                            <button type="button" onClick={() => tambah(p.kode)} className="px-3 h-8 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center justify-center gap-1 min-h-[36px] min-[420px]:min-h-0">
                                 <Plus className="w-3.5 h-3.5" /> Tambah
                             </button>
                         </div>
@@ -137,14 +137,14 @@ function Modal({ open, title, onClose, children }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={onClose} />
-            <div className="relative bg-white border border-sky-100 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="relative bg-white border border-sky-100 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] max-h-[90dvh] overflow-y-auto">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                     <h3 className="font-bold text-base text-slate-900">{title}</h3>
                     <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
-                <div className="px-6 py-5">{children}</div>
+                <div className="px-4 sm:px-6 py-5">{children}</div>
             </div>
         </div>
     );
@@ -324,7 +324,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
         <Sidebar>
             <Head title="Kelola Alat - SILAP-Kinerja" />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 sm:space-y-6">
                 {flash && (
                     <div className="mb-4 flex items-center space-x-2 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl px-4 py-3 text-sm font-semibold">
                         <CheckCircle2 className="w-4 h-4 shrink-0 text-sky-600" />
@@ -333,24 +333,24 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                     </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Kelola Alat Pengamatan</h1>
                         <p className="text-slate-500 text-xs mt-0.5">
                             Pengaturan instrumen pengamatan, daftar parameter, dan jadwal pembacaan data.
                         </p>
                     </div>
-                    <div className="flex items-center space-x-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
                         <button
                             onClick={() => setSettingsModal(true)}
-                            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                            className="flex-1 sm:flex-none flex items-center justify-center space-x-1.5 px-3 py-2.5 sm:py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition min-h-[40px]"
                         >
-                            <Clock className="w-3.5 h-3.5 text-slate-500" />
-                            <span>Jam Operasional: {settings.jam_mulai.toString().padStart(2,'0')}:00–{settings.jam_selesai.toString().padStart(2,'0')}:00 WIB</span>
+                            <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                            <span className="truncate">Jam: {settings.jam_mulai.toString().padStart(2,'0')}:00–{settings.jam_selesai.toString().padStart(2,'0')}:00 WIB</span>
                         </button>
                         <button
                             onClick={openInstrCreate}
-                            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition shadow-sm shadow-sky-600/20"
+                            className="flex-1 sm:flex-none flex items-center justify-center space-x-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition shadow-sm shadow-sky-600/20 min-h-[40px]"
                         >
                             <Plus className="w-3.5 h-3.5" />
                             <span>Tambah Alat</span>
@@ -358,7 +358,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                     </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3.5 sm:space-y-4">
                     {instruments.length === 0 && (
                         <div className="text-center py-16 text-slate-400">
                             <Wrench className="w-12 h-12 mx-auto mb-3 opacity-30 text-sky-600" />
@@ -369,20 +369,20 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                     {instruments.map(instr => (
                         <div key={instr.id} className="bg-white rounded-2xl border border-sky-100/80 shadow-sm shadow-sky-100/30 overflow-hidden">
                             <div
-                                className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-sky-50/40 transition"
+                                className="flex items-center justify-between px-3.5 sm:px-5 py-3.5 sm:py-4 cursor-pointer hover:bg-sky-50/40 transition gap-2"
                                 onClick={() => setExpandedId(expandedId === instr.id ? null : instr.id)}
                             >
-                                <div className="flex items-center space-x-3 min-w-0">
+                                <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
                                     <div className={`w-3 h-3 rounded-full shrink-0 ${instr.is_active ? 'bg-sky-500' : 'bg-slate-300'}`} />
                                     <div className="min-w-0">
                                         <div className="font-bold text-slate-900 text-sm truncate">{instr.nama}</div>
-                                        <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                            {KATEGORI_LABELS[instr.kategori]} · {instr.parameters?.length ?? 0} parameter · Urutan kategori: {instr.urutan_form}
+                                        <div className="text-xs text-slate-400 font-medium mt-0.5 truncate">
+                                            {KATEGORI_LABELS[instr.kategori]} · {instr.parameters?.length ?? 0} param · Urutan: {instr.urutan_form}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center space-x-2 shrink-0">
+                                <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
                                     <button
                                         type="button"
                                         onClick={e => { e.stopPropagation(); toggleActive(instr); }}
@@ -400,17 +400,17 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); openInstrEdit(instr); }}
-                                        className="p-1 text-sky-600 hover:text-sky-800 hover:scale-110 transition cursor-pointer"
+                                        className="p-1.5 text-sky-600 hover:text-sky-800 hover:scale-110 transition cursor-pointer"
                                         title="Edit alat"
                                     >
-                                        <Pencil className="w-5 h-5" strokeWidth={2.5} />
+                                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                                     </button>
                                     <button
                                         onClick={e => { e.stopPropagation(); deleteInstr(instr); }}
-                                        className="p-1 text-rose-600 hover:text-rose-700 hover:scale-110 transition cursor-pointer"
+                                        className="p-1.5 text-rose-600 hover:text-rose-700 hover:scale-110 transition cursor-pointer"
                                         title="Hapus alat"
                                     >
-                                        <Trash2 className="w-5 h-5" strokeWidth={2.5} />
+                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                                     </button>
                                     {expandedId === instr.id
                                         ? <ChevronDown className="w-4 h-4 text-slate-400" />
@@ -420,8 +420,8 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             </div>
 
                             {expandedId === instr.id && (
-                                <div className="border-t border-sky-100 bg-sky-50/20 px-5 py-4">
-                                    <div className="flex items-center justify-between mb-3">
+                                <div className="border-t border-sky-100 bg-sky-50/20 px-3.5 sm:px-5 py-3.5 sm:py-4">
+                                    <div className="flex items-center justify-between mb-3 gap-2">
                                         <h4 className="text-xs font-semibold text-slate-700">Daftar Parameter</h4>
                                         <button
                                             onClick={() => openParamCreate(instr.id)}
@@ -438,7 +438,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
 
                                     <div className="space-y-2">
                                         {(instr.parameters ?? []).map(param => (
-                                            <div key={param.id} className={`bg-white rounded-xl border border-sky-100 px-4 py-3 flex items-start justify-between gap-3 transition ${param.is_active === false ? 'opacity-60 bg-slate-50/80 border-dashed' : ''}`}>
+                                            <div key={param.id} className={`bg-white rounded-xl border border-sky-100 p-3 sm:px-4 sm:py-3 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-3 transition ${param.is_active === false ? 'opacity-60 bg-slate-50/80 border-dashed' : ''}`}>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <span className={`font-bold text-sm ${param.is_active === false ? 'text-slate-500 line-through' : 'text-slate-900'}`}>{param.label}</span>
@@ -453,7 +453,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                                                             {SUMBER_LABELS[param.sumber]}
                                                         </span>
                                                     </div>
-                                                    <div className="text-xs text-slate-400 mt-1 flex flex-wrap gap-3">
+                                                    <div className="text-xs text-slate-400 mt-1 flex flex-wrap gap-2.5 sm:gap-3">
                                                         <span>kode: <span className="font-mono text-slate-600">{param.kode}</span></span>
                                                         <span>input: {TIPE_LABELS[param.tipe_input]}</span>
                                                         {(param.batas_min !== null || param.batas_max !== null) && (
@@ -465,7 +465,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center space-x-2 shrink-0">
+                                                <div className="flex items-center space-x-2 shrink-0 self-end sm:self-auto pt-1 sm:pt-0">
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleParamActive(param)}
@@ -506,7 +506,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                 </div>
 
                 <PanelPilihan parameterPilihan={parameterPilihan} pilihan={pilihan} onFlash={setFlash} />
-            </main>
+            </div>
 
             <Modal
                 open={instrModal.open}
@@ -553,9 +553,9 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                         />
                         <label htmlFor="is_active_instr" className="text-sm font-semibold text-slate-700">Alat aktif (tampil di form observasi)</label>
                     </div>
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={() => setInstrModal({ open: false })} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">Batal</button>
-                        <button type="submit" disabled={instrForm.processing} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition flex items-center space-x-2 shadow-sm shadow-sky-600/20">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                        <button type="button" onClick={() => setInstrModal({ open: false })} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border border-slate-200 text-slate-600 text-xs sm:text-sm font-semibold hover:bg-slate-50 transition text-center min-h-[40px]">Batal</button>
+                        <button type="submit" disabled={instrForm.processing} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-sm shadow-sky-600/20 min-h-[40px]">
                             <Save className="w-4 h-4" />
                             <span>{instrForm.processing ? 'Menyimpan...' : 'Simpan'}</span>
                         </button>
@@ -569,7 +569,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                 onClose={() => setParamModal({ open: false })}
             >
                 <form onSubmit={submitParam} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Kode (unik)" error={paramForm.errors.kode}>
                             <input
                                 type="text"
@@ -600,7 +600,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             required
                         />
                     </FormField>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Tipe Input" error={paramForm.errors.tipe_input}>
                             <select className={selectClass} value={paramForm.data.tipe_input} onChange={e => paramForm.setData('tipe_input', e.target.value)}>
                                 {Object.entries(TIPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -614,7 +614,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             </select>
                         </FormField>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Urutan Single (Form & PDF)" error={paramForm.errors.urutan}>
                             <input type="number" min="0" className={inputClass} value={paramForm.data.urutan} onChange={e => paramForm.setData('urutan', parseInt(e.target.value) || 0)} />
                         </FormField>
@@ -622,7 +622,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             <input type="number" step="any" className={inputClass} value={paramForm.data.faktor_konversi} onChange={e => paramForm.setData('faktor_konversi', e.target.value)} placeholder="mis: 1.0" />
                         </FormField>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Batas Min" error={paramForm.errors.batas_min}>
                             <input type="number" step="any" className={inputClass} value={paramForm.data.batas_min} onChange={e => paramForm.setData('batas_min', e.target.value)} placeholder="Kosong = tak terbatas" />
                         </FormField>
@@ -630,7 +630,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             <input type="number" step="any" className={inputClass} value={paramForm.data.batas_max} onChange={e => paramForm.setData('batas_max', e.target.value)} placeholder="Kosong = tak terbatas" />
                         </FormField>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Kartu (1-7 FDIH, 8 luar FDIH)" error={paramForm.errors.kartu}>
                             <input type="number" min="1" max="8" className={inputClass} value={paramForm.data.kartu} onChange={e => paramForm.setData('kartu', parseInt(e.target.value) || 8)} />
                         </FormField>
@@ -643,7 +643,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             </select>
                         </FormField>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Kode AWS (Opsional)" error={paramForm.errors.kode_aws}>
                             <input type="text" className={inputClass} value={paramForm.data.kode_aws} onChange={e => paramForm.setData('kode_aws', e.target.value)} placeholder="mis: TA_meas, RH_meas" />
                         </FormField>
@@ -661,9 +661,9 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                             onChange={v => paramForm.setData('jadwal_baca', v)}
                         />
                     </FormField>
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={() => setParamModal({ open: false })} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">Batal</button>
-                        <button type="submit" disabled={paramForm.processing} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition flex items-center space-x-2 shadow-sm shadow-sky-600/20">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                        <button type="button" onClick={() => setParamModal({ open: false })} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border border-slate-200 text-slate-600 text-xs sm:text-sm font-semibold hover:bg-slate-50 transition text-center min-h-[40px]">Batal</button>
+                        <button type="submit" disabled={paramForm.processing} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-sm shadow-sky-600/20 min-h-[40px]">
                             <Save className="w-4 h-4" />
                             <span>{paramForm.processing ? 'Menyimpan...' : 'Simpan'}</span>
                         </button>
@@ -677,7 +677,7 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>Jam operasional menentukan pilihan jam di form observasi dan validasi jadwal baca parameter.</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField label="Jam Mulai (WIB)" error={settingsForm.errors.jam_mulai}>
                             <input
                                 type="number" min="0" max="23"
@@ -705,9 +705,9 @@ export default function Instruments({ instruments, settings, parameterPilihan = 
                         <p className="text-[11px] text-slate-400 mt-1">Default 8 (slot 08.00 mencakup hujan 07.00-08.00 hari itu).</p>
                     </FormField>
                     <p className="text-xs text-slate-500">Standar: 07:00–22:00 WIB (16 slot per hari).</p>
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button type="button" onClick={() => setSettingsModal(false)} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">Batal</button>
-                        <button type="submit" disabled={settingsForm.processing} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition flex items-center space-x-2 shadow-sm shadow-sky-600/20">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                        <button type="button" onClick={() => setSettingsModal(false)} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border border-slate-200 text-slate-600 text-xs sm:text-sm font-semibold hover:bg-slate-50 transition text-center min-h-[40px]">Batal</button>
+                        <button type="submit" disabled={settingsForm.processing} className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 shadow-sm shadow-sky-600/20 min-h-[40px]">
                             <Save className="w-4 h-4" />
                             <span>Simpan</span>
                         </button>

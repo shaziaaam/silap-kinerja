@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Head, Link } from '@inertiajs/react';
 import { Lock, UserCheck, ShieldAlert, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
-const bgImages = ['/images/3.png', '/images/1.png', '/images/2.png'];
+const bgImages = ['/images/login/3.png', '/images/login/1.png', '/images/login/2.png'];
 
 export default function Login() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -26,7 +26,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-slate-50 flex flex-col relative overflow-hidden">
+        <div className="min-h-screen min-h-dvh bg-gradient-to-br from-sky-50 via-white to-slate-50 flex flex-col relative overflow-hidden">
             <Head title="Login Pegawai - SILAP-Kinerja BMKG" />
 
             {/* Background slideshow photos */}
@@ -71,7 +71,7 @@ export default function Login() {
                     <div className="text-center mb-6">
                         <div className="flex flex-col items-center justify-center mb-3">
                             <img
-                                src="/images/logo hitam.webp"
+                                src="/images/brand/logo-hitam.webp"
                                 alt="Logo BMKG"
                                 className="h-16 w-auto object-contain"
                             />

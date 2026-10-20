@@ -42,7 +42,7 @@ Nama pengamat (Achmad Sulistyo E.P, Edy Susanto, Eko Taufiq Suharmanto, Joko Cah
 
 ## 5. Arsitektur Data
 
-Entitas utama (diagram lama di `erd.png` sudah tidak memuat tabel parameter):
+Entitas utama (diagram lama di `docs/diagram/erd.png` sudah tidak memuat tabel parameter):
 
 - **users** — id, nama, nip, email, role (pengamat/penyelia/admin), password, must_change_password
 - **schedules** — id, jam_utc, jam_wib, kelompok (`JAM_PENUH`/`AGM1B`), shift (pagi/siang), is_mandatory_photo. 19 slot per hari, 7 hari seminggu

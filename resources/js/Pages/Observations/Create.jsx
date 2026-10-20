@@ -1,11 +1,11 @@
-import React from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import React, { useEffect, useRef } from 'react';
+import { Head, useForm, Link, router } from '@inertiajs/react';
 import Sidebar from '../../Components/Sidebar';
 import WatermarkCamera from '../../Components/WatermarkCamera';
 import ObservationFields, { useObservationFields } from '../../Components/ObservationFields';
 import { ArrowLeft, Send, AlertTriangle, Camera } from 'lucide-react';
 
-export default function CreateObservation({ schedules = [], instruments = [], parameterOptions = {}, previousValues = {}, settings = {}, aturanFisika = {}, slotTerisi = [], hariIni = null }) {
+export default function CreateObservation({ schedules = [], instruments = [], parameterOptions = {}, previousValues = {}, settings = {}, aturanFisika = {}, slotTerisi = [], hariIni = null, tanggalDipilih = null }) {
     const getNearestScheduleId = (scheduleList) => {
         if (!scheduleList || scheduleList.length === 0) return '';
 
@@ -55,13 +55,33 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
 
     const { data, setData, post, processing, errors } = useForm({
         schedule_id: initialScheduleId,
-        tanggal: hariIni || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }),
-        status_pengamatan: 'lengkap',
-        alasan_batal: '',
+        tanggal: tanggalDipilih || hariIni || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }),
+        catatan_kondisi: '',
         values: initialValues,
         foto: null,
         foto_sumber: null,
     });
+
+    // Form panjang: setelah simpan gagal, bawa pengguna ke banner kesalahan agar alasannya terlihat.
+    const bannerGalatRef = useRef(null);
+    const kunciGalat = JSON.stringify(errors);
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            bannerGalatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [kunciGalat]);
+
+    // Daftar slot terisi dari server berlaku untuk `tanggalDipilih`; muat ulang saat tanggal diganti.
+    useEffect(() => {
+        if (!data.tanggal || data.tanggal === tanggalDipilih || (hariIni && data.tanggal > hariIni)) return;
+        router.reload({
+            data: { tanggal: data.tanggal },
+            only: ['slotTerisi', 'tanggalDipilih'],
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    }, [data.tanggal]);
 
     const selectedSchedule = schedules.find(s => String(s.id) === String(data.schedule_id));
     const jamWibStr = selectedSchedule ? selectedSchedule.jam_wib.substring(0, 5) : '07:00';
@@ -83,7 +103,7 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
         <Sidebar>
             <Head title="Input Observasi - SILAP-Kinerja" />
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <Link
@@ -101,7 +121,7 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
                 </div>
 
                 {Object.keys(errors).length > 0 && (
-                    <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-6 flex items-start space-x-3 text-rose-900 text-xs font-semibold shadow-sm">
+                    <div ref={bannerGalatRef} role="alert" className="bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-6 flex items-start space-x-3 text-rose-900 text-xs font-semibold shadow-sm">
                         <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                         <div className="space-y-1">
                             <p className="font-bold text-rose-900 text-sm">Kesalahan Validasi Data Observasi:</p>
@@ -114,10 +134,10 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
                     </div>
                 )}
 
-                <form onSubmit={submit} className="space-y-8">
+                <form onSubmit={submit} className="space-y-6 sm:space-y-8">
                     {/* Header Bagian 1: Slot & Tanggal */}
-                    <div className="bg-white border border-sky-100 rounded-2xl p-6 shadow-sm space-y-6">
-                        <h2 className="font-bold text-base text-slate-900 border-b border-sky-100 pb-3 flex items-center justify-between">
+                    <div className="bg-white border border-sky-100 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-5 sm:space-y-6">
+                        <h2 className="font-bold text-base text-slate-900 border-b border-sky-100 pb-3 flex flex-wrap items-center justify-between gap-2">
                             <span>Informasi Pengamatan &amp; Slot</span>
                             {isMandatoryPhoto ? (
                                 <span className="text-xs bg-amber-50 text-amber-800 border border-amber-300 font-bold px-3 py-1 rounded-full flex items-center space-x-1.5">
@@ -131,7 +151,7 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
                             )}
                         </h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <div>
                                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">Tanggal Pengamatan</label>
                                 <input
@@ -158,7 +178,7 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
                                         const isPhoto = ['07:00', '17:00'].includes(jw);
                                         return (
                                             <option key={s.id} value={s.id}>
-                                                Pukul {jw} WIB {isAgm ? '[AGM 1-B]' : '[Jam Penuh]'} {isPhoto ? '📷 Wajib Foto' : ''}{data.tanggal === hariIni && slotTerisi.map(String).includes(String(s.id)) ? ' ✓ sudah diisi' : ''}
+                                                Pukul {jw} WIB {isAgm ? '[AGM 1-B]' : '[Jam Penuh]'} {isPhoto ? '📷 Wajib Foto' : ''}{data.tanggal === tanggalDipilih && slotTerisi.map(String).includes(String(s.id)) ? ' ✓ sudah diisi' : ''}
                                             </option>
                                         );
                                     })}
@@ -167,57 +187,47 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
                                     {isAgm1bSlot ? 'Slot AGM 1-B: field tab FDIH (kartu 1–7).' : 'Slot jam penuh: field di luar tab FDIH (kartu 8).'}
                                 </p>
                             </div>
-
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Status Observasi</label>
-                                <select
-                                    value={data.status_pengamatan}
-                                    onChange={(e) => setData('status_pengamatan', e.target.value)}
-                                    className={inputClass}
-                                >
-                                    <option value="lengkap">Lengkap / Normal</option>
-                                    <option value="dibatalkan">Dibatalkan (Hambatan Khusus)</option>
-                                </select>
-                            </div>
                         </div>
 
-                        {data.status_pengamatan === 'dibatalkan' && (
-                            <div>
-                                <label className="block text-xs font-semibold text-rose-700 mb-1">Alasan Pembatalan</label>
-                                <textarea
-                                    value={data.alasan_batal}
-                                    onChange={(e) => setData('alasan_batal', e.target.value)}
-                                    className="w-full bg-rose-50/50 border border-rose-200 rounded-xl p-3 text-slate-900 text-xs placeholder:text-xs outline-none focus:bg-white focus:border-rose-500 transition font-medium"
-                                    placeholder="Jelaskan alasan pengamatan dibatalkan..."
-                                    rows="2"
-                                    required
-                                />
-                            </div>
-                        )}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Kondisi khusus <span className="font-normal text-slate-400">(opsional)</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={data.catatan_kondisi}
+                                onChange={(e) => setData('catatan_kondisi', e.target.value)}
+                                maxLength={300}
+                                className={inputClass}
+                                placeholder="Contoh: hujan lebat dan petir, nilai dibaca dari AWS"
+                            />
+                            <p className="text-[11px] text-slate-500 mt-1">
+                                Isi bila tidak bisa ke taman alat. Catatan ini tampil untuk penyelia; foto pada slot 07.00 dan 17.00 tetap wajib.
+                            </p>
+                            {errors.catatan_kondisi && <p className="text-[11px] text-rose-600 mt-1 font-medium">{errors.catatan_kondisi}</p>}
+                        </div>
                     </div>
 
-                    {data.status_pengamatan === 'lengkap' && (
-                        <ObservationFields
-                            data={data}
-                            visibleParams={visibleParams}
-                            handleValueChange={handleValueChange}
-                            issues={issues}
-                            parameterOptions={parameterOptions}
-                            jamWibStr={jamWibStr}
+                    <ObservationFields
+                        data={data}
+                        visibleParams={visibleParams}
+                        handleValueChange={handleValueChange}
+                        issues={issues}
+                        parameterOptions={parameterOptions}
+                        jamWibStr={jamWibStr}
                         />
-                    )}
 
                     {/* Part Foto Bukti Live: HANYA MUNCUL DI SLOT 07:00 & 17:00 */}
                     {isMandatoryPhoto && (
-                        <div className="bg-white border border-sky-100 rounded-2xl p-6 shadow-sm space-y-4">
-                            <h2 className="font-bold text-base text-slate-900 border-b border-sky-100 pb-3 flex items-center justify-between">
+                        <div className="bg-white border border-sky-100 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+                            <h2 className="font-bold text-base text-slate-900 border-b border-sky-100 pb-3 flex flex-wrap items-center justify-between gap-2">
                                 <span>Foto Bukti Kegiatan (Kamera Langsung)</span>
                                 <span className="text-xs text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-300 font-bold">
                                     Slot Wajib Foto ({jamWibStr} WIB)
                                 </span>
                             </h2>
                             <p className="text-xs text-slate-500">
-                                Sesuai ketentuan, foto bukti pengamatan wajib diambil langsung (tanpa galeri) pada slot 07.00 WIB (shift pagi) dan 17.00 WIB (shift siang).
+                                Sesuai ketentuan, foto bukti pengamatan wajib diambil langsung dengan kamera pada slot 07.00 WIB (shift pagi) dan 17.00 WIB (shift siang). Bila tidak bisa ke taman alat (hujan lebat, petir, dll), ambil foto layar AWS atau foto Anda di depan monitor AWS. Foto dari galeri hanya untuk keadaan darurat dan akan ditandai untuk penyelia.
                             </p>
 
                             <WatermarkCamera
@@ -241,10 +251,10 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
                     )}
 
                     {/* Footer Actions: Kunci submit jika foto wajib belum diambil */}
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                    <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-200">
                         <Link
                             href={route('observations.index')}
-                            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-xs font-semibold transition"
+                            className="w-full sm:w-auto inline-flex justify-center items-center space-x-1.5 px-5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-xs font-semibold transition"
                         >
                             <ArrowLeft className="w-3.5 h-3.5" />
                             <span>Batal &amp; Kembali</span>
@@ -252,15 +262,15 @@ export default function CreateObservation({ schedules = [], instruments = [], pa
 
                         <button
                             type="submit"
-                            disabled={processing || issues.pesan.length > 0 || (isMandatoryPhoto && data.status_pengamatan === 'lengkap' && !data.foto)}
-                            className="inline-flex items-center space-x-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-semibold px-6 py-2.5 rounded-xl shadow-sm text-sm transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            disabled={processing || issues.pesan.length > 0 || (isMandatoryPhoto && !data.foto)}
+                            className="w-full sm:w-auto inline-flex justify-center items-center space-x-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-semibold px-6 py-3 sm:py-2.5 rounded-xl shadow-sm text-sm transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             <Send className="w-4 h-4" />
                             <span>{processing ? 'Menyimpan...' : 'Simpan Observasi'}</span>
                         </button>
                     </div>
                 </form>
-            </main>
+            </div>
         </Sidebar>
     );
 }

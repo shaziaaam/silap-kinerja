@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { motion, MotionConfig } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import {
     LayoutDashboard, FileSpreadsheet, FilePlus, UserCheck,
     Wrench, Users, LogOut, FileText,
-    Menu, X, User, ChevronRight
+    Menu, X, User, ChevronRight, CheckCircle, AlertCircle
 } from 'lucide-react';
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -27,7 +27,7 @@ function NavItem({ href, icon: Icon, label, active, onClick, index, itemRef }) {
             <Link
                 href={href}
                 onClick={onClick}
-                className={`group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-xl transition-colors duration-300 active:scale-[0.98] ${
+                className={`group relative flex items-center gap-2.5 px-3 py-2.5 sm:py-2 text-xs rounded-xl transition-colors duration-300 active:scale-[0.98] ${
                     active
                         ? 'text-white font-bold'
                         : 'text-slate-600 hover:bg-sky-50 hover:text-sky-700 font-medium'
@@ -133,7 +133,7 @@ function SidebarBody({ user, liveTime, close }) {
                 className="group flex items-center gap-2.5 px-3.5 py-3.5 border-b border-sky-100 shrink-0 transition-colors duration-300 hover:bg-sky-50/50"
             >
                 <img
-                    src="/images/logo hitam.webp"
+                    src="/images/brand/logo-hitam.webp"
                     alt="BMKG"
                     className="h-7 w-auto object-contain shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                 />
@@ -144,7 +144,7 @@ function SidebarBody({ user, liveTime, close }) {
                 <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); close(); }}
-                    className="ml-auto lg:hidden p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-sky-50 active:scale-90 transition-all duration-200 ease-out"
+                    className="ml-auto lg:hidden p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-sky-50 active:scale-90 transition-all duration-200 ease-out"
                     aria-label="Tutup Menu"
                 >
                     <X className="w-4 h-4" />
@@ -193,14 +193,27 @@ function SidebarBody({ user, liveTime, close }) {
                 )}
             </nav>
 
-            {/* Bottom Logout Button */}
-            <div className="shrink-0 border-t border-sky-100 p-2.5 bg-slate-50/50">
+            {/* Bottom User Profile & Logout */}
+            <div className="shrink-0 border-t border-sky-100 p-2.5 bg-slate-50/50 space-y-2 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+                {user && (
+                    <div className="px-2.5 py-2 rounded-xl bg-white border border-sky-100 shadow-2xs">
+                        <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 font-bold text-xs flex items-center justify-center shrink-0">
+                                {user.nama ? user.nama.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs font-bold text-slate-900 truncate leading-tight">{user.nama}</div>
+                                <div className="text-[10px] text-sky-600 font-semibold capitalize truncate">{user.role} · {user.nip}</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <Link
                     href={route('logout')}
                     method="post"
                     as="button"
                     onClick={close}
-                    className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 hover:translate-x-0.5 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="group w-full flex items-center gap-2.5 px-3 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 hover:translate-x-0.5 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
                     <LogOut className="w-4 h-4 shrink-0 text-rose-500 group-hover:scale-105 transition-transform duration-200 ease-out" />
                     <span>Keluar</span>
@@ -210,7 +223,66 @@ function SidebarBody({ user, liveTime, close }) {
     );
 }
 
-export default function Sidebar({ children }) {
+// Pesan hasil aksi dari server: flash.success / flash.message (hijau), flash.error / errors.message (merah).
+// Halaman yang sudah menampilkan pesan sendiri memakai <Sidebar toast={false}> agar tidak ganda.
+function FlashToast() {
+    const { flash, errors } = usePage().props;
+    const sukses = flash?.success || flash?.message || null;
+    const galat = flash?.error || errors?.message || null;
+    const teks = galat || sukses;
+    const nada = galat ? 'error' : 'ok';
+
+    const [toast, setToast] = useState(teks ? { teks, nada } : null);
+
+    // Kunci pada teks: kunjungan berikutnya dengan pesan baru menampilkan toast baru; partial reload
+    // (polling) tidak membawa flash sehingga toast yang sedang tampil tidak terhapus.
+    useEffect(() => {
+        if (teks) setToast({ teks, nada });
+    }, [teks, nada]);
+
+    useEffect(() => {
+        if (!toast) return undefined;
+        const id = setTimeout(() => setToast(null), 7000);
+        return () => clearTimeout(id);
+    }, [toast]);
+
+    return (
+        <div className="fixed top-4 right-4 z-[60] w-[calc(100%-2rem)] sm:w-96 pointer-events-none">
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        key={toast.teks}
+                        role={toast.nada === 'error' ? 'alert' : 'status'}
+                        initial={{ opacity: 0, y: -16, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -12, scale: 0.97 }}
+                        transition={{ duration: 0.4, ease: EASE }}
+                        className={`pointer-events-auto flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-xs font-medium shadow-lg ${
+                            toast.nada === 'error'
+                                ? 'bg-rose-50 border-rose-200 text-rose-800 shadow-rose-200/50'
+                                : 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-emerald-200/50'
+                        }`}
+                    >
+                        {toast.nada === 'error'
+                            ? <AlertCircle className="w-4 h-4 shrink-0 mt-px text-rose-600" />
+                            : <CheckCircle className="w-4 h-4 shrink-0 mt-px text-emerald-600" />}
+                        <span className="flex-1 leading-snug">{toast.teks}</span>
+                        <button
+                            type="button"
+                            onClick={() => setToast(null)}
+                            className="shrink-0 -mr-1 p-0.5 rounded text-current opacity-60 hover:opacity-100 transition"
+                            aria-label="Tutup pesan"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+export default function Sidebar({ children, toast = true }) {
     const { auth } = usePage().props;
     const user = auth?.user;
 
@@ -234,7 +306,9 @@ export default function Sidebar({ children }) {
 
     return (
         <MotionConfig reducedMotion="user">
-            <div className="flex h-screen bg-slate-50 overflow-hidden">
+            <div className="flex h-screen h-dvh bg-slate-50 overflow-hidden">
+                {toast && <FlashToast />}
+
                 {/* Desktop Sidebar (w-56) */}
                 <aside className="hidden lg:flex flex-col w-56 shrink-0 h-full border-r border-sky-100 shadow-sm bg-white">
                     <SidebarBody user={user} liveTime={liveTime} close={close} />
@@ -251,7 +325,7 @@ export default function Sidebar({ children }) {
 
                 {/* Mobile Drawer */}
                 <aside
-                    className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform lg:hidden shadow-xl ${
+                    className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform lg:hidden shadow-xl ${
                         open ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 >
@@ -261,17 +335,32 @@ export default function Sidebar({ children }) {
                 {/* Main Content Area */}
                 <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                     {/* Mobile Topbar */}
-                    <header className="lg:hidden flex items-center gap-2.5 px-3.5 py-2.5 bg-white border-b border-sky-100 shrink-0 shadow-xs">
-                        <button
-                            onClick={() => setOpen(true)}
-                            className="p-1.5 rounded-lg text-slate-700 hover:bg-sky-50 active:scale-90 transition-all duration-200 ease-out"
-                            aria-label="Buka menu"
-                        >
-                            <Menu className="w-5 h-5" />
-                        </button>
-                        <img src="/images/logo hitam.webp" alt="BMKG" className="h-6 w-auto object-contain" />
-                        <span className="font-extrabold text-slate-900 text-xs tracking-tight">SILAP-Kinerja</span>
-                        <div className="ml-auto text-[10px] text-slate-600 font-mono font-semibold">{liveTime.wib}</div>
+                    <header className="lg:hidden flex items-center justify-between gap-2 px-3 sm:px-4 py-2 bg-white border-b border-sky-100 shrink-0 shadow-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <button
+                                onClick={() => setOpen(true)}
+                                className="p-2 min-w-[38px] min-h-[38px] flex items-center justify-center rounded-xl text-slate-700 hover:bg-sky-50 active:scale-95 border border-sky-100 transition duration-150"
+                                aria-label="Buka menu navigasi"
+                            >
+                                <Menu className="w-5 h-5" />
+                            </button>
+                            <img src="/images/brand/logo-hitam.webp" alt="BMKG" className="h-6 sm:h-7 w-auto object-contain shrink-0" />
+                            <div className="min-w-0">
+                                <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight truncate block">SILAP-Kinerja</span>
+                                <span className="text-[9px] text-sky-600 font-semibold truncate block sm:hidden">Staklim Jateng</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                            {user && (
+                                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 capitalize">
+                                    {user.role}
+                                </span>
+                            )}
+                            <div className="text-[10px] sm:text-xs text-sky-900 font-mono font-bold bg-sky-50 px-2 py-1 rounded-lg border border-sky-100">
+                                {liveTime.wib}
+                            </div>
+                        </div>
                     </header>
 
                     {/* Page Content View: isi halaman naik bertahap saat dibuka (lihat .page-enter di app.css) */}

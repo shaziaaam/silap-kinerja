@@ -171,6 +171,90 @@ class ReportAccessAndInputRulesTest extends TestCase
                 ->where('slotTerisi', [$this->slot['08:00']->id]));
     }
 
+    public function test_create_form_lists_filled_slots_for_the_chosen_past_date(): void
+    {
+        $this->obs($this->pengamatLain, '08:00', '2026-10-09', [], 'pending');
+
+        $this->actingAs($this->pengamat)->get(route('observations.create', ['tanggal' => '2026-10-09']))
+            ->assertInertia(fn ($page) => $page
+                ->where('tanggalDipilih', '2026-10-09')
+                ->where('slotTerisi', [$this->slot['08:00']->id]));
+
+        // A future or malformed date falls back to today instead of leaking or erroring
+        $hariIni = now('Asia/Jakarta')->toDateString();
+        foreach ([now('Asia/Jakarta')->addDays(2)->toDateString(), 'bukan-tanggal'] as $salah) {
+            $this->actingAs($this->pengamat)->get(route('observations.create', ['tanggal' => $salah]))
+                ->assertInertia(fn ($page) => $page->where('tanggalDipilih', $hariIni));
+        }
+    }
+
+    public function test_slot_conflict_message_points_to_something_the_user_can_do(): void
+    {
+        $this->kirim($this->pengamat, '08:00');
+
+        // Someone else's entry: they cannot open it, so the message must not say "ubah observasi tersebut"
+        $lain = $this->kirim($this->pengamatLain, '08:00')->assertSessionHasErrors('schedule_id');
+        $pesanLain = session('errors')->first('schedule_id');
+        $this->assertStringContainsString('Edy Susanto', $pesanLain);
+        $this->assertStringContainsString('pilih slot lain', $pesanLain);
+
+        // Their own entry: point to Riwayat Observasi
+        $this->kirim($this->pengamat, '08:00')->assertSessionHasErrors('schedule_id');
+        $this->assertStringContainsString('Riwayat Observasi', session('errors')->first('schedule_id'));
+    }
+
+    public function test_observation_cannot_be_marked_cancelled(): void
+    {
+        // Setiap jam tetap diamati (saat badai dibaca dari AWS), jadi status batal tidak ada lagi.
+        $this->actingAs($this->pengamat)->post(route('observations.store'), [
+            'schedule_id' => $this->slot['08:00']->id, 'tanggal' => '2026-10-09',
+            'status_pengamatan' => 'dibatalkan', 'alasan_batal' => 'badai',
+            'catatan_kondisi' => '  Hujan lebat, dibaca dari AWS  ',
+            'values' => [InstrumentParameter::where('kode', 'jumlah_awan_okta')->value('id') => ['manual' => '3']],
+        ])->assertSessionHasNoErrors();
+
+        $o = Observation::where('user_id', $this->pengamat->id)->latest('id')->first();
+        $this->assertSame('lengkap', $o->status_pengamatan);
+        // Hanya catatan "kondisi khusus" yang tersimpan, bukan alasan_batal kiriman luar
+        $this->assertSame('Hujan lebat, dibaca dari AWS', $o->alasan_batal);
+    }
+
+    public function test_special_condition_note_does_not_waive_the_mandatory_photo(): void
+    {
+        $this->actingAs($this->pengamat)->post(route('observations.store'), [
+            'schedule_id' => $this->slot['07:00']->id, 'tanggal' => '2026-10-09',
+            'catatan_kondisi' => 'Petir, dibaca dari AWS',
+            'values' => [InstrumentParameter::where('kode', 'jumlah_awan_okta')->value('id') => ['manual' => '3']],
+        ])->assertSessionHasErrors('foto');
+    }
+
+    public function test_pending_entry_can_be_edited_by_its_owner_only(): void
+    {
+        $o = $this->obs($this->pengamat, '08:00', '2026-10-09', [], 'pending');
+
+        $this->actingAs($this->pengamat)->get(route('observations.edit', $o))->assertOk();
+        $this->actingAs($this->pengamatLain)->get(route('observations.edit', $o))->assertForbidden();
+    }
+
+    public function test_report_page_says_why_a_pdf_cannot_be_downloaded_yet(): void
+    {
+        $this->accT4($this->pengamat);
+        // Another user's approved quarter must not appear for this pengamat
+        $this->accT4($this->pengamatLain);
+
+        $kunci = $this->pengamat->id . '|2026|T4';
+        $this->actingAs($this->pengamat)->get(route('supervisor.skp.index'))
+            ->assertInertia(fn ($page) => $page
+                ->where("alasanLaporan.$kunci", '')
+                ->missing('alasanLaporan.' . $this->pengamatLain->id . '|2026|T4')
+                ->missing('alasanLaporan.' . $this->pengamat->id . '|2026|T3'));
+
+        // A revision in the quarter blocks the PDF and the page says so
+        $this->obs($this->pengamat, '08:00', '2026-10-09', [], 'revision');
+        $this->actingAs($this->pengamat)->get(route('supervisor.skp.index'))
+            ->assertInertia(fn ($page) => $page->where("alasanLaporan.$kunci", fn ($v) => str_contains((string) $v, 'revisi')));
+    }
+
     // ---- Kelola Alat > Pilihan -----------------------------------------------------
 
     public function test_admin_manages_dropdown_choices(): void

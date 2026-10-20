@@ -62,7 +62,7 @@ Tabel dibuat ringkas dan fokus pada pembuktian SKP & pengawasan operasional:
 
 ## 4. Logo Resmi & Komponen Brand
 
-- **Logo Utama Header:** `/images/BMKG.png` (Logo BMKG bulat dengan teks lambang berwarna putih di bawahnya).
+- **Logo Utama Header:** `/images/brand/bmkg.png` (Logo BMKG bulat dengan teks lambang berwarna putih di bawahnya).
 - **Nama Aplikasi:** `SILAP-Kinerja` (Sistem Informasi Laporan & Kinerja BMKG Jateng).
 
 ---

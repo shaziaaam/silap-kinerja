@@ -33,7 +33,7 @@ class ObservationController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $schedules = Schedule::orderBy('jam_wib', 'asc')->get();
         $instruments = Instrument::with(['parameters' => function ($q) {
@@ -48,9 +48,15 @@ class ObservationController extends Controller
         // Dibaca, Piche Sekarang, Gunn-Bellani hari sebelumnya)
         $previousValues = app(\App\Services\ObservationRules::class)->nilaiSebelum();
 
-        // Slots already filled today (station-wide): the form picks the nearest empty one.
+        // Slots already filled on the chosen date (station-wide). The form asks again with
+        // ?tanggal= when the date changes, so back-dated entries see taken slots up front.
         $hariIni = now('Asia/Jakarta')->toDateString();
-        $slotTerisi = Observation::whereDate('tanggal', $hariIni)->pluck('schedule_id')->unique()->values();
+        $tanggalDipilih = $hariIni;
+        $diminta = (string) $request->query('tanggal', '');
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $diminta) && strtotime($diminta) !== false && $diminta <= $hariIni) {
+            $tanggalDipilih = $diminta;
+        }
+        $slotTerisi = Observation::whereDate('tanggal', $tanggalDipilih)->pluck('schedule_id')->unique()->values();
 
         $settings = [
             'jam_mulai' => (int) Setting::get('jam_mulai', 7),
@@ -66,6 +72,7 @@ class ObservationController extends Controller
             'previousValues' => $previousValues,
             'slotTerisi' => $slotTerisi,
             'hariIni' => $hariIni,
+            'tanggalDipilih' => $tanggalDipilih,
             'settings' => $settings,
             'aturanFisika' => $this->aturanFisikaUntukForm(),
         ]);
@@ -76,8 +83,7 @@ class ObservationController extends Controller
         $validated = $request->validate([
             'schedule_id' => 'required|exists:schedules,id',
             'tanggal' => 'required|date|before_or_equal:' . now('Asia/Jakarta')->toDateString(),
-            'status_pengamatan' => 'required|in:lengkap,dibatalkan',
-            'alasan_batal' => 'nullable|required_if:status_pengamatan,dibatalkan|string',
+            'catatan_kondisi' => 'nullable|string|max:300',
             'foto' => 'nullable|string',
             'foto_sumber' => 'nullable|in:kamera,galeri',
             'values' => 'nullable|array',
@@ -91,19 +97,19 @@ class ObservationController extends Controller
             return back()->withErrors(['schedule_id' => $pesan])->withInput();
         }
 
-        if ($isMandatoryPhoto && empty($validated['foto']) && $validated['status_pengamatan'] === 'lengkap') {
+        if ($isMandatoryPhoto && empty($validated['foto'])) {
             return back()->withErrors([
                 'foto' => 'Foto bukti pengamatan wajib diambil pada slot pengamatan 07:00 WIB dan 17:00 WIB.',
             ])->withInput();
         }
 
-        [$values, $fisikaErrors] = $this->olahNilai($validated['values'] ?? [], $validated['status_pengamatan']);
+        [$values, $fisikaErrors] = $this->olahNilai($validated['values'] ?? []);
         if ($fisikaErrors) {
             return back()->withErrors($fisikaErrors)->withInput();
         }
 
         $fotoRef = $this->simpanFoto($validated['foto'] ?? null, $validated['tanggal']);
-        if ($isMandatoryPhoto && !$fotoRef && $validated['status_pengamatan'] === 'lengkap') {
+        if ($isMandatoryPhoto && !$fotoRef) {
             return back()->withErrors(['foto' => 'Foto tidak terbaca. Ambil ulang foto dengan kamera lalu simpan kembali.'])->withInput();
         }
 
@@ -113,8 +119,9 @@ class ObservationController extends Controller
             'user_id' => $request->user()->id,
             'schedule_id' => $validated['schedule_id'],
             'tanggal' => $validated['tanggal'],
-            'status_pengamatan' => $validated['status_pengamatan'],
-            'alasan_batal' => $validated['alasan_batal'] ?? null,
+            // Pengamatan dilakukan setiap jam (saat badai pun dibaca dari AWS), tidak ada status batal.
+            'status_pengamatan' => 'lengkap',
+            'alasan_batal' => $this->catatanKondisi($validated),
             'shift' => $shift,
             'foto_path' => $fotoRef,
             'photo_slot' => $isMandatoryPhoto ? $jamWib : null,
@@ -133,7 +140,7 @@ class ObservationController extends Controller
      * Normalise 9999, recompute the app-calculated fields server-side, then run the
      * physics checks. Returns [values keyed by parameter id, errors].
      */
-    protected function olahNilai(array $values, string $statusPengamatan): array
+    protected function olahNilai(array $values): array
     {
         foreach ($values as $paramId => $valData) {
             foreach (['manual', 'aws'] as $sumber) {
@@ -143,10 +150,6 @@ class ObservationController extends Controller
                 }
                 $values[$paramId][$sumber] = $this->normalkanTidakDiukur($v);
             }
-        }
-
-        if ($statusPengamatan !== 'lengkap') {
-            return [$values, []];
         }
 
         $rules = app(\App\Services\ObservationRules::class);
@@ -173,13 +176,23 @@ class ObservationController extends Controller
         }
     }
 
+    /**
+     * Catatan opsional "kondisi khusus" (mis. hujan lebat/petir, dibaca dari AWS). Disimpan di kolom
+     * alasan_batal yang lama; bukan status batal, foto slot 07.00/17.00 tetap wajib.
+     */
+    protected function catatanKondisi(array $validated): ?string
+    {
+        $catatan = trim((string) ($validated['catatan_kondisi'] ?? ''));
+
+        return $catatan === '' ? null : $catatan;
+    }
+
     protected function pesanValidasi(): array
     {
         return [
             'tanggal.before_or_equal' => 'Tanggal pengamatan tidak boleh melebihi hari ini.',
             'tanggal.required' => 'Tanggal pengamatan wajib diisi.',
             'schedule_id.required' => 'Slot jadwal pengamatan wajib dipilih.',
-            'alasan_batal.required_if' => 'Alasan pembatalan wajib diisi.',
         ];
     }
 
@@ -202,8 +215,13 @@ class ObservationController extends Controller
         $jam = str_replace(':', '.', substr((string) $schedule->jam_wib, 0, 5));
         $tgl = \Carbon\Carbon::parse($tanggal)->format('d/m/Y');
 
+        // A pengamat can only open their own entries, so point them to something they can do.
+        if ($ada->user_id === auth()->id()) {
+            return "Slot {$jam} WIB tanggal {$tgl} sudah Anda isi. Untuk mengubahnya, buka Riwayat Observasi lalu pilih Ubah.";
+        }
+
         return "Slot {$jam} WIB tanggal {$tgl} sudah diisi oleh " . ($ada->user->nama ?? 'pengamat lain')
-            . '. Bila ada yang perlu diperbaiki, ubah observasi tersebut.';
+            . '. Satu slot hanya bisa diisi sekali untuk seluruh stasiun: pilih slot lain, atau hubungi pengamat tersebut atau penyelia bila isinya perlu diperbaiki.';
     }
 
     /**
@@ -335,8 +353,7 @@ class ObservationController extends Controller
         $validated = $request->validate([
             'schedule_id' => 'required|exists:schedules,id',
             'tanggal' => 'required|date|before_or_equal:' . now('Asia/Jakarta')->toDateString(),
-            'status_pengamatan' => 'required|in:lengkap,dibatalkan',
-            'alasan_batal' => 'nullable|required_if:status_pengamatan,dibatalkan|string',
+            'catatan_kondisi' => 'nullable|string|max:300',
             'foto' => 'nullable|string',
             'foto_sumber' => 'nullable|in:kamera,galeri',
             'values' => 'nullable|array',
@@ -350,13 +367,13 @@ class ObservationController extends Controller
             return back()->withErrors(['schedule_id' => $pesan])->withInput();
         }
 
-        if ($isMandatoryPhoto && empty($validated['foto']) && empty($observation->foto_path) && $validated['status_pengamatan'] === 'lengkap') {
+        if ($isMandatoryPhoto && empty($validated['foto']) && empty($observation->foto_path)) {
             return back()->withErrors([
                 'foto' => 'Foto bukti pengamatan wajib diambil pada slot pengamatan 07:00 WIB dan 17:00 WIB.',
             ])->withInput();
         }
 
-        [$values, $fisikaErrors] = $this->olahNilai($validated['values'] ?? [], $validated['status_pengamatan']);
+        [$values, $fisikaErrors] = $this->olahNilai($validated['values'] ?? []);
         if ($fisikaErrors) {
             return back()->withErrors($fisikaErrors)->withInput();
         }
@@ -377,8 +394,8 @@ class ObservationController extends Controller
         $observation->update([
             'schedule_id' => $validated['schedule_id'],
             'tanggal' => $validated['tanggal'],
-            'status_pengamatan' => $validated['status_pengamatan'],
-            'alasan_batal' => $validated['alasan_batal'] ?? null,
+            'status_pengamatan' => 'lengkap',
+            'alasan_batal' => $this->catatanKondisi($validated),
             'shift' => $shift,
             'photo_slot' => $isMandatoryPhoto ? $jamWib : null,
             'status_approval' => 'pending',

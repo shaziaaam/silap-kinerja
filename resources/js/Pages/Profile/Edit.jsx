@@ -3,7 +3,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import Sidebar from '../../Components/Sidebar';
 import { User, Lock, Save, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
-const inputClass = "w-full border border-slate-200 rounded-xl px-3.5 h-9 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition font-medium bg-white";
+const inputClass = "w-full border border-slate-200 rounded-xl px-3.5 h-10 text-slate-900 text-xs placeholder:text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200/50 transition font-medium bg-white";
 
 function Field({ label, error, children }) {
     return (
@@ -36,7 +36,7 @@ function PasswordInput({ value, onChange, placeholder, ...rest }) {
             <button
                 type="button"
                 onClick={() => setShow(s => !s)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition cursor-pointer p-1"
                 tabIndex={-1}
             >
                 {show ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -70,9 +70,9 @@ export default function ProfileEdit({ user }) {
     };
 
     return (
-        <Sidebar>
+        <Sidebar toast={false}>
             <Head title="Profil Saya - SILAP-Kinerja" />
-            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+            <div className="max-w-2xl mx-auto px-3.5 sm:px-6 py-5 sm:py-8 space-y-5 sm:space-y-6">
 
                 {/* Flash success */}
                 {flash?.success && (
@@ -92,7 +92,7 @@ export default function ProfileEdit({ user }) {
 
                 {/* Single Combined Card */}
                 <div className="bg-white rounded-2xl shadow-sm shadow-sky-100/30 border border-sky-100/80 overflow-hidden">
-                    <form onSubmit={submit} className="p-6 space-y-6">
+                    <form onSubmit={submit} className="p-4 sm:p-6 space-y-5 sm:space-y-6">
 
                         {/* Section 1: Informasi Identitas */}
                         <div className="space-y-4">
@@ -195,7 +195,7 @@ export default function ProfileEdit({ user }) {
                             <button
                                 type="submit"
                                 disabled={form.processing}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl transition shadow-sm shadow-sky-600/20 disabled:opacity-60 cursor-pointer"
+                                className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl transition shadow-sm shadow-sky-600/20 disabled:opacity-60 cursor-pointer min-h-[40px]"
                             >
                                 <Save className="w-3.5 h-3.5" />
                                 <span>{form.processing ? 'Menyimpan...' : 'Simpan Perubahan'}</span>

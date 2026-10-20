@@ -148,7 +148,7 @@ export default function Landing() {
 
     return (
         <MotionConfig reducedMotion="user">
-        <div className="min-h-screen bg-white text-[#2B3F5C] font-sans antialiased selection:bg-[#168BC5] selection:text-white">
+        <div className="min-h-screen bg-white text-[#2B3F5C] font-sans antialiased selection:bg-[#168BC5] selection:text-white overflow-x-hidden">
             <Head title="SILAP-Kinerja | Stasiun Klimatologi Jawa Tengah" />
 
             {/* --- NAVBAR --- */}
@@ -171,25 +171,25 @@ export default function Landing() {
                     <a
                         href="#beranda"
                         onClick={(e) => scrollToSection(e, 'beranda')}
-                        className="flex items-center gap-3 group"
+                        className="flex items-center gap-2.5 sm:gap-3 group min-w-0"
                     >
                         <img
-                            src="/images/logo.png"
+                            src="/images/brand/logo.png"
                             alt="Logo BMKG"
-                            className="h-10 w-auto object-contain transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                            className="h-9 sm:h-10 w-auto shrink-0 object-contain transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                         />
-                        <div className="flex flex-col">
-                            <span className="font-extrabold text-[17px] text-[#102B4E] leading-tight tracking-tight">
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-extrabold text-[16px] sm:text-[17px] text-[#102B4E] leading-tight tracking-tight">
                                 SILAP-Kinerja
                             </span>
-                            <span className="text-[11px] sm:text-[12px] font-semibold text-[#168BC5] leading-tight">
+                            <span className="text-[10.5px] sm:text-[12px] font-semibold text-[#168BC5] leading-tight">
                                 Stasiun Klimatologi Jawa Tengah
                             </span>
                         </div>
                     </a>
 
                     {/* Desktop Navigation Links */}
-                    <nav className="hidden md:flex items-center gap-7 relative">
+                    <nav className="hidden lg:flex items-center gap-5 xl:gap-7 relative">
                         {NAV_ITEMS.map((item, i) => {
                             const isActive = activeSection === item.id;
                             return (
@@ -224,7 +224,7 @@ export default function Landing() {
                     </nav>
 
                     {/* Right Login / Dashboard CTA */}
-                    <div className="hidden md:flex items-center gap-4">
+                    <div className="hidden lg:flex items-center gap-4">
                         {user ? (
                             <Link
                                 href="/dashboard"
@@ -247,7 +247,7 @@ export default function Landing() {
                     {/* Mobile Hamburger Button */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="md:hidden p-2 rounded-lg text-[#102B4E] hover:bg-[#EAF6FF] active:scale-95 border border-[#D3E6F4] transition-all duration-200 ease-out"
+                        className="lg:hidden shrink-0 p-2 rounded-lg text-[#102B4E] hover:bg-[#EAF6FF] active:scale-95 border border-[#D3E6F4] transition-all duration-200 ease-out"
                         aria-label="Buka menu navigasi"
                     >
                         {mobileMenuOpen ? <X className="w-5 h-5 transition-transform duration-200" /> : <Menu className="w-5 h-5 transition-transform duration-200" />}
@@ -265,7 +265,7 @@ export default function Landing() {
                                 height: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
                                 opacity: { duration: 0.22, ease: 'easeInOut' }
                             }}
-                            className="md:hidden overflow-hidden border-t border-[#D3E6F4] bg-white px-4 pt-3 pb-6 space-y-2 shadow-lg"
+                            className="lg:hidden overflow-y-auto max-h-[calc(100dvh-72px)] border-t border-[#D3E6F4] bg-white px-4 pt-3 pb-6 space-y-2 shadow-lg"
                         >
                             {NAV_ITEMS.map((item, i) => (
                                 <motion.a
@@ -308,10 +308,10 @@ export default function Landing() {
                                 className="lg:col-span-5 xl:col-span-5 space-y-6 z-10"
                             >
                                 {/* Main Headline: Matching user reference image */}
-                                <motion.h1 variants={heroItem} className="text-[32px] sm:text-[38px] lg:text-[40px] xl:text-[44px] font-extrabold text-[#102B4E] tracking-tight leading-[1.12]">
+                                <motion.h1 variants={heroItem} className="text-[28px] min-[400px]:text-[32px] sm:text-[38px] lg:text-[40px] xl:text-[44px] font-extrabold text-[#102B4E] tracking-tight leading-[1.12]">
                                     Pengamatan Cuaca<br className="hidden sm:inline" />
                                     Terverifikasi,<br className="hidden sm:inline" />
-                                    <span className="whitespace-nowrap">Pelaporan Lebih Mudah.</span>
+                                    <span className="sm:whitespace-nowrap">Pelaporan Lebih Mudah.</span>
                                 </motion.h1>
 
                                 {/* Description Text */}
@@ -320,10 +320,10 @@ export default function Landing() {
                                 </motion.p>
 
                                 {/* Action Buttons */}
-                                <motion.div variants={heroItem} className="pt-2 flex flex-wrap items-center gap-4 sm:gap-6">
+                                <motion.div variants={heroItem} className="pt-2 flex flex-col min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center gap-4 sm:gap-6">
                                     <Link
                                         href={user ? "/dashboard" : "/login"}
-                                        className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#102B4E] via-[#0E5284] to-[#168BC5] text-white text-[14px] sm:text-[15px] font-bold shadow-md shadow-[#102B4E]/25 transition-all duration-300 hover:from-[#0B213D] hover:via-[#105F99] hover:to-[#1A9BE0] hover:shadow-xl hover:shadow-[#168BC5]/30 hover:-translate-y-0.5 active:translate-y-0"
+                                        className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#102B4E] via-[#0E5284] to-[#168BC5] text-white text-[14px] sm:text-[15px] font-bold shadow-md shadow-[#102B4E]/25 transition-all duration-300 hover:from-[#0B213D] hover:via-[#105F99] hover:to-[#1A9BE0] hover:shadow-xl hover:shadow-[#168BC5]/30 hover:-translate-y-0.5 active:translate-y-0"
                                     >
                                         <span>{user ? "Masuk Dashboard" : "Masuk Akun Pegawai"}</span>
                                         <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -331,7 +331,7 @@ export default function Landing() {
                                     <a
                                         href="#fitur"
                                         onClick={(e) => scrollToSection(e, 'fitur')}
-                                        className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-semibold text-[#0284C7] hover:text-[#0369A1] transition-colors"
+                                        className="inline-flex items-center justify-center gap-2 text-[14px] sm:text-[15px] font-semibold text-[#0284C7] hover:text-[#0369A1] transition-colors"
                                     >
                                         <span>Pelajari Lebih Lanjut</span>
                                         <ArrowRight className="w-4 h-4" />
@@ -341,15 +341,15 @@ export default function Landing() {
 
                             {/* Right Visual Column: Enlarged Equipment Image */}
                             <motion.div
-                                initial={{ opacity: 0, x: 120, scale: 0.9, filter: 'blur(14px)' }}
+                                initial={{ opacity: 0, x: 60, scale: 0.92, filter: 'blur(14px)' }}
                                 animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
                                 transition={{ duration: 1.3, delay: 0.25, ease: EASE }}
-                                className="lg:col-span-7 xl:col-span-7 relative flex items-center justify-end"
+                                className="lg:col-span-7 xl:col-span-7 relative flex items-center justify-center lg:justify-end"
                             >
-                                <div className="relative w-full max-w-[820px] lg:scale-105 xl:scale-110 origin-right transition-transform duration-500">
+                                <div className="relative w-full max-w-[560px] sm:max-w-[680px] lg:max-w-[820px] lg:scale-105 xl:scale-110 origin-right transition-transform duration-500">
                                     {/* Equipment Graphic with integrated indicator and seamless blend */}
                                     <motion.img
-                                        src="/images/hero_instruments.png?v=hero_v9_aws"
+                                        src="/images/landing/hero-instruments.png?v=hero_v9_aws"
                                         alt="Instrumen Pengamatan Cuaca Otomatis AWS dan Sensor Meteorologi BMKG"
                                         className="w-full h-auto object-contain select-none"
                                         draggable="false"
@@ -467,7 +467,7 @@ export default function Landing() {
                             >
                                 <div className="h-48 sm:h-52 w-full overflow-hidden border-b border-[#D3E6F4] relative shrink-0">
                                     <img
-                                        src="/images/instrument_aws.png"
+                                        src="/images/landing/instrument-aws.png"
                                         alt="Alat Otomatis AWS"
                                         className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
                                     />
@@ -511,7 +511,7 @@ export default function Landing() {
                             >
                                 <div className="h-48 sm:h-52 w-full overflow-hidden border-b border-[#D3E6F4] relative shrink-0">
                                     <img
-                                        src="/images/instrument_manual.png"
+                                        src="/images/landing/instrument-manual.png"
                                         alt="Alat Manual Sangkar Meteorologi dan Panci Penguapan"
                                         className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
                                     />
@@ -555,7 +555,7 @@ export default function Landing() {
                             >
                                 <div className="h-48 sm:h-52 w-full overflow-hidden border-b border-[#D3E6F4] relative shrink-0">
                                     <img
-                                        src="/images/instrument_visual.png"
+                                        src="/images/landing/instrument-visual.png"
                                         alt="Pengamatan Visual Tutupan Awan Langit"
                                         className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
                                     />
@@ -848,7 +848,7 @@ export default function Landing() {
                             >
                                 <div className="relative w-full max-w-[560px] group transition-transform duration-500 hover:scale-[1.02]">
                                     <img
-                                        src="/images/report_docs.png?v=pdf_aplikasi_v6"
+                                        src="/images/landing/report-docs.png?v=pdf_aplikasi_v6"
                                         alt="Contoh PDF laporan triwulan SILAP-Kinerja: sampul serta lampiran bukti kinerja shift pagi dan shift siang"
                                         className="w-full h-auto object-contain"
                                     />
@@ -1115,7 +1115,7 @@ export default function Landing() {
                         {/* Footer Kiri: Logo & Nama Institusi */}
                         <div className="flex items-center gap-2.5">
                             <img
-                                src="/images/logo.png"
+                                src="/images/brand/logo.png"
                                 alt="Logo BMKG"
                                 className="h-8 sm:h-9 w-auto object-contain brightness-110"
                             />

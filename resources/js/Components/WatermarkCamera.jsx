@@ -166,17 +166,28 @@ export default function WatermarkCamera({ onCapture, geotag }) {
     const [showEmergencyUpload, setShowEmergencyUpload] = useState(false);
     const [memprosesGaleri, setMemprosesGaleri] = useState(false);
 
+    // Pesan kendala yang tampil di halaman (bukan alert) agar jelas penyebab dan cara memperbaikinya.
+    const [galatKamera, setGalatKamera] = useState(null);
+    const [galatGps, setGalatGps] = useState(null);
+
     // Follow the device position while the form is open, so a capture is stamped instantly.
     useEffect(() => {
         if (!navigator.geolocation) return undefined;
         const id = navigator.geolocation.watchPosition(
-            (pos) => setGeoCoords({
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude,
-                alt: pos.coords.altitude != null ? Math.round(pos.coords.altitude) : null,
-                accuracy: pos.coords.accuracy ?? null,
-            }),
-            () => {},
+            (pos) => {
+                setGalatGps(null);
+                setGeoCoords({
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                    alt: pos.coords.altitude != null ? Math.round(pos.coords.altitude) : null,
+                    accuracy: pos.coords.accuracy ?? null,
+                });
+            },
+            (err) => setGalatGps(
+                err.code === 1
+                    ? 'Izin lokasi ditolak, sehingga foto akan bertuliskan "Lokasi GPS tidak tersedia". Izinkan lokasi untuk situs ini (ikon gembok di kolom alamat browser) lalu muat ulang halaman.'
+                    : 'Sinyal GPS belum didapat. Pindah ke tempat terbuka atau aktifkan GPS perangkat; pencarian lokasi terus dicoba.'
+            ),
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
         );
         return () => navigator.geolocation.clearWatch(id);
@@ -233,11 +244,17 @@ export default function WatermarkCamera({ onCapture, geotag }) {
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
                 setIsCameraActive(true);
+                setGalatKamera(null);
             }
         } catch (err) {
             // If browser live camera fails, auto-activate emergency fallback
             setShowEmergencyUpload(true);
-            alert('Tidak dapat membuka kamera browser. Opsi Mode Darurat (Kamera HP / Galeri) telah diaktifkan.');
+            const sebab = err?.name === 'NotAllowedError'
+                ? 'Izin kamera ditolak. Izinkan kamera untuk situs ini (ikon gembok di kolom alamat browser) lalu coba lagi.'
+                : err?.name === 'NotFoundError'
+                    ? 'Kamera tidak ditemukan di perangkat ini.'
+                    : 'Kamera tidak bisa dibuka (mungkin sedang dipakai aplikasi lain).';
+            setGalatKamera(`${sebab} Anda juga bisa memakai "Foto via Kamera HP" atau Mode Upload Darurat di bawah.`);
         }
     };
 
@@ -437,17 +454,31 @@ export default function WatermarkCamera({ onCapture, geotag }) {
 
             {!capturedImage ? (
                 <div className="space-y-4">
+                    {galatKamera && (
+                        <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-800">
+                            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-px" />
+                            <span className="flex-1 leading-relaxed">{galatKamera}</span>
+                        </div>
+                    )}
+                    {galatGps && (
+                        <div role="status" className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-medium text-amber-800">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-px" />
+                            <span className="flex-1 leading-relaxed">{galatGps}</span>
+                        </div>
+                    )}
                     {isCameraActive ? (
-                        <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
-                            <video ref={videoRef} autoPlay playsInline className="w-full h-64 object-cover" />
-                            <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-xs px-3 py-1.5 rounded-lg text-slate-900 border border-sky-100 font-medium shadow-xs">
-                                📍 {geoCoords ? (alamat?.judul || `${geoCoords.lat.toFixed(5)}, ${geoCoords.lng.toFixed(5)}`) : 'Mencari lokasi GPS...'} | {currentTime.wib}
+                        <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-200">
+                            <video ref={videoRef} autoPlay playsInline className="w-full h-72 sm:h-80 object-cover" />
+                            {/* Geotag status indicator at top */}
+                            <div className="absolute top-2.5 left-2.5 right-2.5 sm:right-auto bg-slate-900/85 backdrop-blur-md text-[11px] sm:text-xs px-3 py-1.5 rounded-xl text-white border border-white/20 font-medium shadow-sm max-w-full sm:max-w-md truncate">
+                                📍 {geoCoords ? (alamat?.judul || `${geoCoords.lat.toFixed(5)}, ${geoCoords.lng.toFixed(5)}`) : 'Mencari lokasi GPS...'} · {currentTime.wib}
                             </div>
-                            <div className="absolute bottom-3 right-3 flex space-x-2">
+                            {/* Controls at bottom */}
+                            <div className="absolute bottom-3 inset-x-3 sm:inset-x-auto sm:right-3 flex items-center justify-center sm:justify-end gap-2">
                                 <button
                                     type="button"
                                     onClick={capturePhoto}
-                                    className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center space-x-2"
+                                    className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm transition shadow-md shadow-sky-950/40 flex items-center justify-center space-x-2"
                                 >
                                     <Camera className="w-4 h-4" />
                                     <span>Ambil Foto Realtime</span>
@@ -455,7 +486,7 @@ export default function WatermarkCamera({ onCapture, geotag }) {
                             </div>
                         </div>
                     ) : (
-                        <div className="border-2 border-dashed border-sky-200 rounded-xl p-6 sm:p-8 text-center bg-white shadow-sm shadow-sky-100/50">
+                        <div className="border-2 border-dashed border-sky-200 rounded-xl p-5 sm:p-8 text-center bg-white shadow-sm shadow-sky-100/50">
                             <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-100">
                                 <Camera className="w-6 h-6" />
                             </div>
@@ -465,18 +496,18 @@ export default function WatermarkCamera({ onCapture, geotag }) {
                             <p className="text-xs text-slate-600 max-w-md mx-auto mb-5 leading-relaxed">
                                 Ambil foto bukti langsung di lokasi. Foto otomatis dikompresi dan diberi geotag: peta, alamat, koordinat GPS, dan waktu.
                             </p>
-                            <div className="flex flex-wrap justify-center gap-3">
+                            <div className="flex flex-col sm:flex-row justify-center gap-2.5 sm:gap-3">
                                 <button
                                     type="button"
                                     onClick={startCamera}
-                                    className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-sm shadow-sky-600/30"
+                                    className="w-full sm:w-auto justify-center bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-sm shadow-sky-600/30"
                                 >
                                     <Camera className="w-4 h-4" />
                                     <span>Buka Kamera Web Live</span>
                                 </button>
 
                                 {/* Direct HP Native Camera Trigger */}
-                                <label className="cursor-pointer inline-flex items-center space-x-2 bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs">
+                                <label className="w-full sm:w-auto justify-center cursor-pointer inline-flex items-center space-x-2 bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs">
                                     <Camera className="w-4 h-4 text-sky-600" />
                                     <span>Foto via Kamera HP</span>
                                     <input
@@ -504,8 +535,8 @@ export default function WatermarkCamera({ onCapture, geotag }) {
                                     <strong> lokasi dan waktu saat diunggah</strong>, bukan saat dipotret, dan ditandai "foto dari galeri" untuk penyelia.
                                     Izinkan akses lokasi agar koordinat tercatat.
                                 </p>
-                                <div className="flex items-center space-x-3">
-                                    <label className="cursor-pointer inline-flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-xs">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                                    <label className="cursor-pointer inline-flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2.5 sm:py-2 rounded-xl transition shadow-xs">
                                         <ImageIcon className="w-4 h-4" />
                                         <span>{memprosesGaleri ? 'Mengambil lokasi...' : 'Pilih Foto dari Galeri'}</span>
                                         <input
@@ -519,14 +550,14 @@ export default function WatermarkCamera({ onCapture, geotag }) {
                                     <button
                                         type="button"
                                         onClick={() => setShowEmergencyUpload(false)}
-                                        className="text-slate-500 hover:text-slate-800 font-semibold text-xs"
+                                        className="text-slate-500 hover:text-slate-800 font-semibold text-xs py-2 text-center"
                                     >
                                         Batal
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-sky-100">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-sky-100">
                                 <div className="flex items-center space-x-2">
                                     <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
                                     <span>Ada kendala sinyal atau kamera web? Anda bisa beralih ke Mode Upload Darurat kapan saja.</span>
@@ -544,17 +575,17 @@ export default function WatermarkCamera({ onCapture, geotag }) {
                 </div>
             ) : (
                 <div className="space-y-3">
-                    <div className="relative rounded-xl overflow-hidden border border-sky-200 shadow-sm">
-                        <img src={capturedImage} alt="Captured Watermarked" className="w-full h-64 object-cover" />
-                        <div className="absolute top-3 left-3 bg-sky-600 text-white text-xs px-3 py-1 rounded-full border border-sky-500 flex items-center space-x-1.5 shadow-xs">
-                            <CheckCircle className="w-3.5 h-3.5 text-white" />
-                            <span className="font-bold">Foto Ber-Watermark &amp; Terkompresi Siap Kirim</span>
+                    <div className="relative rounded-xl overflow-hidden border border-sky-200 shadow-sm bg-slate-950">
+                        <img src={capturedImage} alt="Captured Watermarked" className="w-full max-h-80 sm:max-h-96 object-contain" />
+                        <div className="absolute top-3 left-3 right-3 sm:right-auto bg-sky-600/90 backdrop-blur-xs text-white text-xs px-3 py-1.5 rounded-full border border-sky-400 flex items-center space-x-1.5 shadow-xs truncate">
+                            <CheckCircle className="w-3.5 h-3.5 text-white shrink-0" />
+                            <span className="font-bold truncate">Foto Ber-Watermark &amp; Terkompresi Siap Kirim</span>
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={resetPhoto}
-                        className="bg-white hover:bg-sky-50 text-slate-800 border border-sky-200 px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2"
+                        className="w-full sm:w-auto justify-center bg-white hover:bg-sky-50 text-slate-800 border border-sky-200 px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 shadow-2xs"
                     >
                         <RefreshCw className="w-3.5 h-3.5 text-sky-600" />
                         <span>Foto Ulang / Ganti Gambar</span>

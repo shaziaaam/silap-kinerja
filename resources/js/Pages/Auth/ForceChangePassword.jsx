@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Head } from '@inertiajs/react';
 import { ShieldAlert, Lock } from 'lucide-react';
 
-const bgImages = ['/images/1.png', '/images/2.png', '/images/3.png'];
+const bgImages = ['/images/login/1.png', '/images/login/2.png', '/images/login/3.png'];
 
 export default function ForceChangePassword() {
     const { data, setData, post, processing, errors } = useForm({
@@ -24,7 +24,7 @@ export default function ForceChangePassword() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-slate-50 flex flex-col relative overflow-hidden">
+        <div className="min-h-screen min-h-dvh bg-gradient-to-br from-sky-50 via-white to-slate-50 flex flex-col relative overflow-hidden">
             <Head title="Wajib Ganti Password Pertama Kali - SILAP-Kinerja BMKG" />
 
             {/* Background slideshow photos */}
@@ -58,7 +58,7 @@ export default function ForceChangePassword() {
                     <div className="text-center mb-5">
                         <div className="flex flex-col items-center justify-center mb-3">
                             <img
-                                src="/images/logo hitam.webp"
+                                src="/images/brand/logo-hitam.webp"
                                 alt="Logo BMKG"
                                 className="h-16 w-auto object-contain"
                             />

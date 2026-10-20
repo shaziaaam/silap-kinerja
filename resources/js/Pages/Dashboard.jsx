@@ -16,14 +16,14 @@ const jamTitik = (j) => (j || '').replace(':', '.');
 function Kartu({ judul, ikon: Ikon, aksi, children, className = '' }) {
     return (
         <section className={`bg-white border border-sky-100 rounded-2xl shadow-sm overflow-hidden ${className}`}>
-            <div className="px-5 py-3.5 border-b border-sky-50 flex items-center justify-between gap-3">
+            <div className="px-4 sm:px-5 py-3 sm:py-3.5 border-b border-sky-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
                 <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                    {Ikon && <Ikon className="w-4 h-4 text-sky-600" />}
+                    {Ikon && <Ikon className="w-4 h-4 text-sky-600 shrink-0" />}
                     <span>{judul}</span>
                 </h2>
-                {aksi}
+                {aksi && <div className="shrink-0 flex items-center">{aksi}</div>}
             </div>
-            <div className="p-5">{children}</div>
+            <div className="p-4 sm:p-5">{children}</div>
         </section>
     );
 }
@@ -33,10 +33,10 @@ function Angka({ label, nilai, sub, warna = 'slate' }) {
         slate: 'text-slate-900', sky: 'text-sky-700', emerald: 'text-emerald-700', amber: 'text-amber-700', rose: 'text-rose-700',
     }[warna];
     return (
-        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
-            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{label}</div>
-            <div className={`text-2xl font-extrabold ${w}`}>{nilai}</div>
-            {sub && <div className="text-[11px] text-slate-500">{sub}</div>}
+        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 sm:px-4 py-2.5 sm:py-3 min-w-0">
+            <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wide truncate">{label}</div>
+            <div className={`text-xl sm:text-2xl font-extrabold truncate ${w}`}>{nilai}</div>
+            {sub && <div className="text-[10px] sm:text-[11px] text-slate-500 truncate">{sub}</div>}
         </div>
     );
 }
@@ -53,7 +53,7 @@ function BadgeAcc({ status }) {
 
 function SlotHariIni({ slot }) {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+        <div className="grid grid-cols-2 min-[440px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-2">
             {slot.map((s) => {
                 const o = s.observasi;
                 const agm = s.kelompok === 'AGM1B';
@@ -67,15 +67,15 @@ function SlotHariIni({ slot }) {
                     gaya = 'bg-amber-50 border-amber-200 text-amber-800';
                 }
                 return (
-                    <div key={s.id} className={`rounded-xl border px-3 py-2 ${gaya} ${agm ? 'ring-1 ring-sky-200' : ''}`}>
+                    <div key={s.id} className={`rounded-xl border p-2 sm:px-3 sm:py-2 ${gaya} ${agm ? 'ring-1 ring-sky-200' : ''}`}>
                         <div className="flex items-center justify-between">
-                            <span className="font-extrabold text-sm">{jamTitik(s.jam)}</span>
+                            <span className="font-extrabold text-xs sm:text-sm">{jamTitik(s.jam)}</span>
                             <span className="flex items-center gap-1">
                                 {agm && <span className="text-[9px] font-bold text-sky-700 bg-sky-100 px-1 rounded">AGM</span>}
                                 {s.wajibFoto && <Camera className={`w-3.5 h-3.5 ${o?.adaFoto ? 'text-emerald-600' : 'text-amber-600'}`} title="Slot wajib foto" />}
                             </span>
                         </div>
-                        <div className="text-[10px] font-medium truncate" title={ket}>{ket}</div>
+                        <div className="text-[10px] font-medium truncate mt-0.5" title={ket}>{ket}</div>
                     </div>
                 );
             })}
@@ -207,21 +207,21 @@ function KalenderStasiun({ kalender }) {
     };
     return (
         <div>
-            <div className="grid grid-cols-7 gap-1.5 text-center">
-                {NAMA_HARI.map((n) => <div key={n} className="text-[10px] font-bold text-slate-400">{n}</div>)}
+            <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center">
+                {NAMA_HARI.map((n) => <div key={n} className="text-[10px] sm:text-xs font-bold text-slate-400">{n}</div>)}
                 {Array.from({ length: kosongAwal }).map((_, i) => <div key={`k${i}`} />)}
                 {kalender.hari.map((h) => (
                     <div
                         key={h.tanggal}
                         title={`${fmtTanggal(h.tanggal)}: jam penuh ${h.jamPenuh}/${kalender.totalJamPenuh}, AGM 1-B ${h.agm1b}/${kalender.totalAgm1b}`}
-                        className={`rounded-lg border py-1.5 ${warna(h)} ${h.hariIni ? 'ring-2 ring-sky-400' : ''}`}
+                        className={`rounded-lg border py-1 sm:py-1.5 ${warna(h)} ${h.hariIni ? 'ring-2 ring-sky-400' : ''}`}
                     >
-                        <div className="text-xs font-bold">{h.hari}</div>
-                        {!h.nanti && <div className="text-[9px] font-medium opacity-80">{h.jamPenuh}/{kalender.totalJamPenuh}</div>}
+                        <div className="text-[11px] sm:text-xs font-bold">{h.hari}</div>
+                        {!h.nanti && <div className="text-[8px] sm:text-[9px] font-medium opacity-80">{h.jamPenuh}/{kalender.totalJamPenuh}</div>}
                     </div>
                 ))}
             </div>
-            <p className="text-[11px] text-slate-500 mt-2">Angka = slot jam penuh terisi. Arahkan kursor ke tanggal untuk melihat slot AGM 1-B.</p>
+            <p className="text-[11px] text-slate-500 mt-2">Angka = slot jam penuh terisi. Arahkan kursor / sentuh tanggal untuk melihat slot AGM 1-B.</p>
         </div>
     );
 }
@@ -244,7 +244,46 @@ function DashboardPenyelia(p) {
                 ikon={UserCheck}
                 aksi={<Link href={route('supervisor.queue')} className="text-xs font-bold text-sky-700 hover:underline">Buka antrean validasi →</Link>}
             >
-                <div className="overflow-x-auto -mx-5 -my-5">
+                {/* Mobile Cards View */}
+                <div className="md:hidden divide-y divide-slate-100 -mx-4 -my-4">
+                    {p.statusTriwulan.map((s) => (
+                        <div key={s.pegawai.id} className="p-3.5 space-y-2.5 text-xs">
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                    <div className="font-bold text-slate-900 text-sm truncate">{s.pegawai.nama}</div>
+                                    <div className="text-[10px] text-slate-500 font-medium">{s.jumlahObservasi} observasi</div>
+                                </div>
+                                <div className="shrink-0">
+                                    {s.statusAcc === 'approved' ? <BadgeAcc status="approved" />
+                                        : s.siapAcc ? <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">Siap di-ACC</span>
+                                            : s.revisi ? <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Ada revisi</span>
+                                                : <span className="text-[10px] text-slate-400">Belum ada data</span>}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
+                                <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                                    <span className="text-[10px] text-slate-400 block font-medium">Kelengkapan</span>
+                                    <span className="font-bold text-sky-700 text-xs sm:text-sm">{String(s.kelengkapan).replace('.', ',')}%</span>
+                                </div>
+                                <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                                    <span className="text-[10px] text-slate-400 block font-medium">Foto Shift</span>
+                                    <span className={`font-bold text-xs sm:text-sm ${s.fotoTerpenuhi < s.fotoWajib ? 'text-amber-700' : 'text-slate-700'}`}>{s.fotoTerpenuhi}/{s.fotoWajib}</span>
+                                </div>
+                                <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                                    <span className="text-[10px] text-slate-400 block font-medium">Revisi</span>
+                                    <span className={`font-bold text-xs sm:text-sm ${s.revisi ? 'text-rose-700' : 'text-slate-500'}`}>{s.revisi || '0'}</span>
+                                </div>
+                                <div className="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                                    <span className="text-[10px] text-slate-400 block font-medium">Foto Galeri</span>
+                                    <span className={`font-bold text-xs sm:text-sm ${s.fotoGaleri ? 'text-amber-700' : 'text-slate-500'}`}>{s.fotoGaleri || '0'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto -mx-5 -my-5">
                     <table className="w-full text-xs">
                         <thead className="bg-sky-50/60 text-slate-600 text-[11px] uppercase">
                             <tr>
@@ -421,13 +460,13 @@ export default function Dashboard(props) {
         <Sidebar>
             <Head title="Dashboard - SILAP-Kinerja" />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-                <div className="relative rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-sky-700 via-blue-700 to-sky-800 text-white shadow-sm overflow-hidden border border-sky-600/20">
+            <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6">
+                <div className="relative rounded-2xl p-4 sm:p-6 bg-gradient-to-r from-sky-700 via-blue-700 to-sky-800 text-white shadow-sm overflow-hidden border border-sky-600/20">
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-sky-100 border border-white/20 mb-2">
-                                <ShieldCheck className="w-3.5 h-3.5" />
-                                <span>BMKG Stasiun Klimatologi Jawa Tengah · {peran}</span>
+                            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-white/15 text-sky-100 border border-white/20 mb-2">
+                                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                                <span>BMKG Staklim Jateng · {peran}</span>
                             </div>
                             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Halo, {user.nama}!</h1>
                             <p className="text-xs text-sky-100 font-medium mt-0.5">
@@ -441,9 +480,9 @@ export default function Dashboard(props) {
                         {user.role === 'pengamat' && props.slotBerikutnya && (
                             <Link
                                 href={route('observations.create')}
-                                className="inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl bg-white hover:bg-sky-50 text-sky-900 font-bold text-sm transition shadow-sm shrink-0"
+                                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-3 rounded-xl bg-white hover:bg-sky-50 text-sky-900 font-bold text-xs sm:text-sm transition shadow-sm shrink-0 active:scale-98"
                             >
-                                <FilePlus className="w-5 h-5 text-sky-600" />
+                                <FilePlus className="w-4 h-4 text-sky-600 shrink-0" />
                                 <span>Input Observasi Pukul {jamTitik(props.slotBerikutnya.jam)} WIB</span>
                             </Link>
                         )}
@@ -453,7 +492,7 @@ export default function Dashboard(props) {
                 {user.role === 'pengamat' && <DashboardPengamat {...props} />}
                 {user.role === 'penyelia' && <DashboardPenyelia {...props} />}
                 {user.role === 'admin' && <DashboardAdmin {...props} />}
-            </main>
+            </div>
         </Sidebar>
     );
 }

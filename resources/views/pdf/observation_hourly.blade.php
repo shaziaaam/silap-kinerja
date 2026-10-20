@@ -31,7 +31,7 @@
         .ket.ketik { color: #0369a1; font-weight: bold; }
 
         .legend { font-size: 7px; color: #475569; margin-top: 5px; line-height: 1.4; }
-        .batal { background: #fff1f2; border: 1px solid #fecdd3; padding: 5px; border-radius: 3px; color: #9f1239; margin-bottom: 6px; }
+        .batal { background: #fffbeb; border: 1px solid #fde68a; padding: 5px; border-radius: 3px; color: #92400e; margin-bottom: 6px; }
         .ttd { width: 100%; margin-top: 14px; page-break-inside: avoid; }
         .ttd td { text-align: center; font-size: 8.5px; vertical-align: top; }
         .foot { position: fixed; bottom: -6mm; left: 0; right: 0; font-size: 6.5px; color: #94a3b8; }
@@ -86,7 +86,7 @@
     </table>
 
     @if($observation->alasan_batal)
-        <div class="batal"><b>Pengamatan dibatalkan:</b> {{ $observation->alasan_batal }}</div>
+        <div class="batal"><b>Kondisi khusus:</b> {{ $observation->alasan_batal }}</div>
     @endif
 
     <table class="tabel">

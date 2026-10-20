@@ -56,10 +56,8 @@ export function useObservationFields({ instruments, data, setData, jamWibStr, at
     };
 
     const issues = useMemo(
-        () => (data.status_pengamatan === 'lengkap'
-            ? periksa(data.values, visibleParams, aturanFisika)
-            : { pesan: [], perParam: {} }),
-        [data.values, data.status_pengamatan, visibleParams, aturanFisika],
+        () => periksa(data.values, visibleParams, aturanFisika),
+        [data.values, visibleParams, aturanFisika],
     );
 
     return { allParams, visibleParams, handleValueChange, issues };
@@ -213,15 +211,15 @@ export default function ObservationFields({ data, visibleParams, handleValueChan
             )}
 
             {cards.map(({ k, params }) => (
-                <div key={k} className="bg-white border border-sky-100 rounded-2xl p-6 shadow-sm space-y-4">
-                    <h3 className="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2.5 flex items-center justify-between">
+                <div key={k} className="bg-white border border-sky-100 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-4">
+                    <h3 className="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2.5 flex flex-wrap items-center justify-between gap-2">
                         <span>{CARD_TITLES[k]}</span>
                         <span className="text-[10px] font-mono text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
                             {k <= 7 && isAgm1bSlot ? 'AGM 1-B' : jamWibStr === '07:00' ? 'JAM_PENUH + HARIAN_0700' : 'JAM_PENUH'}
                         </span>
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                         {params.map((p) => (
                             <div key={p.id} className="space-y-1">
                                 <div className="flex items-center justify-between">

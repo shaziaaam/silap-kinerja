@@ -86,6 +86,13 @@ class SkpReportController extends Controller
             return $item;
         });
 
+        // "userId|tahun|periode" => '' (siap dicetak) or the reason it cannot be printed yet.
+        // A combination without a recap row is simply not approved; the page handles that case.
+        $alasanLaporan = [];
+        foreach (RekapSkpTriwulan::whereIn('user_id', $users->pluck('id'))->get() as $rekap) {
+            $alasanLaporan["{$rekap->user_id}|{$rekap->tahun}|{$rekap->triwulan}"] = $this->alasanBelumBisaDicetak($rekap) ?? '';
+        }
+
         $skpExports = $user->role === 'pengamat'
             ? []
             : SkpExport::with('targetUser')->latest()->limit(10)->get();
@@ -93,6 +100,7 @@ class SkpReportController extends Controller
         return Inertia::render('Supervisor/SkpReport', [
             'pengamatList' => $users,
             'recaps' => $recaps,
+            'alasanLaporan' => $alasanLaporan,
             'skpExports' => $skpExports,
         ]);
     }
