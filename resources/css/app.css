@@ -158,3 +158,15 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .page-enter > * > * { animation: none; }
 }
+
+/* Responsive touch & safe-area helpers */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+

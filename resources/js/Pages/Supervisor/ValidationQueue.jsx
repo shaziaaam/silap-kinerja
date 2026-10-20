@@ -124,7 +124,7 @@ export default function ValidationQueue({ observations = { data: [] }, quarterSu
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
                         <div className="flex items-center space-x-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-xs w-full sm:w-auto justify-between sm:justify-start">
                             <div className="flex items-center space-x-2">
                                 <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />

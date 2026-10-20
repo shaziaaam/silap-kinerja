@@ -198,9 +198,6 @@ function SidebarBody({ user, liveTime, close }) {
                 {user && (
                     <div className="px-2.5 py-2 rounded-xl bg-white border border-sky-100 shadow-2xs">
                         <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                {user.nama ? user.nama.charAt(0).toUpperCase() : 'U'}
-                            </div>
                             <div className="min-w-0 flex-1">
                                 <div className="text-xs font-bold text-slate-900 truncate leading-tight">{user.nama}</div>
                                 <div className="text-[10px] text-sky-600 font-semibold capitalize truncate">{user.role} · {user.nip}</div>
@@ -247,7 +244,7 @@ function FlashToast() {
     }, [toast]);
 
     return (
-        <div className="fixed top-4 right-4 z-[60] w-[calc(100%-2rem)] sm:w-96 pointer-events-none">
+        <div className="fixed top-4 left-4 sm:left-auto right-4 z-[60] w-[calc(100%-2rem)] sm:w-96 pointer-events-none">
             <AnimatePresence>
                 {toast && (
                     <motion.div

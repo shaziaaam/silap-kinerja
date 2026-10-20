@@ -48,7 +48,7 @@ function PanelPilihan({ parameterPilihan = [], pilihan = {}, onFlash }) {
                 <ListChecks className="w-4 h-4 text-sky-700 mt-0.5" />
                 <div>
                     <h2 className="text-sm font-bold text-slate-900">Pilihan Dropdown</h2>
-                    <p className="text-[11px] text-slate-500">Samakan dengan isi dropdown di BMKGSoft v2. Mengubah atau menghapus pilihan tidak mengubah data observasi yang sudah tersimpan.</p>
+                    <p className="text-[11px] text-slate-500">Samakan dengan isi dropdown di form nasional. Mengubah atau menghapus pilihan tidak mengubah data observasi yang sudah tersimpan.</p>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-sky-50">
@@ -91,7 +91,7 @@ function PanelPilihan({ parameterPilihan = [], pilihan = {}, onFlash }) {
                         </ul>
                         {errors[`edit${edit?.id}`] && <p className="text-[11px] text-rose-600">{errors[`edit${edit?.id}`]}</p>}
                         <div className="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 pt-1">
-                            <input className={`${input} flex-1`} placeholder="Pilihan baru, salin dari BMKGSoft"
+                            <input className={`${input} flex-1`} placeholder="Pilihan baru, salin dari form nasional"
                                 value={baru[p.kode] || ''}
                                 onChange={(e) => setBaru({ ...baru, [p.kode]: e.target.value })}
                                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); tambah(p.kode); } }} />

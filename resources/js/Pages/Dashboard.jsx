@@ -53,7 +53,7 @@ function BadgeAcc({ status }) {
 
 function SlotHariIni({ slot }) {
     return (
-        <div className="grid grid-cols-2 min-[440px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 min-[380px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-1.5 sm:gap-2">
             {slot.map((s) => {
                 const o = s.observasi;
                 const agm = s.kelompok === 'AGM1B';
@@ -172,7 +172,7 @@ function DashboardPengamat(p) {
                 ikon={ShieldCheck}
                 aksi={<BadgeAcc status={t.statusAcc} />}
             >
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                     <Angka label="Kelengkapan" nilai={`${String(t.kelengkapan).replace('.', ',')}%`} sub={`${t.jumlahObservasi} dari ${t.jadwal} slot terjadwal`} warna="sky" />
                     <Angka label="Foto shift" nilai={`${t.fotoTerpenuhi}/${t.fotoWajib}`} sub="shift dengan foto wajib" warna={t.fotoTerpenuhi < t.fotoWajib ? 'amber' : 'emerald'} />
                     <Angka label="Perlu revisi" nilai={t.revisi} warna={t.revisi ? 'rose' : 'emerald'} />
@@ -232,7 +232,7 @@ function DashboardPenyelia(p) {
     const sudah = p.statusTriwulan.filter((s) => s.statusAcc === 'approved').length;
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 <Angka label="Siap di-ACC" nilai={siap} sub="pegawai" warna="sky" />
                 <Angka label="Sudah di-ACC" nilai={`${sudah}/${p.statusTriwulan.length}`} sub="pegawai" warna="emerald" />
                 <Angka label="Observasi revisi" nilai={revisi} sub="menunggu perbaikan" warna={revisi ? 'rose' : 'emerald'} />
@@ -359,7 +359,7 @@ function DashboardAdmin(p) {
     return (
         <div className="space-y-6">
             <Kartu judul="Antrean & penyimpanan foto" ikon={Server}>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                     <Angka label="Penyimpanan foto" nilai={s.driveAktif ? 'Google Drive' : 'Server'} sub={`PHOTO_DISK=${s.photoDisk}`} warna="sky" />
                     <Angka label="Foto menunggu upload" nilai={s.fotoMenungguUpload} sub={s.driveAktif ? 'masih di server' : 'mode server'} warna={s.fotoMenungguUpload ? 'amber' : 'emerald'} />
                     <Angka label="Job antre" nilai={s.jobAntre} sub={`queue: ${s.queueConnection}`} />
@@ -480,7 +480,7 @@ export default function Dashboard(props) {
                         {user.role === 'pengamat' && props.slotBerikutnya && (
                             <Link
                                 href={route('observations.create')}
-                                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-3 rounded-xl bg-white hover:bg-sky-50 text-sky-900 font-bold text-xs sm:text-sm transition shadow-sm shrink-0 active:scale-98"
+                                className="w-full md:w-auto inline-flex items-center justify-center space-x-2 px-5 py-3 rounded-xl bg-white hover:bg-sky-50 text-sky-900 font-bold text-xs sm:text-sm transition shadow-sm shrink-0 active:scale-98"
                             >
                                 <FilePlus className="w-4 h-4 text-sky-600 shrink-0" />
                                 <span>Input Observasi Pukul {jamTitik(props.slotBerikutnya.jam)} WIB</span>

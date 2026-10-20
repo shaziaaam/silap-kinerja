@@ -36,7 +36,7 @@
 </head>
 <body>
 @php
-    $logo = collect([public_path('images/brand/bmkg.png'), public_path('images/brand/logo.png')])->first(fn ($p) => file_exists($p));
+    $logo = collect([public_path('images/brand/logo-hitam.png'), public_path('images/brand/logo.png')])->first(fn ($p) => file_exists($p));
     $hari = fn ($t) => \Carbon\Carbon::parse($t)->locale('id')->isoFormat('dddd, D MMMM YYYY');
 @endphp
 

@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         // Users list according to SRS / Discussion rules:
         // Admin: A001, Password: password123, must_change_password: true
         // Penyelia: P001 (Richardus Teguh Prayitno), Password: password123, must_change_password: true
-        // Pengamat: P002 to P008 (7 Pengamat: Achmad Sulistyo E.P, Edy Susanto, Eko Taufiq Suharmanto, Joko Cahyono, Muryanti, Nursamsiah, S.Si., M.Si., Shandy Al Mughozali)
+        // Pengamat: P002 to P007 (6 Pengamat: Achmad Sulistyo E.P, Edy Susanto, Eko Taufiq Suharmanto, Muryanti, Nursamsiah, S.Si., M.Si., Shandy Al Mughozali)
         $users = [
             [
                 'nip' => 'A001',
@@ -49,39 +49,35 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'nip' => 'P005',
-                'nama' => 'Joko Cahyono',
-                'email' => 'joko@bmkg.go.id',
-                'role' => 'pengamat',
-            ],
-            [
-                'nip' => 'P006',
                 'nama' => 'Muryanti',
                 'email' => 'muryanti@bmkg.go.id',
                 'role' => 'pengamat',
             ],
             [
-                'nip' => 'P007',
+                'nip' => 'P006',
                 'nama' => 'Nursamsiah, S.Si., M.Si.',
                 'email' => 'nursamsiah@bmkg.go.id',
                 'role' => 'pengamat',
             ],
             [
-                'nip' => 'P008',
+                'nip' => 'P007',
                 'nama' => 'Shandy Al Mughozali',        
                 'email' => 'shandy@bmkg.go.id',
                 'role' => 'pengamat',
             ],
         ];
 
-        // Geser akun Shandy ke P008 terlebih dahulu jika sebelumnya terdaftar dengan P007 agar tidak terjadi konflik NIP
-        User::where('email', 'shandy@bmkg.go.id')->update(['nip' => 'P008']);
+        // Geser NIP lama ke nilai sementara dulu agar urutan NIP baru tidak bentrok (kolom nip unik)
+        foreach ($users as $i => $userData) {
+            User::where('email', $userData['email'])->update(['nip' => 'TMP' . $i]);
+        }
 
         foreach ($users as $userData) {
             User::updateOrCreate(
-                ['nip' => $userData['nip']],
+                ['email' => $userData['email']],
                 [
+                    'nip' => $userData['nip'],
                     'nama' => $userData['nama'],
-                    'email' => $userData['email'],
                     'role' => $userData['role'],
                     'password' => Hash::make('password123'),
                     'must_change_password' => true,

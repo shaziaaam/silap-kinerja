@@ -205,7 +205,7 @@ export default function ObservationFields({ data, visibleParams, handleValueChan
                     <Info className="w-5 h-5 text-sky-600 shrink-0" />
                     <div>
                         <p className="font-bold">Formulir Laporan Agm 1-b (Tab FDIH Nasional)</p>
-                        <p className="text-sky-800">Urutan kartu dan field sama dengan BMKGSoft v2 &gt; Input Data &gt; Klimatologi &gt; FDIH.</p>
+                        <p className="text-sky-800">Urutan kartu dan field sama dengan form nasional (Input Data &gt; Klimatologi &gt; FDIH).</p>
                     </div>
                 </div>
             )}

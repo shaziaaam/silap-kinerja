@@ -59,7 +59,7 @@
     <div class="foot">
         Dicetak dari SILAP-Kinerja {{ now()->format('d/m/Y H:i') }} WIB &middot;
         status: {{ $observation->status_approval === 'approved' ? 'Terverifikasi' : 'Belum diverifikasi' }} &middot;
-        urutan baris sama dengan urutan input BMKGSoft v2
+        urutan baris sama dengan urutan input form nasional
     </div>
 
     <div class="kop">
@@ -148,7 +148,7 @@
     </table>
 
     <div class="legend">
-        <b>Keterangan:</b> Diketik = salin ke BMKGSoft v2 sesuai urutan nomor &middot; Otomatis (nasional) = dihitung sistem nasional, tidak perlu diketik &middot;
+        <b>Keterangan:</b> Diketik = salin ke form nasional sesuai urutan nomor &middot; Otomatis (nasional) = dihitung sistem nasional, tidak perlu diketik &middot;
         Dihitung, cek = dihitung aplikasi untuk mencocokkan &middot; Bacaan sebelumnya = terisi dari pembacaan terakhir &middot; 9999 = tidak diukur &middot; nilai AWS dibaca dari monitor AWS.
     </div>
 
