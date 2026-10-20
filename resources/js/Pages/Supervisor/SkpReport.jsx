@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import Sidebar from '../../Components/Sidebar';
 import { Download, RefreshCw, Archive, CheckCircle2, FileSpreadsheet, Filter } from 'lucide-react';
 
@@ -21,15 +21,29 @@ export default function SkpReport({ pengamatList, recaps, alasanLaporan = {}, sk
     // Pengamat can only ever pick themselves; the server enforces it as well.
     const [selectedUser, setSelectedUser] = useState(isPengamat ? user.id : (pengamatList[0]?.id ?? ''));
 
-    const { post, processing } = useForm();
 
-    // Poll only while a package is still being built, then stop.
-    const adaEksporBerjalan = skpExports.some(e => e.sedang_berjalan);
+    // Satu tombol: minta paket ZIP, tunggu antrean selesai, lalu unduh otomatis.
+    const [menungguZip, setMenungguZip] = useState(null); // id ekspor terakhir sebelum klik
+    const [galatZip, setGalatZip] = useState('');
+
     useEffect(() => {
-        if (!adaEksporBerjalan) return;
-        const timer = setInterval(() => router.reload({ only: ['skpExports'] }), 8000);
+        if (menungguZip === null) return;
+        const timer = setInterval(() => router.reload({ only: ['skpExports'] }), 4000);
         return () => clearInterval(timer);
-    }, [adaEksporBerjalan]);
+    }, [menungguZip]);
+
+    useEffect(() => {
+        if (menungguZip === null) return;
+        const baru = skpExports.find(e => e.id > menungguZip);
+        if (!baru) return;
+        if (baru.status === 'selesai') {
+            setMenungguZip(null);
+            window.location.href = route('supervisor.skp.export_download', baru.id);
+        } else if (baru.status === 'gagal') {
+            setMenungguZip(null);
+            setGalatZip(baru.pesan_error || 'Paket ZIP gagal dibuat. Coba lagi atau hubungi admin.');
+        }
+    }, [skpExports, menungguZip]);
 
     const pdfUrl = selectedUser && tahun
         ? route('supervisor.skp.pdf-direct', { user_id: selectedUser, tahun, periode: selectedPeriode })
@@ -77,10 +91,16 @@ export default function SkpReport({ pengamatList, recaps, alasanLaporan = {}, sk
 
     const handleDownloadZip = (e) => {
         e.preventDefault();
-        // The package is built on the queue; the file appears in the "Paket ZIP" list.
-        post(route('supervisor.skp.zip'), {
-            data: { tahun, periode: selectedPeriode },
+        setGalatZip('');
+        setMenungguZip(skpExports.reduce((maks, x) => Math.max(maks, x.id), 0));
+        // router.post (bukan useForm().post): useForm mengirim state form-nya sendiri, bukan `data` ini.
+        router.post(route('supervisor.skp.zip'), { tahun, periode: selectedPeriode }, {
             preserveScroll: true,
+            // Tidak ada pegawai yang di-ACC / validasi gagal: jangan menunggu.
+            onError: (errs) => {
+                setMenungguZip(null);
+                setGalatZip(Object.values(errs)[0] || 'Paket ZIP gagal diminta.');
+            },
         });
     };
 
@@ -191,14 +211,17 @@ export default function SkpReport({ pengamatList, recaps, alasanLaporan = {}, sk
                             <button
                                 type="button"
                                 onClick={handleDownloadZip}
-                                disabled={processing || !tahun}
+                                disabled={menungguZip !== null || !tahun}
                                 className="w-full sm:w-auto justify-center px-5 bg-slate-800 hover:bg-slate-900 text-white font-semibold h-10 rounded-xl text-xs transition shadow-sm flex items-center space-x-2 disabled:opacity-50"
                             >
-                                <Archive className="w-4 h-4" />
-                                <span>Buat Paket ZIP Semua Pegawai</span>
+                                {menungguZip !== null ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
+                                <span>{menungguZip !== null ? 'Menyiapkan ZIP...' : 'Unduh ZIP Semua Pegawai'}</span>
                             </button>
                         )}
                     </div>
+                    {galatZip && (
+                        <p className="sm:text-right text-[11px] text-rose-600">{galatZip}</p>
+                    )}
                     {selectedUser && alasanPdf && (
                         <p className="sm:text-right text-[11px] text-slate-500">{alasanPdf}</p>
                     )}
@@ -358,63 +381,6 @@ export default function SkpReport({ pengamatList, recaps, alasanLaporan = {}, sk
                         </table>
                     </div>
                 </div>
-
-                {user.role !== 'pengamat' && skpExports.length > 0 && (
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-100 flex items-center space-x-2">
-                            <Archive className="w-4 h-4 text-slate-500" />
-                            <h2 className="font-bold text-slate-900 text-sm">Paket ZIP</h2>
-                            <span className="text-[11px] text-slate-500">dibuat di latar belakang</span>
-                        </div>
-                        <div className="divide-y divide-slate-100">
-                            {skpExports.map((ex) => (
-                                <div key={ex.id} className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <div className="text-sm font-semibold text-slate-900 truncate">
-                                            {ex.periode_label} {ex.tahun}
-                                            <span className="text-slate-500 font-normal">
-                                                {' · '}{ex.target_user ? ex.target_user.nama : 'Semua pegawai'}
-                                            </span>
-                                        </div>
-                                        <div className="text-[11px] text-slate-500">
-                                            Diminta {new Date(ex.created_at).toLocaleString('id-ID')}
-                                            {ex.status === 'selesai' && ex.jumlah_pegawai > 0 && ` · ${ex.jumlah_pegawai} berkas PDF`}
-                                        </div>
-                                        {ex.status === 'gagal' && ex.pesan_error && (
-                                            <div className="text-[11px] text-rose-600 mt-0.5">{ex.pesan_error}</div>
-                                        )}
-                                    </div>
-                                    <div className="shrink-0 w-full sm:w-auto">
-                                        {ex.status === 'selesai' ? (
-                                            <a
-                                                href={route('supervisor.skp.export_download', ex.id)}
-                                                className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition min-h-[38px]"
-                                            >
-                                                <Download className="w-3.5 h-3.5" />
-                                                <span>Unduh</span>
-                                            </a>
-                                        ) : ex.status === 'gagal' ? (
-                                            <span className="block sm:inline-block text-center text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1.5 rounded-xl">Gagal</span>
-                                        ) : (
-                                            <div className="flex flex-col sm:items-end gap-1">
-                                                <span className="inline-flex items-center justify-center space-x-1.5 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-2.5 py-1.5 rounded-xl">
-                                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                                    <span>{ex.status === 'antre' ? 'Mengantre' : 'Memproses'}</span>
-                                                </span>
-                                                {/* Tanpa queue worker, paket tidak pernah diproses: beri tahu setelah 5 menit. */}
-                                                {ex.status === 'antre' && Date.now() - new Date(ex.created_at).getTime() > 5 * 60 * 1000 && (
-                                                    <span className="max-w-full sm:max-w-[16rem] text-left sm:text-right text-[10px] leading-snug text-amber-700">
-                                                        Belum diproses lebih dari 5 menit. Hubungi admin untuk memastikan queue worker berjalan.
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
             </div>
         </Sidebar>

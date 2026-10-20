@@ -291,6 +291,6 @@ class SkpReportController extends Controller
 
         ExportSkpZip::dispatch($export->id);
 
-        return back()->with('message', "Paket ZIP {$recaps->count()} pegawai sedang disiapkan di latar belakang. Berkasnya muncul di daftar \"Paket ZIP\" begitu selesai.");
+        return back()->with('message', "Paket ZIP {$recaps->count()} pegawai sedang disiapkan. Berkas akan terunduh otomatis begitu selesai.");
     }
 }
